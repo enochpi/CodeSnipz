@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyCode Hub - Python Scripts Collection</title>
+    
+    <!-- React CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone@7.24.4/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Load Scripts in Order -->
+    <script type="text/babel" src="js/data/scripts.js"></script>
+    <script type="text/babel" src="js/components/icons.js"></script>
+    <script type="text/babel" src="js/components/ui.js"></script>
+    <script type="text/babel" src="js/components/CodeBlock.js"></script>
+    <script type="text/babel" src="js/components/ProjectCard.js"></script>
+    <script type="text/babel" src="js/pages/Home.js"></script>
+    <script type="text/babel" src="js/pages/Projects.js"></script>
+    <script type="text/babel" src="js/pages/About.js"></script>
+    <script type="text/babel" src="js/Layout.js"></script>
+    <script type="text/babel" src="js/App.js"></script>
+</body>
+</html>

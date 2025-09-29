@@ -1,14 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { PythonScript } from "@/entities/PythonScript";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Code2 } from "lucide-react";
-import ProjectCard from "../components/ProjectCard";
-
-export default function Projects() {
-    const [projects, setProjects] = useState([]);
-    const [loading, setLoading] = useState(true);
+function ProjectsPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [selectedDifficulty, setSelectedDifficulty] = useState("All");
@@ -16,25 +6,11 @@ export default function Projects() {
     const categories = ["All", "Mini-Games", "Utilities", "Learning Snippets"];
     const difficulties = ["All", "Beginner", "Intermediate", "Advanced"];
 
-    useEffect(() => {
-        loadProjects();
-    }, []);
-
-    const loadProjects = async () => {
-        try {
-            const data = await PythonScript.list('-created_date');
-            setProjects(data);
-        } catch (error) {
-            console.error("Error loading projects:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const filteredProjects = projects.filter(project => {
-        const matchesSearch = project.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            project.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            project.tags?.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
+    const filteredProjects = pythonScripts.filter(project => {
+        const searchLower = searchTerm.toLowerCase();
+        const matchesSearch = project.title.toLowerCase().includes(searchLower) ||
+                            project.description.toLowerCase().includes(searchLower) ||
+                            (project.tags && project.tags.some(tag => tag.toLowerCase().includes(searchLower)));
         
         const matchesCategory = selectedCategory === "All" || project.category === selectedCategory;
         const matchesDifficulty = selectedDifficulty === "All" || project.difficulty === selectedDifficulty;
@@ -55,7 +31,6 @@ export default function Projects() {
                     </p>
                 </div>
 
-                {/* Filters */}
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-8">
                     <div className="flex flex-col lg:flex-row gap-4">
                         <div className="flex-1">
@@ -108,26 +83,16 @@ export default function Projects() {
                     </div>
                 </div>
 
-                {/* Results */}
                 <div className="mb-6">
                     <p className="text-slate-600">
-                        Showing {filteredProjects.length} of {projects.length} scripts
-                        {searchTerm && ` for "${searchTerm}"`}
-                        {selectedCategory !== "All" && ` in ${selectedCategory}`}
-                        {selectedDifficulty !== "All" && ` • ${selectedDifficulty} level`}
+                        Showing {filteredProjects.length} of {pythonScripts.length} scripts
+                        {searchTerm && " for \"" + searchTerm + "\""}
+                        {selectedCategory !== "All" && " in " + selectedCategory}
+                        {selectedDifficulty !== "All" && " • " + selectedDifficulty + " level"}
                     </p>
                 </div>
 
-                {/* Projects Grid */}
-                {loading ? (
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-                        {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="animate-pulse">
-                                <div className="bg-slate-200 rounded-lg h-96"></div>
-                            </div>
-                        ))}
-                    </div>
-                ) : filteredProjects.length > 0 ? (
+                {filteredProjects.length > 0 ? (
                     <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
                         {filteredProjects.map((project) => (
                             <ProjectCard key={project.id} project={project} />
@@ -138,7 +103,7 @@ export default function Projects() {
                         <Code2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
                         <h3 className="text-xl font-semibold text-slate-600 mb-2">No Scripts Found</h3>
                         <p className="text-slate-500 mb-6">
-                            Try adjusting your search terms or filters to find what you're looking for.
+                            Try adjusting your search terms or filters to find what you are looking for.
                         </p>
                         <Button
                             onClick={() => {

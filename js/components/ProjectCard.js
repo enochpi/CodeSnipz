@@ -1,11 +1,8 @@
-import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Code2, Play, Download } from "lucide-react";
-import CodeBlock from "./CodeBlock";
-
-export default function ProjectCard({ project, compact = false, showCode = true }) {
+function ProjectCard(props) {
+    const project = props.project;
+    const compact = props.compact || false;
+    const showCode = props.showCode !== false;
+    
     const categoryColors = {
         "Mini-Games": "bg-green-100 text-green-700 border-green-200",
         "Utilities": "bg-blue-100 text-blue-700 border-blue-200",
@@ -22,22 +19,24 @@ export default function ProjectCard({ project, compact = false, showCode = true 
         const element = document.createElement("a");
         const file = new Blob([project.code], { type: "text/plain" });
         element.href = URL.createObjectURL(file);
-        element.download = `${project.title.replace(/\s+/g, "_").toLowerCase()}.py`;
+        element.download = project.title.replace(/\s+/g, "_").toLowerCase() + ".py";
         document.body.appendChild(element);
         element.click();
         document.body.removeChild(element);
     };
 
+    const filename = project.title.replace(/\s+/g, "_").toLowerCase() + ".py";
+
     return (
-        <Card className={`group hover:shadow-lg transition-all duration-300 border-0 shadow-sm ${compact ? 'h-full' : ''}`}>
-            <CardHeader className="pb-3">
+        <Card className={"group hover:shadow-lg transition-all duration-300 " + (compact ? "h-full" : "")}>
+            <div className="p-6 pb-3">
                 <div className="flex items-start justify-between">
                     <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
                             <Code2 className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                            <CardTitle className="text-lg font-bold text-slate-800">{project.title}</CardTitle>
+                            <h3 className="text-lg font-bold text-slate-800">{project.title}</h3>
                             <p className="text-sm text-slate-500 mt-1">{project.description}</p>
                         </div>
                     </div>
@@ -45,7 +44,7 @@ export default function ProjectCard({ project, compact = false, showCode = true 
                 
                 <div className="flex items-center space-x-2 mt-3">
                     <Badge className={categoryColors[project.category]}>{project.category}</Badge>
-                    <Badge variant="secondary" className={difficultyColors[project.difficulty]}>
+                    <Badge className={difficultyColors[project.difficulty]}>
                         {project.difficulty}
                     </Badge>
                 </div>
@@ -59,13 +58,13 @@ export default function ProjectCard({ project, compact = false, showCode = true 
                         ))}
                     </div>
                 )}
-            </CardHeader>
+            </div>
 
             {showCode && (
-                <CardContent className="space-y-4">
+                <div className="p-6 pt-0 space-y-4">
                     <CodeBlock 
                         code={project.code} 
-                        filename={`${project.title.replace(/\s+/g, "_").toLowerCase()}.py`}
+                        filename={filename}
                         onDownload={handleDownload}
                     />
                     
@@ -86,11 +85,11 @@ export default function ProjectCard({ project, compact = false, showCode = true 
                             Download Script
                         </Button>
                     </div>
-                </CardContent>
+                </div>
             )}
 
             {compact && (
-                <CardContent className="pt-0">
+                <div className="p-6 pt-0">
                     <Button 
                         onClick={handleDownload}
                         variant="outline"
@@ -99,7 +98,7 @@ export default function ProjectCard({ project, compact = false, showCode = true 
                         <Download className="w-4 h-4 mr-2" />
                         Download
                     </Button>
-                </CardContent>
+                </div>
             )}
         </Card>
     );

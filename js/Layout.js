@@ -1,46 +1,16 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { Code2, Home, BookOpen, User } from "lucide-react";
-
-export default function Layout({ children, currentPageName }) {
-    const location = useLocation();
-
+function Layout(props) {
     const navigationItems = [
-        {
-            title: "Home",
-            url: createPageUrl("Home"),
-            icon: Home,
-        },
-        {
-            title: "Projects",
-            url: createPageUrl("Projects"),
-            icon: Code2,
-        },
-        {
-            title: "About",
-            url: createPageUrl("About"),
-            icon: User,
-        }
+        { title: "Home", page: "home", icon: Home },
+        { title: "Projects", page: "projects", icon: Code2 },
+        { title: "About", page: "about", icon: User }
     ];
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-            <style>{`
-                :root {
-                    --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                    --accent-color: #4f46e5;
-                    --text-primary: #1e293b;
-                    --text-secondary: #64748b;
-                    --code-bg: #1e293b;
-                }
-            `}</style>
-            
-            {/* Header */}
             <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-16">
-                        <Link to={createPageUrl("Home")} className="flex items-center space-x-3">
+                        <div onClick={() => props.onNavigate('home')} className="flex items-center space-x-3 cursor-pointer">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center">
                                 <Code2 className="w-6 h-6 text-white" />
                             </div>
@@ -50,34 +20,32 @@ export default function Layout({ children, currentPageName }) {
                                 </h1>
                                 <p className="text-xs text-slate-500">Python Scripts Collection</p>
                             </div>
-                        </Link>
+                        </div>
 
                         <nav className="flex items-center space-x-8">
-                            {navigationItems.map((item) => (
-                                <Link
-                                    key={item.title}
-                                    to={item.url}
-                                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-                                        location.pathname === item.url
-                                            ? "bg-indigo-50 text-indigo-700 shadow-sm"
-                                            : "text-slate-600 hover:text-indigo-600 hover:bg-slate-50"
-                                    }`}
-                                >
-                                    <item.icon className="w-4 h-4" />
-                                    <span className="font-medium">{item.title}</span>
-                                </Link>
-                            ))}
+                            {navigationItems.map((item) => {
+                                const IconComponent = item.icon;
+                                const isActive = props.currentPage === item.page;
+                                const activeClass = isActive ? "bg-indigo-50 text-indigo-700 shadow-sm" : "text-slate-600 hover:text-indigo-600 hover:bg-slate-50";
+                                
+                                return (
+                                    <div
+                                        key={item.title}
+                                        onClick={() => props.onNavigate(item.page)}
+                                        className={"flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer " + activeClass}
+                                    >
+                                        <IconComponent className="w-4 h-4" />
+                                        <span className="font-medium">{item.title}</span>
+                                    </div>
+                                );
+                            })}
                         </nav>
                     </div>
                 </div>
             </header>
 
-            {/* Main content */}
-            <main className="flex-1">
-                {children}
-            </main>
+            <main className="flex-1">{props.children}</main>
 
-            {/* Footer */}
             <footer className="bg-slate-900 text-white py-12 mt-20">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center">
