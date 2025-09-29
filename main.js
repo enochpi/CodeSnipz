@@ -2,670 +2,3878 @@
 const projects = [
   // ASCII Art & Terminal Games Category
   {
-      title: "ASCII Snake Game",
-      category: "ascii",
-      description: "Classic snake game rendered entirely in ASCII characters in the terminal.",
-      tags: ["console", "ascii-art", "terminal"],
-      difficulty: 2,
-      lines: "~120 lines",
-      code: `import random
+    title: "ASCII Snake Game",
+    category: "ascii",
+    description: "Classic snake game with keyboard controls, score tracking, speed progression, and game over screen.",
+    tags: ["console", "ascii-art", "terminal"],
+    difficulty: 2,
+    lines: "~180 lines",
+    code: `import random
   import time
   import os
   import sys
+  from collections import deque
 
-  # Snake game in ASCII
+  # Game Constants
   WIDTH = 40
   HEIGHT = 20
+  INITIAL_SPEED = 0.15
+  SPEED_INCREMENT = 0.01
+  MAX_SPEED = 0.05
+
+  # Try to import keyboard input (works on Windows)
+  try:
+      import msvcrt
+      HAS_MSVCRT = True
+  except ImportError:
+      HAS_MSVCRT = False
+      print("Note: Arrow key controls not available on this system")
+      print("Using automatic demo mode...")
+      time.sleep(2)
 
   def clear_screen():
+      """Clear the terminal screen"""
       os.system('cls' if os.name == 'nt' else 'clear')
 
-  def print_board(snake, food):
-      clear_screen()
-      board = [[' ' for _ in range(WIDTH)] for _ in range(HEIGHT)]
+  class SnakeGame:
+      def __init__(self):
+          self.width = WIDTH
+          self.height = HEIGHT
+          self.snake = deque([[20, 10], [19, 10], [18, 10]])
+          self.direction = [1, 0]
+          self.next_direction = [1, 0]
+          self.food = self.place_food()
+          self.score = 0
+          self.speed = INITIAL_SPEED
+          self.game_over = False
+          self.high_score = 0
       
-      # Place food
-      board[food[1]][food[0]] = '●'
+      def place_food(self):
+          """Place food at random position not on snake"""
+          while True:
+              food = [random.randint(0, self.width-1), 
+                    random.randint(0, self.height-1)]
+              if food not in list(self.snake):
+                  return food
       
-      # Place snake
-      for i, segment in enumerate(snake):
-          if i == 0:
-              board[segment[1]][segment[0]] = '◉'  # Head
-          else:
-              board[segment[1]][segment[0]] = '○'  # Body
+      def change_direction(self, new_direction):
+          """Change snake direction, preventing 180 degree turns"""
+          opposite = [-self.direction[0], -self.direction[1]]
+          if new_direction != opposite:
+              self.next_direction = new_direction
       
-      # Print border and board
-      print('╔' + '═' * WIDTH + '╗')
-      for row in board:
-          print('║' + ''.join(row) + '║')
-      print('╚' + '═' * WIDTH + '╝')
-      print(f'Score: {len(snake) - 3}')
-
-  def main():
-      snake = [[20, 10], [19, 10], [18, 10]]
-      direction = [1, 0]
-      food = [random.randint(0, WIDTH-1), random.randint(0, HEIGHT-1)]
-      
-      while True:
-          print_board(snake, food)
+      def move_snake(self):
+          """Move snake in current direction"""
+          self.direction = self.next_direction
           
-          # Move snake
-          new_head = [snake[0][0] + direction[0], snake[0][1] + direction[1]]
+          head = list(self.snake[0])
+          new_head = [head[0] + self.direction[0], 
+                    head[1] + self.direction[1]]
           
-          # Check collisions
-          if (new_head[0] < 0 or new_head[0] >= WIDTH or 
-              new_head[1] < 0 or new_head[1] >= HEIGHT or 
-              new_head in snake):
-              print("Game Over!")
-              break
+          # Check wall collision
+          if (new_head[0] < 0 or new_head[0] >= self.width or 
+              new_head[1] < 0 or new_head[1] >= self.height):
+              self.game_over = True
+              return False
           
-          snake.insert(0, new_head)
+          # Check self collision
+          if new_head in list(self.snake):
+              self.game_over = True
+              return False
+          
+          self.snake.appendleft(new_head)
           
           # Check if food eaten
-          if new_head == food:
-              food = [random.randint(0, WIDTH-1), random.randint(0, HEIGHT-1)]
+          if new_head == self.food:
+              self.score += 10
+              if self.score > self.high_score:
+                  self.high_score = self.score
+              # Increase speed
+              self.speed = max(MAX_SPEED, self.speed - SPEED_INCREMENT)
+              self.food = self.place_food()
           else:
-              snake.pop()
+              self.snake.pop()
           
-          time.sleep(0.1)
+          return True
+      
+      def draw_board(self):
+          """Draw the game board"""
+          clear_screen()
+          board = [[' ' for _ in range(self.width)] 
+                  for _ in range(self.height)]
+          
+          # Place food
+          board[self.food[1]][self.food[0]] = '●'
+          
+          # Place snake
+          for i, segment in enumerate(self.snake):
+              if i == 0:
+                  board[segment[1]][segment[0]] = '◉'  # Head
+              else:
+                  board[segment[1]][segment[0]] = '○'  # Body
+          
+          # Print top border
+          print('╔' + '═' * self.width + '╗')
+          
+          # Print board
+          for row in board:
+              print('║' + ''.join(row) + '║')
+          
+          # Print bottom border
+          print('╚' + '═' * self.width + '╝')
+          
+          # Print game info
+          print(f'Score: {self.score:04d} | Length: {len(self.snake):02d} | High Score: {self.high_score:04d}')
+          print(f'Speed Level: {int((INITIAL_SPEED - self.speed) / SPEED_INCREMENT) + 1}')
+          
+          if HAS_MSVCRT:
+              print('Controls: Arrow Keys to move | Q to quit')
+          else:
+              print('Demo Mode - Watch the snake!')
+      
+      def show_game_over(self):
+          """Display game over screen"""
+          clear_screen()
+          print('\\n' * 3)
+          print('╔' + '═' * 42 + '╗')
+          print('║' + ' ' * 15 + 'GAME OVER!' + ' ' * 16 + '║')
+          print('║' + ' ' * 42 + '║')
+          print(f'║     Final Score: {self.score:<25} ║')
+          print(f'║     Snake Length: {len(self.snake):<25} ║')
+          print(f'║     High Score:   {self.high_score:<25} ║')
+          print('║' + ' ' * 42 + '║')
+          print('╚' + '═' * 42 + '╝')
+          print('\\nThanks for playing!')
+      
+      def get_input(self):
+          """Get keyboard input if available"""
+          if not HAS_MSVCRT:
+              # Auto-play demo mode
+              head = list(self.snake[0])
+              food = self.food
+              
+              # Simple AI: move towards food
+              if head[0] < food[0] and self.direction != [-1, 0]:
+                  self.change_direction([1, 0])
+              elif head[0] > food[0] and self.direction != [1, 0]:
+                  self.change_direction([-1, 0])
+              elif head[1] < food[1] and self.direction != [0, -1]:
+                  self.change_direction([0, 1])
+              elif head[1] > food[1] and self.direction != [0, 1]:
+                  self.change_direction([0, -1])
+              return True
+          
+          # Check for keyboard input
+          if msvcrt.kbhit():
+              key = msvcrt.getch()
+              
+              if key == b'q' or key == b'Q':
+                  return False
+              elif key == b'\\xe0':  # Arrow key prefix
+                  key = msvcrt.getch()
+                  if key == b'H':  # Up
+                      self.change_direction([0, -1])
+                  elif key == b'P':  # Down
+                      self.change_direction([0, 1])
+                  elif key == b'K':  # Left
+                      self.change_direction([-1, 0])
+                  elif key == b'M':  # Right
+                      self.change_direction([1, 0])
+          
+          return True
+
+  def main():
+      """Main game loop"""
+      game = SnakeGame()
+      
+      print("\\nSnake Game Starting...")
+      print("=" * 40)
+      if HAS_MSVCRT:
+          print("Use Arrow Keys to control the snake")
+          print("Press Q to quit")
+      else:
+          print("Running in demo mode - watch the AI play!")
+      print("=" * 40)
+      time.sleep(2)
+      
+      try:
+          while not game.game_over:
+              game.draw_board()
+              
+              # Get input
+              if not game.get_input():
+                  print("\\nGame quit by user")
+                  sys.exit(0)
+              
+              # Move snake
+              if not game.move_snake():
+                  break
+              
+              time.sleep(game.speed)
+          
+          game.show_game_over()
+          
+      except KeyboardInterrupt:
+          print("\\n\\nGame interrupted by user")
+          sys.exit(0)
 
   if __name__ == '__main__':
       main()`
-    },
+  },
 
+  {
+    title: "ASCII Dungeon Crawler",
+    category: "ascii",
+    description: "Explore procedurally generated dungeons, fight monsters, collect loot, and level up your character.",
+    tags: ["console", "ascii-art", "roguelike"],
+    difficulty: 4,
+    lines: "~320 lines",
+    code: `import curses
+  import random
+  import time
+  from dataclasses import dataclass
+  from typing import List, Tuple, Optional
 
-    {
-      title: "ASCII Dungeon Crawler",
-      category: "ascii",
-      description: "Explore dungeons, fight monsters, and collect loot in ASCII graphics.",
-      tags: ["console", "ascii-art", "roguelike"],
-      difficulty: 4,
-      lines: "~220 lines",
-      code: `import curses,random,math,time
-    # minimal runnable ascii roguelike using curses
-    def gen_map(w,h,rooms=10,room_min=4,room_max=8):
-        m=[['#' for _ in range(w)] for __ in range(h)]
-        rs=[]
-        for _ in range(rooms):
-            rw=random.randint(room_min,room_max);rh=random.randint(room_min,room_max)
-            rx=random.randint(1,w-rw-2);ry=random.randint(1,h-rh-2)
-            r=(rx,ry,rw,rh)
-            ok=True
-            for orr in rs:
-                ox,oy,owr,ohr=orr
-                if rx<ox+owr+2 and ox<rx+rw+2 and ry<oy+ohr+2 and oy<ry+rh+2:
-                    ok=False;break
-            if not ok:continue
-            rs.append(r)
-            for yy in range(ry,ry+rh):
-                for xx in range(rx,rx+rw):
-                    m[yy][xx]='.'
-            if len(rs)>1:
-                px,py=rs[-2][0]+rs[-2][2]//2,rs[-2][1]+rs[-2][3]//2
-                cx,cy=rx+rw//2,ry+rh//2
-                if random.random()<0.5:
-                    for x in range(min(px,cx),max(px,cx)+1):m[py][x]='.'
-                    for y in range(min(py,cy),max(py,cy)+1):m[y][cx]='.'
-                else:
-                    for y in range(min(py,cy),max(py,cy)+1):m[y][px]='.'
-                    for x in range(min(px,cx),max(px,cx)+1):m[cy][x]='.'
-        return m,rs
+  # Game Constants
+  MAP_WIDTH = 80
+  MAP_HEIGHT = 24
+  ROOMS = 12
+  ROOM_MIN_SIZE = 4
+  ROOM_MAX_SIZE = 10
+  VISION_RADIUS = 8
 
-    class Actor:
-        def __init__(self,x,y,ch,hp,atk,name):
-            self.x=x;self.y=y;self.ch=ch;self.max_hp=hp;self.hp=hp;self.atk=atk;self.name=name;self.gold=0
-        def is_alive(self):return self.hp>0
+  @dataclass
+  class Actor:
+      """Base class for all game entities"""
+      x: int
+      y: int
+      char: str
+      hp: int
+      max_hp: int
+      attack: int
+      name: str
+      gold: int = 0
+      xp: int = 0
+      level: int = 1
+      
+      def is_alive(self) -> bool:
+          return self.hp > 0
+      
+      def take_damage(self, damage: int) -> int:
+          """Apply damage and return actual damage dealt"""
+          actual_damage = max(0, damage)
+          self.hp -= actual_damage
+          return actual_damage
+      
+      def heal(self, amount: int):
+          """Heal the actor"""
+          self.hp = min(self.max_hp, self.hp + amount)
 
-    def place_items_and_monsters(m,rooms):
-        monsters=[]
-        items=[]
-        for i,r in enumerate(rooms):
-            if i==0:continue
-            rx,ry,rw,rh=r
-            nmon=random.randint(1,3)
-            for _ in range(nmon):
-                mx=random.randint(rx,rx+rw-1);my=random.randint(ry,ry+rh-1)
-                if m[my][mx]=='.':
-                    typ=random.choice(['gob','orc','bat'])
-                    if typ=='gob':monsters.append(Actor(mx,my,'g',6,2,'Goblin'))
-                    if typ=='orc':monsters.append(Actor(mx,my,'o',10,3,'Orc'))
-                    if typ=='bat':monsters.append(Actor(mx,my,'b',4,1,'Bat'))
-            if random.random()<0.5:
-                ix=random.randint(rx,rx+rw-1);iy=random.randint(ry,ry+rh-1)
-                if m[iy][ix]=='.':
-                    it=random.choice(['potion','gold','sword'])
-                    items.append(((ix,iy),it))
-        return monsters,items
+  class DungeonGenerator:
+      """Handles dungeon generation"""
+      
+      def __init__(self, width: int, height: int):
+          self.width = width
+          self.height = height
+          self.map = [['#' for _ in range(width)] for _ in range(height)]
+          self.rooms = []
+      
+      def generate(self, num_rooms: int, min_size: int, max_size: int):
+          """Generate a dungeon with rooms and corridors"""
+          for _ in range(num_rooms):
+              room_width = random.randint(min_size, max_size)
+              room_height = random.randint(min_size, max_size)
+              room_x = random.randint(1, self.width - room_width - 2)
+              room_y = random.randint(1, self.height - room_height - 2)
+              
+              new_room = (room_x, room_y, room_width, room_height)
+              
+              # Check for overlaps
+              if not self._rooms_overlap(new_room):
+                  self._carve_room(new_room)
+                  
+                  # Connect to previous room
+                  if len(self.rooms) > 0:
+                      self._create_corridor(self.rooms[-1], new_room)
+                  
+                  self.rooms.append(new_room)
+          
+          return self.map, self.rooms
+      
+      def _rooms_overlap(self, new_room: Tuple[int, int, int, int]) -> bool:
+          """Check if new room overlaps with existing rooms"""
+          x1, y1, w1, h1 = new_room
+          
+          for x2, y2, w2, h2 in self.rooms:
+              if (x1 < x2 + w2 + 2 and x2 < x1 + w1 + 2 and
+                  y1 < y2 + h2 + 2 and y2 < y1 + h1 + 2):
+                  return True
+          return False
+      
+      def _carve_room(self, room: Tuple[int, int, int, int]):
+          """Carve out a room in the map"""
+          x, y, width, height = room
+          for row in range(y, y + height):
+              for col in range(x, x + width):
+                  self.map[row][col] = '.'
+      
+      def _create_corridor(self, room1: Tuple[int, int, int, int], 
+                          room2: Tuple[int, int, int, int]):
+          """Create a corridor between two rooms"""
+          x1, y1, w1, h1 = room1
+          x2, y2, w2, h2 = room2
+          
+          # Get center points
+          center1_x = x1 + w1 // 2
+          center1_y = y1 + h1 // 2
+          center2_x = x2 + w2 // 2
+          center2_y = y2 + h2 // 2
+          
+          # Randomly choose L-shaped corridor direction
+          if random.random() < 0.5:
+              # Horizontal then vertical
+              for x in range(min(center1_x, center2_x), max(center1_x, center2_x) + 1):
+                  self.map[center1_y][x] = '.'
+              for y in range(min(center1_y, center2_y), max(center1_y, center2_y) + 1):
+                  self.map[y][center2_x] = '.'
+          else:
+              # Vertical then horizontal
+              for y in range(min(center1_y, center2_y), max(center1_y, center2_y) + 1):
+                  self.map[y][center1_x] = '.'
+              for x in range(min(center1_x, center2_x), max(center1_x, center2_x) + 1):
+                  self.map[center2_y][x] = '.'
 
-    def visible(dmap,px,py,vision=8):
-        h=len(dmap);w=len(dmap[0])
-        vis=[[False]*w for _ in range(h)]
-        for y in range(max(0,py-vision),min(h,py+vision+1)):
-            for x in range(max(0,px-vision),min(w,px+vision+1)):
-                dx=x-px;dy=y-py
-                if dx*dx+dy*dy<=vision*vision:
-                    vis[y][x]=True
-        return vis
+  class GameWorld:
+      """Manages the game world and entities"""
+      
+      def __init__(self):
+          self.dungeon_gen = DungeonGenerator(MAP_WIDTH, MAP_HEIGHT)
+          self.dungeon_map, self.rooms = self.dungeon_gen.generate(
+              ROOMS, ROOM_MIN_SIZE, ROOM_MAX_SIZE)
+          
+          # Create player in first room
+          start_room = self.rooms[0]
+          px = start_room[0] + 1
+          py = start_room[1] + 1
+          self.player = Actor(px, py, '@', 20, 20, 3, 'Hero')
+          
+          # Place exit in last room
+          last_room = self.rooms[-1]
+          self.exit_pos = (last_room[0] + last_room[2] // 2,
+                          last_room[1] + last_room[3] // 2)
+          
+          self.monsters = []
+          self.items = []
+          self._populate_dungeon()
+          
+          self.message = "Welcome to the dungeon! Find the exit to win."
+          self.game_over = False
+          self.victory = False
+      
+      def _populate_dungeon(self):
+          """Populate dungeon with monsters and items"""
+          monster_types = [
+              ('g', 6, 2, 'Goblin'),
+              ('o', 10, 3, 'Orc'),
+              ('b', 4, 1, 'Bat'),
+              ('t', 15, 4, 'Troll')
+          ]
+          
+          item_types = ['potion', 'gold', 'sword', 'armor']
+          
+          # Skip first room (player spawn)
+          for room in self.rooms[1:]:
+              rx, ry, rw, rh = room
+              
+              # Place monsters
+              num_monsters = random.randint(1, 3)
+              for _ in range(num_monsters):
+                  mx = random.randint(rx, rx + rw - 1)
+                  my = random.randint(ry, ry + rh - 1)
+                  
+                  if self.dungeon_map[my][mx] == '.':
+                      char, hp, atk, name = random.choice(monster_types)
+                      monster = Actor(mx, my, char, hp, hp, atk, name)
+                      self.monsters.append(monster)
+              
+              # Place items
+              if random.random() < 0.6:
+                  ix = random.randint(rx, rx + rw - 1)
+                  iy = random.randint(ry, ry + rh - 1)
+                  
+                  if self.dungeon_map[iy][ix] == '.':
+                      item = random.choice(item_types)
+                      self.items.append(((ix, iy), item))
+      
+      def is_visible(self, x: int, y: int) -> bool:
+          """Check if position is visible to player"""
+          dx = x - self.player.x
+          dy = y - self.player.y
+          distance_squared = dx * dx + dy * dy
+          return distance_squared <= VISION_RADIUS * VISION_RADIUS
+      
+      def find_monster_at(self, x: int, y: int) -> Optional[Actor]:
+          """Find living monster at position"""
+          for monster in self.monsters:
+              if monster.x == x and monster.y == y and monster.is_alive():
+                  return monster
+          return None
+      
+      def pickup_item(self):
+          """Try to pick up item at player position"""
+          for i, ((ix, iy), item_type) in enumerate(self.items):
+              if ix == self.player.x and iy == self.player.y:
+                  if item_type == 'potion':
+                      self.player.heal(8)
+                      self.message = "You drank a healing potion! (+8 HP)"
+                  elif item_type == 'gold':
+                      gold = random.randint(5, 25)
+                      self.player.gold += gold
+                      self.message = f"You collected {gold} gold!"
+                  elif item_type == 'sword':
+                      self.player.attack += 2
+                      self.message = "You found a sharp sword! (ATK +2)"
+                  elif item_type == 'armor':
+                      self.player.max_hp += 5
+                      self.player.hp += 5
+                      self.message = "You found sturdy armor! (Max HP +5)"
+                  
+                  self.items.pop(i)
+                  return
+          
+          self.message = "Nothing here to pick up."
+      
+      def move_player(self, dx: int, dy: int):
+          """Attempt to move player"""
+          new_x = self.player.x + dx
+          new_y = self.player.y + dy
+          
+          # Check bounds
+          if (new_x < 0 or new_x >= MAP_WIDTH or
+              new_y < 0 or new_y >= MAP_HEIGHT):
+              self.message = "You can't go that way!"
+              return
+          
+          # Check walls
+          if self.dungeon_map[new_y][new_x] == '#':
+              self.message = "Bump! There's a wall there."
+              return
+          
+          # Check for monsters
+          monster = self.find_monster_at(new_x, new_y)
+          if monster:
+              damage = self.player.attack + random.randint(-1, 2)
+              actual_damage = monster.take_damage(damage)
+              
+              if monster.is_alive():
+                  self.message = f"You hit {monster.name} for {actual_damage} damage!"
+              else:
+                  gold_drop = random.randint(3, 12)
+                  self.player.gold += gold_drop
+                  self.player.xp += 1
+                  self.message = f"{monster.name} defeated! +{gold_drop} gold"
+                  
+                  # Level up check
+                  if self.player.xp >= self.player.level * 5:
+                      self.level_up()
+              
+              # Monsters attack back
+              self.monsters_turn()
+              return
+          
+          # Move player
+          self.player.x = new_x
+          self.player.y = new_y
+          
+          # Check for exit
+          if (self.player.x, self.player.y) == self.exit_pos:
+              self.victory = True
+              self.game_over = True
+              self.message = "You found the exit! Victory!"
+              return
+          
+          # Monsters take their turn
+          self.monsters_turn()
+          
+          # Auto-pickup
+          for (ix, iy), _ in self.items:
+              if ix == self.player.x and iy == self.player.y:
+                  self.pickup_item()
+                  break
+          else:
+              self.message = ""
+      
+      def level_up(self):
+          """Level up the player"""
+          self.player.level += 1
+          self.player.xp = 0
+          self.player.max_hp += 5
+          self.player.hp = self.player.max_hp
+          self.player.attack += 1
+          self.message += " LEVEL UP! HP and ATK increased!"
+      
+      def monsters_turn(self):
+          """All monsters take their turn"""
+          for monster in self.monsters:
+              if not monster.is_alive():
+                  continue
+              
+              # Calculate distance to player
+              dx = self.player.x - monster.x
+              dy = self.player.y - monster.y
+              distance = abs(dx) + abs(dy)
+              
+              # Attack if adjacent
+              if distance == 1:
+                  damage = monster.attack + random.randint(-1, 1)
+                  actual_damage = self.player.take_damage(damage)
+                  self.message = f"{monster.name} hits you for {actual_damage} damage!"
+                  
+                  if not self.player.is_alive():
+                      self.game_over = True
+                      self.message = "You have been slain! Game Over."
+              
+              # Move towards player if visible
+              elif distance <= VISION_RADIUS:
+                  # Simple pathfinding
+                  possible_moves = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+                  possible_moves.sort(key=lambda d: abs(dx - d[0]) + abs(dy - d[1]))
+                  
+                  for move_dx, move_dy in possible_moves:
+                      new_x = monster.x + move_dx
+                      new_y = monster.y + move_dy
+                      
+                      if (0 <= new_x < MAP_WIDTH and 0 <= new_y < MAP_HEIGHT and
+                          self.dungeon_map[new_y][new_x] == '.' and
+                          not self.find_monster_at(new_x, new_y) and
+                          (new_x, new_y) != (self.player.x, self.player.y)):
+                          monster.x = new_x
+                          monster.y = new_y
+                          break
 
-    def draw(win,dmap,player,monsters,items,msg,offsetx=0,offsety=0):
-        h=len(dmap);w=len(dmap[0])
-        vis=visible(dmap,player.x,player.y,vision=8)
-        for y in range(h):
-            for x in range(w):
-                if not vis[y][x]:ch=' '
-                else:
-                    ch=dmap[y][x]
-                win.addch(y+offsety,x+offsetx,ord(ch))
-        for (ix,iy),it in items:
-            if visible(dmap,player.x,player.y)[iy][ix]:
-                win.addch(iy+offsety,ix+offsetx,ord('!'))
-        for m in monsters:
-            if m.is_alive() and visible(dmap,player.x,player.y)[m.y][m.x]:
-                win.addch(m.y+offsety,m.x+offsetx,ord(m.ch))
-        win.addch(player.y+offsety,player.x+offsetx,ord('@'))
-        stat=f" HP:{player.hp}/{player.max_hp} ATK:{player.atk} GOLD:{player.gold} LVL:{player.xp if hasattr(player,'xp') else 1}"
-        try:
-            win.addstr(0,0,stat[:w-1])
-        except:pass
-        if msg:
-            try:win.addstr(h-1,0,msg[:w-1])
-            except:pass
+  def draw_game(stdscr, world: GameWorld):
+      """Draw the game state"""
+      try:
+          stdscr.clear()
+          
+          # Draw map
+          for y in range(MAP_HEIGHT):
+              for x in range(MAP_WIDTH):
+                  if world.is_visible(x, y):
+                      char = world.dungeon_map[y][x]
+                      stdscr.addch(y, x, ord(char))
+          
+          # Draw exit
+          ex, ey = world.exit_pos
+          if world.is_visible(ex, ey):
+              stdscr.addch(ey, ex, ord('>'), curses.A_BOLD)
+          
+          # Draw items
+          for (ix, iy), item_type in world.items:
+              if world.is_visible(ix, iy):
+                  stdscr.addch(iy, ix, ord('!'), curses.A_STANDOUT)
+          
+          # Draw monsters
+          for monster in world.monsters:
+              if monster.is_alive() and world.is_visible(monster.x, monster.y):
+                  stdscr.addch(monster.y, monster.x, ord(monster.char))
+          
+          # Draw player
+          stdscr.addch(world.player.y, world.player.x, ord('@'), curses.A_BOLD)
+          
+          # Draw HUD
+          hud_y = MAP_HEIGHT
+          stats = f"HP:{world.player.hp}/{world.player.max_hp} ATK:{world.player.attack} GOLD:{world.player.gold} LVL:{world.player.level} XP:{world.player.xp}/{world.player.level*5}"
+          stdscr.addstr(hud_y, 0, stats[:MAP_WIDTH])
+          
+          # Draw message
+          if world.message:
+              stdscr.addstr(hud_y + 1, 0, world.message[:MAP_WIDTH])
+          
+          # Draw controls
+          stdscr.addstr(hud_y + 2, 0, "Arrow keys/HJKL:Move | G:Pickup | I:Inventory | Q:Quit")
+          
+          stdscr.refresh()
+      except curses.error:
+          pass
 
-    def find_monster_at(monsters,x,y):
-        for m in monsters:
-            if m.x==x and m.y==y and m.is_alive():return m
-        return None
+  def game_loop(stdscr):
+      """Main game loop"""
+      curses.curs_set(0)
+      stdscr.nodelay(True)
+      stdscr.keypad(True)
+      
+      world = GameWorld()
+      
+      last_update = time.time()
+      
+      while not world.game_over:
+          now = time.time()
+          if now - last_update < 0.05:
+              time.sleep(0.01)
+              continue
+          last_update = now
+          
+          draw_game(stdscr, world)
+          
+          # Get input
+          try:
+              key = stdscr.getch()
+          except:
+              key = -1
+          
+          if key == -1:
+              continue
+          
+          # Handle input
+          if key in (ord('q'), ord('Q'), 27):  # Q or ESC
+              break
+          elif key in (curses.KEY_UP, ord('k')):
+              world.move_player(0, -1)
+          elif key in (curses.KEY_DOWN, ord('j')):
+              world.move_player(0, 1)
+          elif key in (curses.KEY_LEFT, ord('h')):
+              world.move_player(-1, 0)
+          elif key in (curses.KEY_RIGHT, ord('l')):
+              world.move_player(1, 0)
+          elif key in (ord('g'), ord('G')):
+              world.pickup_item()
+          elif key in (ord('i'), ord('I')):
+              stdscr.nodelay(False)
+              stdscr.addstr(0, 0, f"INVENTORY - HP:{world.player.hp}/{world.player.max_hp} ATK:{world.player.attack} GOLD:{world.player.gold} - Press any key")
+              stdscr.getch()
+              stdscr.nodelay(True)
+      
+      # Game over screen
+      stdscr.nodelay(False)
+      stdscr.clear()
+      
+      if world.victory:
+          message = "VICTORY! You escaped the dungeon!"
+      else:
+          message = "GAME OVER! You have been defeated."
+      
+      stdscr.addstr(MAP_HEIGHT // 2 - 2, MAP_WIDTH // 2 - len(message) // 2, message)
+      stdscr.addstr(MAP_HEIGHT // 2, MAP_WIDTH // 2 - 15, f"Final Score: {world.player.gold}")
+      stdscr.addstr(MAP_HEIGHT // 2 + 1, MAP_WIDTH // 2 - 15, f"Level Reached: {world.player.level}")
+      stdscr.addstr(MAP_HEIGHT // 2 + 3, MAP_WIDTH // 2 - 15, "Press any key to exit...")
+      stdscr.refresh()
+      stdscr.getch()
 
-    def ai_turn(m,player,dmap):
-        if not m.is_alive():return
-        dx=player.x-m.x;dy=player.y-m.y
-        dist=abs(dx)+abs(dy)
-        if dist<=1:
-            dmg=max(0,m.atk+random.randint(-1,1))
-            player.hp-=dmg
-        else:
-            dirs=[(1,0),(-1,0),(0,1),(0,-1)]
-            dirs.sort(key=lambda d:abs((m.x+d[0])-player.x)+abs((m.y+d[1])-player.y))
-            for d in dirs:
-                nx,ny=m.x+d[0],m.y+d[1]
-                if 0<=ny<len(dmap) and 0<=nx<len(dmap[0]) and dmap[ny][nx]=='.' and not find_monster_at(monsters,nx,ny) and not (player.x==nx and player.y==ny):
-                    m.x,m.y=nx,ny;break
+  def main():
+      """Entry point"""
+      try:
+          curses.wrapper(game_loop)
+      except KeyboardInterrupt:
+          print("\\nGame interrupted by user")
 
-    def pickup(items,player):
-        for i,((ix,iy),it) in enumerate(items):
-            if ix==player.x and iy==player.y:
-                if it=='potion':
-                    player.hp=min(player.max_hp,player.hp+6);msg=f"Drank potion."
-                elif it=='gold':
-                    g=random.randint(5,20);player.gold+=g;msg=f"Picked up {g} gold."
-                elif it=='sword':
-                    player.atk+=1;msg="Found sword! ATK up."
-                else:msg=f"Picked up {it}."
-                items.pop(i);return msg
-        return ""
-
-    def game_loop(stdscr):
-        curses.curs_set(0);h,w=24,80
-        dmap,rooms=gen_map(w,h,rooms=18,room_min=4,room_max=10)
-        monsters,items=place_items_and_monsters(dmap,rooms)
-        rx,ry,_,_=rooms[0];px=rx+1;py=ry+1
-        player=Actor(px,py,'@',20,3,'You');player.xp=1;player.level=1
-        msg="Welcome"
-        stdscr.clear()
-        stdscr.nodelay(True);stdscr.keypad(True)
-        last_time=time.time()
-        while True:
-            now=time.time()
-            if now-last_time>0.05:
-                last_time=now
-            draw(stdscr,dmap,player,monsters,items,msg)
-            stdscr.refresh()
-            if not player.is_alive():
-                stdscr.nodelay(False);stdscr.addstr(12,30,"You died. Press any key.");stdscr.getch();break
-            try:key=stdscr.getch()
-            except:key=-1
-            if key==-1:time.sleep(0.01);continue
-            if key in (ord('q'),27):break
-            dx=dy=0;acted=False
-            if key in (curses.KEY_UP,ord('k')):dy=-1;acted=True
-            if key in (curses.KEY_DOWN,ord('j')):dy=1;acted=True
-            if key in (curses.KEY_LEFT,ord('h')):dx=-1;acted=True
-            if key in (curses.KEY_RIGHT,ord('l')):dx=1;acted=True
-            if key==ord('g'):
-                m=pickup(items,player);msg=m if m else "Nothing here."
-                acted=True
-            if key==ord('i'):
-                inv=f"HP:{player.hp}/{player.max_hp} ATK:{player.atk} GOLD:{player.gold}"
-                stdscr.nodelay(False);stdscr.addstr(0,0,inv+" Press any key");stdscr.getch();stdscr.nodelay(True);msg=""
-            if acted and (dx!=0 or dy!=0):
-                nx,ny=player.x+dx,player.y+dy
-                if nx<0 or ny<0 or ny>=len(dmap) or nx>=len(dmap[0]) or dmap[ny][nx]=='#':
-                    msg="Bump!"
-                else:
-                    target=find_monster_at(monsters,nx,ny)
-                    if target:
-                        dmg=max(0,player.atk+random.randint(-1,1))
-                        target.hp-=dmg
-                        msg=f"You hit {target.name} for {dmg}."
-                        if not target.is_alive():
-                            player.gold+=random.randint(1,10)
-                            msg+=f" {target.name} died."
-                            player.xp+=1
-                            if player.xp>=5:
-                                player.level+=1;player.xp=0;player.max_hp+=5;player.hp=player.max_hp;player.atk+=1;msg+=" Level up!"
-                    else:
-                        player.x,player.y=nx,ny
-                        pmsg=pickup(items,player)
-                        if pmsg:msg=pmsg
-                        else:msg=""
-            # monsters turn
-            for m in monsters:
-                if m.is_alive():
-                    ai_turn(m,player,dmap)
-            # remove dead monsters display cleanup
-            monsters=[m for m in monsters if m.is_alive()]
-            # win condition: find exit (maybe last room center)
-            lastroom=rooms[-1];ex,ey,lastw,lasth=lastroom[0]+lastroom[2]//2,lastroom[1]+lastroom[3]//2
-            if player.x==ex and player.y==ey:
-                stdscr.nodelay(False);stdscr.addstr(12,30,"You found the exit! Press any key.");stdscr.getch();break
-        curses.endwin()
-
-    def main():
-        curses.wrapper(game_loop)
-
-    if __name__=='__main__':
-        main()` 
-    },
+  if __name__ == '__main__':
+      main()`
+  },
 
   {
     title: "ASCII Chess",
     category: "ascii",
-    description: "Full chess game with ASCII board and piece representation.",
+    description: "Full chess game with move validation, check detection, castling, en passant, and game state tracking.",
     tags: ["console", "ascii-art", "board-game"],
     difficulty: 4,
-    lines: "~200 lines",
+    lines: "~380 lines",
     code: `import os
-  def clear(): os.system("cls" if os.name=="nt" else "clear")
-  pieces = {
-    "r":"♜","n":"♞","b":"♝","q":"♛","k":"♚","p":"♟",
-    "R":"♖","N":"♘","B":"♗","Q":"♕","K":"♔","P":"♙"," ":" "
-  }
-  board = [
-    ["r","n","b","q","k","b","n","r"],
-    ["p"]*8,
-    [" "]*8,
-    [" "]*8,
-    [" "]*8,
-    [" "]*8,
-    ["P"]*8,
-    ["R","N","B","Q","K","B","N","R"]
-  ]
-  def print_board():
-      print("  a b c d e f g h")
-      for i,row in enumerate(board):
-          print(8-i, end=" ")
-          for c in row:
-              print(pieces[c], end=" ")
-          print(8-i)
-      print("  a b c d e f g h")
-  def parse_move(m):
-      try:
-          from_x = ord(m[0])-97
-          from_y = 8-int(m[1])
-          to_x = ord(m[2])-97
-          to_y = 8-int(m[3])
-          return (from_y,from_x,to_y,to_x)
-      except:
-          return None
-  turn = "white"
-  while True:
-      clear()
-      print_board()
-      print(f"{turn.capitalize()}'s move. Enter move (e2e4):")
-      m = input()
-      if m=="exit": break
-      move = parse_move(m)
-      if not move: print("Invalid format"); input(); continue
-      fy,fx,ty,tx = move
-      piece = board[fy][fx]
-      if piece==" " or (turn=="white" and piece.islower()) or (turn=="black" and piece.isupper()):
-          print("Invalid piece"); input(); continue
-      board[ty][tx] = board[fy][fx]
-      board[fy][fx] = " "
-      turn = "black" if turn=="white" else "white"`
-  },
+  import sys
+  from typing import Optional, Tuple, List
 
+  # Chess piece Unicode symbols
+  PIECES = {
+      "r": "♜", "n": "♞", "b": "♝", "q": "♛", "k": "♚", "p": "♟",
+      "R": "♖", "N": "♘", "B": "♗", "Q": "♕", "K": "♔", "P": "♙",
+      " ": " "
+  }
+
+  def clear_screen():
+      """Clear the terminal screen"""
+      os.system("cls" if os.name == "nt" else "clear")
+
+  class ChessGame:
+      def __init__(self):
+          """Initialize the chess board"""
+          self.board = [
+              ["r", "n", "b", "q", "k", "b", "n", "r"],
+              ["p"] * 8,
+              [" "] * 8,
+              [" "] * 8,
+              [" "] * 8,
+              [" "] * 8,
+              ["P"] * 8,
+              ["R", "N", "B", "Q", "K", "B", "N", "R"]
+          ]
+          self.turn = "white"
+          self.move_history = []
+          self.captured_white = []
+          self.captured_black = []
+          self.white_king_moved = False
+          self.black_king_moved = False
+          self.white_rook_a_moved = False
+          self.white_rook_h_moved = False
+          self.black_rook_a_moved = False
+          self.black_rook_h_moved = False
+          self.en_passant_target = None
+          self.halfmove_clock = 0
+          self.fullmove_number = 1
+      
+      def print_board(self):
+          """Display the chess board"""
+          clear_screen()
+          print("\\n" + "=" * 50)
+          print("           ASCII CHESS GAME")
+          print("=" * 50 + "\\n")
+          
+          # Column labels (top)
+          print("    a   b   c   d   e   f   g   h")
+          print("  ┌───┬───┬───┬───┬───┬───┬───┬───┐")
+          
+          # Board rows
+          for i, row in enumerate(self.board):
+              print(f"{8-i} │", end="")
+              for piece in row:
+                  print(f" {PIECES[piece]} │", end="")
+              print(f" {8-i}")
+              
+              if i < 7:
+                  print("  ├───┼───┼───┼───┼───┼───┼───┼───┤")
+          
+          print("  └───┴───┴───┴───┴───┴───┴───┴───┘")
+          print("    a   b   c   d   e   f   g   h\\n")
+          
+          # Display captured pieces
+          if self.captured_black:
+              print(f"White captured: {' '.join([PIECES[p] for p in self.captured_black])}")
+          if self.captured_white:
+              print(f"Black captured: {' '.join([PIECES[p] for p in self.captured_white])}")
+          
+          print(f"\\nTurn: {self.turn.capitalize()}")
+          print(f"Move: {self.fullmove_number}")
+          
+          # Check status
+          if self.is_in_check(self.turn):
+              print("\\n⚠️  CHECK! ⚠️")
+      
+      def parse_move(self, move_str: str) -> Optional[Tuple[int, int, int, int]]:
+          """Parse algebraic notation (e.g., 'e2e4')"""
+          try:
+              if len(move_str) != 4:
+                  return None
+              
+              from_col = ord(move_str[0].lower()) - 97
+              from_row = 8 - int(move_str[1])
+              to_col = ord(move_str[2].lower()) - 97
+              to_row = 8 - int(move_str[3])
+              
+              if not (0 <= from_col < 8 and 0 <= from_row < 8 and
+                    0 <= to_col < 8 and 0 <= to_row < 8):
+                  return None
+              
+              return (from_row, from_col, to_row, to_col)
+          except:
+              return None
+      
+      def get_piece_at(self, row: int, col: int) -> str:
+          """Get piece at position"""
+          return self.board[row][col]
+      
+      def is_white_piece(self, piece: str) -> bool:
+          """Check if piece is white"""
+          return piece.isupper()
+      
+      def is_black_piece(self, piece: str) -> bool:
+          """Check if piece is black"""
+          return piece.islower()
+      
+      def is_valid_pawn_move(self, from_row: int, from_col: int, 
+                            to_row: int, to_col: int, piece: str) -> bool:
+          """Validate pawn movement"""
+          direction = -1 if self.is_white_piece(piece) else 1
+          start_row = 6 if self.is_white_piece(piece) else 1
+          
+          target = self.board[to_row][to_col]
+          
+          # Forward move
+          if from_col == to_col and target == " ":
+              # Single step
+              if to_row == from_row + direction:
+                  return True
+              # Double step from start
+              if from_row == start_row and to_row == from_row + 2 * direction:
+                  if self.board[from_row + direction][from_col] == " ":
+                      return True
+          
+          # Diagonal capture
+          if abs(from_col - to_col) == 1 and to_row == from_row + direction:
+              if target != " " and self.is_opponent_piece(target, piece):
+                  return True
+              # En passant
+              if self.en_passant_target == (to_row, to_col):
+                  return True
+          
+          return False
+      
+      def is_valid_rook_move(self, from_row: int, from_col: int,
+                            to_row: int, to_col: int) -> bool:
+          """Validate rook movement"""
+          if from_row != to_row and from_col != to_col:
+              return False
+          return self.is_path_clear(from_row, from_col, to_row, to_col)
+      
+      def is_valid_knight_move(self, from_row: int, from_col: int,
+                              to_row: int, to_col: int) -> bool:
+          """Validate knight movement"""
+          row_diff = abs(from_row - to_row)
+          col_diff = abs(from_col - to_col)
+          return (row_diff == 2 and col_diff == 1) or (row_diff == 1 and col_diff == 2)
+      
+      def is_valid_bishop_move(self, from_row: int, from_col: int,
+                              to_row: int, to_col: int) -> bool:
+          """Validate bishop movement"""
+          if abs(from_row - to_row) != abs(from_col - to_col):
+              return False
+          return self.is_path_clear(from_row, from_col, to_row, to_col)
+      
+      def is_valid_queen_move(self, from_row: int, from_col: int,
+                            to_row: int, to_col: int) -> bool:
+          """Validate queen movement"""
+          # Queen moves like rook or bishop
+          if from_row == to_row or from_col == to_col:
+              return self.is_path_clear(from_row, from_col, to_row, to_col)
+          if abs(from_row - to_row) == abs(from_col - to_col):
+              return self.is_path_clear(from_row, from_col, to_row, to_col)
+          return False
+      
+      def is_valid_king_move(self, from_row: int, from_col: int,
+                            to_row: int, to_col: int) -> bool:
+          """Validate king movement"""
+          row_diff = abs(from_row - to_row)
+          col_diff = abs(from_col - to_col)
+          
+          # Normal king move
+          if row_diff <= 1 and col_diff <= 1:
+              return True
+          
+          # Castling
+          if row_diff == 0 and col_diff == 2:
+              return self.can_castle(from_row, from_col, to_row, to_col)
+          
+          return False
+      
+      def is_path_clear(self, from_row: int, from_col: int,
+                        to_row: int, to_col: int) -> bool:
+          """Check if path is clear between two positions"""
+          row_dir = 0 if from_row == to_row else (1 if to_row > from_row else -1)
+          col_dir = 0 if from_col == to_col else (1 if to_col > from_col else -1)
+          
+          current_row = from_row + row_dir
+          current_col = from_col + col_dir
+          
+          while (current_row, current_col) != (to_row, to_col):
+              if self.board[current_row][current_col] != " ":
+                  return False
+              current_row += row_dir
+              current_col += col_dir
+          
+          return True
+      
+      def is_opponent_piece(self, target: str, piece: str) -> bool:
+          """Check if target is opponent's piece"""
+          if target == " ":
+              return False
+          return (self.is_white_piece(piece) and self.is_black_piece(target)) or \\
+                (self.is_black_piece(piece) and self.is_white_piece(target))
+      
+      def can_castle(self, from_row: int, from_col: int,
+                    to_row: int, to_col: int) -> bool:
+          """Check if castling is valid"""
+          piece = self.board[from_row][from_col]
+          
+          # King must not have moved
+          if self.is_white_piece(piece) and self.white_king_moved:
+              return False
+          if self.is_black_piece(piece) and self.black_king_moved:
+              return False
+          
+          # Kingside castling
+          if to_col == 6:
+              rook_col = 7
+              if self.is_white_piece(piece) and self.white_rook_h_moved:
+                  return False
+              if self.is_black_piece(piece) and self.black_rook_h_moved:
+                  return False
+              
+              # Path must be clear
+              if not self.is_path_clear(from_row, from_col, from_row, rook_col):
+                  return False
+          
+          # Queenside castling
+          elif to_col == 2:
+              rook_col = 0
+              if self.is_white_piece(piece) and self.white_rook_a_moved:
+                  return False
+              if self.is_black_piece(piece) and self.black_rook_a_moved:
+                  return False
+              
+              # Path must be clear
+              if not self.is_path_clear(from_row, from_col, from_row, rook_col):
+                  return False
+          
+          # King must not be in check
+          if self.is_in_check(self.turn):
+              return False
+          
+          return True
+      
+      def is_valid_move(self, from_row: int, from_col: int,
+                      to_row: int, to_col: int) -> bool:
+          """Check if move is valid"""
+          piece = self.board[from_row][from_col]
+          target = self.board[to_row][to_col]
+          piece_type = piece.lower()
+          
+          # Can't capture own piece
+          if target != " " and not self.is_opponent_piece(target, piece):
+              return False
+          
+          # Validate based on piece type
+          if piece_type == 'p':
+              return self.is_valid_pawn_move(from_row, from_col, to_row, to_col, piece)
+          elif piece_type == 'r':
+              return self.is_valid_rook_move(from_row, from_col, to_row, to_col)
+          elif piece_type == 'n':
+              return self.is_valid_knight_move(from_row, from_col, to_row, to_col)
+          elif piece_type == 'b':
+              return self.is_valid_bishop_move(from_row, from_col, to_row, to_col)
+          elif piece_type == 'q':
+              return self.is_valid_queen_move(from_row, from_col, to_row, to_col)
+          elif piece_type == 'k':
+              return self.is_valid_king_move(from_row, from_col, to_row, to_col)
+          
+          return False
+      
+      def find_king(self, color: str) -> Tuple[int, int]:
+          """Find the king's position"""
+          king = 'K' if color == "white" else 'k'
+          for row in range(8):
+              for col in range(8):
+                  if self.board[row][col] == king:
+                      return (row, col)
+          return (-1, -1)
+      
+      def is_in_check(self, color: str) -> bool:
+          """Check if the king is in check"""
+          king_pos = self.find_king(color)
+          if king_pos == (-1, -1):
+              return False
+          
+          # Check if any opponent piece can attack the king
+          opponent = "black" if color == "white" else "white"
+          for row in range(8):
+              for col in range(8):
+                  piece = self.board[row][col]
+                  if piece != " ":
+                      if (opponent == "white" and self.is_white_piece(piece)) or \\
+                        (opponent == "black" and self.is_black_piece(piece)):
+                          if self.is_valid_move(row, col, king_pos[0], king_pos[1]):
+                              return True
+          return False
+      
+      def make_move(self, from_row: int, from_col: int,
+                    to_row: int, to_col: int) -> Tuple[bool, str]:
+          """Execute a move"""
+          piece = self.board[from_row][from_col]
+          target = self.board[to_row][to_col]
+          
+          # Check if it's the right player's piece
+          if (self.turn == "white" and not self.is_white_piece(piece)) or \\
+            (self.turn == "black" and not self.is_black_piece(piece)):
+              return False, "Not your piece!"
+          
+          # Validate move
+          if not self.is_valid_move(from_row, from_col, to_row, to_col):
+              return False, "Invalid move!"
+          
+          # Simulate move to check for check
+          old_target = target
+          self.board[to_row][to_col] = piece
+          self.board[from_row][from_col] = " "
+          
+          if self.is_in_check(self.turn):
+              # Undo move
+              self.board[from_row][from_col] = piece
+              self.board[to_row][to_col] = old_target
+              return False, "Move would put you in check!"
+          
+          # Capture piece
+          if target != " ":
+              if self.is_white_piece(target):
+                  self.captured_white.append(target)
+              else:
+                  self.captured_black.append(target)
+          
+          # Handle castling
+          if piece.lower() == 'k' and abs(to_col - from_col) == 2:
+              if to_col == 6:  # Kingside
+                  self.board[from_row][5] = self.board[from_row][7]
+                  self.board[from_row][7] = " "
+              elif to_col == 2:  # Queenside
+                  self.board[from_row][3] = self.board[from_row][0]
+                  self.board[from_row][0] = " "
+          
+          # Update castling rights
+          if piece == 'K':
+              self.white_king_moved = True
+          elif piece == 'k':
+              self.black_king_moved = True
+          elif piece == 'R':
+              if from_col == 0:
+                  self.white_rook_a_moved = True
+              elif from_col == 7:
+                  self.white_rook_h_moved = True
+          elif piece == 'r':
+              if from_col == 0:
+                  self.black_rook_a_moved = True
+              elif from_col == 7:
+                  self.black_rook_h_moved = True
+          
+          # Record move
+          move_notation = f"{chr(from_col + 97)}{8-from_row}{chr(to_col + 97)}{8-to_row}"
+          self.move_history.append(move_notation)
+          
+          # Switch turn
+          if self.turn == "black":
+              self.fullmove_number += 1
+          self.turn = "black" if self.turn == "white" else "white"
+          
+          return True, "Move successful!"
+
+  def main():
+      """Main game loop"""
+      game = ChessGame()
+      
+      print("\\nChess Game Starting...")
+      print("=" * 50)
+      print("Enter moves in format: e2e4 (from square to square)")
+      print("Commands: 'quit' to exit, 'help' for help, 'history' for moves")
+      print("=" * 50)
+      input("\\nPress Enter to begin...")
+      
+      while True:
+          game.print_board()
+          
+          move_input = input("\\nEnter move: ").strip().lower()
+          
+          if move_input == "quit":
+              print("\\nThanks for playing!")
+              break
+          
+          if move_input == "help":
+              print("\\n" + "=" * 50)
+              print("HELP - How to Play")
+              print("=" * 50)
+              print("• Enter moves like 'e2e4' (from position to position)")
+              print("• Pieces move according to standard chess rules")
+              print("• The game prevents illegal moves")
+              print("• 'quit' - Exit the game")
+              print("• 'history' - View move history")
+              print("=" * 50)
+              input("\\nPress Enter to continue...")
+              continue
+          
+          if move_input == "history":
+              print("\\n" + "=" * 50)
+              print("MOVE HISTORY")
+              print("=" * 50)
+              if game.move_history:
+                  for i, move in enumerate(game.move_history, 1):
+                      print(f"{i}. {move}")
+              else:
+                  print("No moves yet")
+              print("=" * 50)
+              input("\\nPress Enter to continue...")
+              continue
+          
+          parsed_move = game.parse_move(move_input)
+          
+          if not parsed_move:
+              print("\\nInvalid format! Use format like 'e2e4'")
+              input("Press Enter to continue...")
+              continue
+          
+          success, message = game.make_move(*parsed_move)
+          
+          if not success:
+              print(f"\\nError: {message}")
+              input("Press Enter to continue...")
+
+  if __name__ == '__main__':
+      try:
+          main()
+      except KeyboardInterrupt:
+          print("\\n\\nGame interrupted by user. Goodbye!")
+          sys.exit(0)`
+  },
   {
     title: "ASCII Tetris",
     category: "ascii",
-    description: "Tetris game using ASCII blocks in the terminal.",
+    description: "Classic Tetris with scoring, levels, line clearing effects, and next piece preview.",
     tags: ["console", "ascii-art", "puzzle"],
     difficulty: 3,
-    lines: "~150 lines",
-    code: `import os,time,random,msvcrt
-  w,h=10,20
-  board=[[" "]*w for _ in range(h)]
-  shapes=[
-  [[1,1,1,1]], # I
-  [[1,1],[1,1]], # O
-  [[0,1,0],[1,1,1]], # T
-  [[1,1,0],[0,1,1]], # S
-  [[0,1,1],[1,1,0]] # Z
+    lines: "~280 lines",
+    code: `import os
+  import time
+  import random
+  import sys
+
+  # Try to import keyboard input module
+  try:
+      import msvcrt
+      HAS_MSVCRT = True
+  except ImportError:
+      HAS_MSVCRT = False
+      import select
+
+  # Game Constants
+  BOARD_WIDTH = 10
+  BOARD_HEIGHT = 20
+  INITIAL_FALL_SPEED = 0.5
+  SPEED_INCREASE_PER_LEVEL = 0.05
+
+  # Tetromino shapes
+  SHAPES = [
+      [[1, 1, 1, 1]],              # I
+      [[1, 1], [1, 1]],            # O
+      [[0, 1, 0], [1, 1, 1]],      # T
+      [[1, 1, 0], [0, 1, 1]],      # S
+      [[0, 1, 1], [1, 1, 0]],      # Z
+      [[1, 0, 0], [1, 1, 1]],      # L
+      [[0, 0, 1], [1, 1, 1]]       # J
   ]
-  def clear(): os.system("cls")
-  def draw():
-  clear()
-  for row in board:
-    print("|"+''.join(["#" if c else " " for c in row])+"|")
-  print("-"*(w+2))
-  def can_place(shape,x,y):
-  for i,r in enumerate(shape):
-    for j,v in enumerate(r):
-    if v:
-      if y+i>=h or x+j<0 or x+j>=w or board[y+i][x+j]: return False
-  return True
-  def place(shape,x,y):
-  for i,r in enumerate(shape):
-    for j,v in enumerate(r):
-    if v: board[y+i][x+j]=1
-  def remove(shape,x,y):
-  for i,r in enumerate(shape):
-    for j,v in enumerate(r):
-    if v: board[y+i][x+j]=0
-  def clear_lines():
-  global board
-  new_board=[row for row in board if any(c==0 for c in row)]
-  while len(new_board)<h: new_board=[[0]*w]+new_board
-  board=new_board
-  x,y=3,0
-  shape=random.choice(shapes)
-  while True:
-  draw()
-  time.sleep(0.2)
-  if msvcrt.kbhit():
-    k=msvcrt.getch()
-    if k==b'a' and can_place(shape,x-1,y): x-=1
-    if k==b'd' and can_place(shape,x+1,y): x+=1
-    if k==b's' and can_place(shape,x,y+1): y+=1
-    if k==b'w':
-    new_shape=[list(r) for r in zip(*shape[::-1])]
-    if can_place(new_shape,x,y): shape=new_shape
-  if can_place(shape,x,y+1): y+=1
-  else:
-    place(shape,x,y)
-    clear_lines()
-    x,y=3,0
-    shape=random.choice(shapes)
-    if not can_place(shape,x,y):
-    draw()
-    print("Game Over!")
-    break`
+
+  SHAPE_COLORS = ['I', 'O', 'T', 'S', 'Z', 'L', 'J']
+
+  def clear_screen():
+      """Clear the terminal screen"""
+      os.system("cls" if os.name == "nt" else "clear")
+
+  class TetrisGame:
+      def __init__(self):
+          self.width = BOARD_WIDTH
+          self.height = BOARD_HEIGHT
+          self.board = [[" " for _ in range(self.width)] 
+                      for _ in range(self.height)]
+          self.score = 0
+          self.level = 1
+          self.lines_cleared = 0
+          self.fall_speed = INITIAL_FALL_SPEED
+          
+          self.current_shape = None
+          self.current_x = 0
+          self.current_y = 0
+          self.current_color = None
+          
+          self.next_shape = None
+          self.next_color = None
+          
+          self.game_over = False
+          self.last_fall_time = time.time()
+          
+          self.spawn_new_piece()
+          self.generate_next_piece()
+      
+      def generate_next_piece(self):
+          """Generate the next piece"""
+          index = random.randint(0, len(SHAPES) - 1)
+          self.next_shape = [row[:] for row in SHAPES[index]]
+          self.next_color = SHAPE_COLORS[index]
+      
+      def spawn_new_piece(self):
+          """Spawn a new piece at the top"""
+          if self.next_shape:
+              self.current_shape = self.next_shape
+              self.current_color = self.next_color
+          else:
+              index = random.randint(0, len(SHAPES) - 1)
+              self.current_shape = [row[:] for row in SHAPES[index]]
+              self.current_color = SHAPE_COLORS[index]
+          
+          self.current_x = self.width // 2 - len(self.current_shape[0]) // 2
+          self.current_y = 0
+          
+          self.generate_next_piece()
+          
+          # Check if spawn position is blocked
+          if not self.can_place(self.current_shape, self.current_x, self.current_y):
+              self.game_over = True
+      
+      def can_place(self, shape, x, y):
+          """Check if shape can be placed at position"""
+          for i, row in enumerate(shape):
+              for j, cell in enumerate(row):
+                  if cell:
+                      new_x = x + j
+                      new_y = y + i
+                      
+                      # Check boundaries
+                      if new_x < 0 or new_x >= self.width or new_y >= self.height:
+                          return False
+                      
+                      # Check if position is occupied
+                      if new_y >= 0 and self.board[new_y][new_x] != " ":
+                          return False
+          return True
+      
+      def place_piece(self):
+          """Place current piece on the board"""
+          for i, row in enumerate(self.current_shape):
+              for j, cell in enumerate(row):
+                  if cell:
+                      board_y = self.current_y + i
+                      board_x = self.current_x + j
+                      if 0 <= board_y < self.height:
+                          self.board[board_y][board_x] = self.current_color
+      
+      def rotate_piece(self):
+          """Rotate the current piece clockwise"""
+          rotated = [list(row) for row in zip(*self.current_shape[::-1])]
+          
+          # Try to place rotated piece
+          if self.can_place(rotated, self.current_x, self.current_y):
+              self.current_shape = rotated
+          # Try wall kicks
+          elif self.can_place(rotated, self.current_x - 1, self.current_y):
+              self.current_shape = rotated
+              self.current_x -= 1
+          elif self.can_place(rotated, self.current_x + 1, self.current_y):
+              self.current_shape = rotated
+              self.current_x += 1
+      
+      def move_left(self):
+          """Move piece left"""
+          if self.can_place(self.current_shape, self.current_x - 1, self.current_y):
+              self.current_x -= 1
+      
+      def move_right(self):
+          """Move piece right"""
+          if self.can_place(self.current_shape, self.current_x + 1, self.current_y):
+              self.current_x += 1
+      
+      def move_down(self):
+          """Move piece down"""
+          if self.can_place(self.current_shape, self.current_x, self.current_y + 1):
+              self.current_y += 1
+              return True
+          return False
+      
+      def hard_drop(self):
+          """Drop piece to bottom instantly"""
+          while self.move_down():
+              self.score += 2  # Bonus points for hard drop
+      
+      def clear_lines(self):
+          """Clear completed lines and update score"""
+          lines_to_clear = []
+          
+          for i, row in enumerate(self.board):
+              if all(cell != " " for cell in row):
+                  lines_to_clear.append(i)
+          
+          if lines_to_clear:
+              # Remove cleared lines
+              for line_index in sorted(lines_to_clear, reverse=True):
+                  del self.board[line_index]
+              
+              # Add new empty lines at top
+              for _ in range(len(lines_to_clear)):
+                  self.board.insert(0, [" " for _ in range(self.width)])
+              
+              # Update score and level
+              num_lines = len(lines_to_clear)
+              self.lines_cleared += num_lines
+              
+              # Score based on number of lines cleared at once
+              line_scores = {1: 100, 2: 300, 3: 500, 4: 800}
+              self.score += line_scores.get(num_lines, 100) * self.level
+              
+              # Level up every 10 lines
+              new_level = self.lines_cleared // 10 + 1
+              if new_level > self.level:
+                  self.level = new_level
+                  self.fall_speed = max(0.1, INITIAL_FALL_SPEED - 
+                                      (self.level - 1) * SPEED_INCREASE_PER_LEVEL)
+      
+      def draw_board(self):
+          """Draw the game board"""
+          clear_screen()
+          
+          print("\\n" + "=" * 50)
+          print("              TETRIS GAME")
+          print("=" * 50 + "\\n")
+          
+          # Create display board with current piece
+          display_board = [row[:] for row in self.board]
+          
+          # Draw current piece on display board
+          for i, row in enumerate(self.current_shape):
+              for j, cell in enumerate(row):
+                  if cell:
+                      display_y = self.current_y + i
+                      display_x = self.current_x + j
+                      if 0 <= display_y < self.height:
+                          display_board[display_y][display_x] = self.current_color
+          
+          # Draw the board
+          print("  ┌" + "─" * (self.width * 2) + "┐")
+          for row in display_board:
+              print("  │" + "".join([f"{cell} " for cell in row]) + "│")
+          print("  └" + "─" * (self.width * 2) + "┘")
+          
+          # Draw stats
+          print(f"\\n  Score: {self.score}")
+          print(f"  Level: {self.level}")
+          print(f"  Lines: {self.lines_cleared}")
+          
+          # Draw next piece
+          print("\\n  Next Piece:")
+          print("  ┌────────┐")
+          for i in range(3):
+              print("  │", end="")
+              if i < len(self.next_shape):
+                  row = self.next_shape[i]
+                  for cell in row:
+                      print(self.next_color if cell else " ", end=" ")
+                  # Pad the rest
+                  for _ in range(4 - len(row)):
+                      print(" ", end=" ")
+              else:
+                  print("        ", end="")
+              print("│")
+          print("  └────────┘")
+          
+          # Draw controls
+          print("\\n  Controls:")
+          if HAS_MSVCRT:
+              print("  A/D - Move Left/Right")
+              print("  S - Soft Drop")
+              print("  W - Rotate")
+              print("  Space - Hard Drop")
+              print("  Q - Quit")
+          else:
+              print("  Auto-play demo mode")
+              print("  Press Ctrl+C to quit")
+      
+      def get_input(self):
+          """Get keyboard input"""
+          if not HAS_MSVCRT:
+              # Simple AI for demo mode
+              if self.current_x > self.width // 2:
+                  self.move_left()
+              elif self.current_x < self.width // 2:
+                  self.move_right()
+              return True
+          
+          if msvcrt.kbhit():
+              key = msvcrt.getch()
+              
+              if key == b'q' or key == b'Q':
+                  return False
+              elif key == b'a' or key == b'A':
+                  self.move_left()
+              elif key == b'd' or key == b'D':
+                  self.move_right()
+              elif key == b's' or key == b'S':
+                  self.move_down()
+                  self.score += 1  # Bonus for soft drop
+              elif key == b'w' or key == b'W':
+                  self.rotate_piece()
+              elif key == b' ':
+                  self.hard_drop()
+                  self.place_piece()
+                  self.clear_lines()
+                  self.spawn_new_piece()
+          
+          return True
+      
+      def update(self):
+          """Update game state"""
+          current_time = time.time()
+          
+          # Auto-fall based on fall speed
+          if current_time - self.last_fall_time >= self.fall_speed:
+              if not self.move_down():
+                  # Piece has landed
+                  self.place_piece()
+                  self.clear_lines()
+                  self.spawn_new_piece()
+              
+              self.last_fall_time = current_time
+      
+      def show_game_over(self):
+          """Display game over screen"""
+          clear_screen()
+          print("\\n" * 5)
+          print("  ╔" + "═" * 46 + "╗")
+          print("  ║" + " " * 17 + "GAME OVER!" + " " * 18 + "║")
+          print("  ║" + " " * 46 + "║")
+          print(f"  ║     Final Score: {self.score:<28} ║")
+          print(f"  ║     Level Reached: {self.level:<27} ║")
+          print(f"  ║     Lines Cleared: {self.lines_cleared:<27} ║")
+          print("  ║" + " " * 46 + "║")
+          print("  ╚" + "═" * 46 + "╝")
+          print("\\n  Thanks for playing!\\n")
+
+  def main():
+      """Main game loop"""
+      game = TetrisGame()
+      
+      print("\\nTetris Game Starting...")
+      print("=" * 50)
+      if HAS_MSVCRT:
+          print("Controls: A/D=Left/Right, W=Rotate, S=Soft Drop")
+          print("          Space=Hard Drop, Q=Quit")
+      else:
+          print("Demo mode - watch the AI play!")
+          print("Press Ctrl+C to quit")
+      print("=" * 50)
+      time.sleep(2)
+      
+      try:
+          while not game.game_over:
+              game.draw_board()
+              
+              if not game.get_input():
+                  print("\\nGame quit by user")
+                  sys.exit(0)
+              
+              game.update()
+              
+              time.sleep(0.05)  # Small delay for smooth gameplay
+          
+          game.show_game_over()
+          
+      except KeyboardInterrupt:
+          print("\\n\\nGame interrupted by user. Goodbye!")
+          sys.exit(0)
+
+  if __name__ == '__main__':
+      main()`
   },
   {
     title: "ASCII Pong",
     category: "ascii",
-    description: "Two-player Pong rendered with ASCII characters.",
+    description: "Two-player Pong with score tracking, ball speed increase, and game-to-X points.",
     tags: ["console", "ascii-art", "arcade"],
     difficulty: 2,
-    lines: "~100 lines",
-    code: `import os, time, msvcrt
-  w,h=40,10
-  p1,p2=h//2,h//2
-  bx,by=w//2,h//2
-  dx,dy=1,1
-  def draw():
-      os.system("cls")
-      for y in range(h):
-          row=""
-          for x in range(w):
-              if x==0 and y==p1: row+="|"
-              elif x==w-1 and y==p2: row+="|"
-              elif x==bx and y==by: row+="O"
-              else: row+=" "
-          print(row)
-  while True:
-      draw()
-      time.sleep(0.1)
-      if msvcrt.kbhit():
-          k=msvcrt.getch()
-          if k==b'w' and p1>0: p1-=1
-          if k==b's' and p1<h-1: p1+=1
-          if k==b'i' and p2>0: p2-=1
-          if k==b'k' and p2<h-1: p2+=1
-      bx+=dx; by+=dy
-      if by<=0 or by>=h-1: dy*=-1
-      if bx<=1:
-          if by==p1: dx*=-1
-          else: print("Player 2 wins!"); break
-      if bx>=w-2:
-          if by==p2: dx*=-1
-          else: print("Player 1 wins!"); break`
+    lines: "~220 lines",
+    code: `import os
+  import time
+  import sys
+
+  # Try to import keyboard module
+  try:
+      import msvcrt
+      HAS_MSVCRT = True
+  except ImportError:
+      HAS_MSVCRT = False
+      print("Note: Real-time controls not available on this system")
+
+  # Game Constants
+  BOARD_WIDTH = 60
+  BOARD_HEIGHT = 20
+  PADDLE_HEIGHT = 4
+  WINNING_SCORE = 5
+  INITIAL_BALL_SPEED = 0.08
+  SPEED_INCREASE = 0.005
+  MAX_SPEED = 0.03
+
+  def clear_screen():
+      """Clear the terminal screen"""
+      os.system("cls" if os.name == "nt" else "clear")
+
+  class PongGame:
+      def __init__(self):
+          self.width = BOARD_WIDTH
+          self.height = BOARD_HEIGHT
+          self.paddle_height = PADDLE_HEIGHT
+          
+          # Paddle positions (y-coordinate of top of paddle)
+          self.player1_y = self.height // 2 - self.paddle_height // 2
+          self.player2_y = self.height // 2 - self.paddle_height // 2
+          
+          # Ball position and velocity
+          self.ball_x = self.width // 2
+          self.ball_y = self.height // 2
+          self.ball_dx = 1
+          self.ball_dy = 1
+          self.ball_speed = INITIAL_BALL_SPEED
+          
+          # Scores
+          self.player1_score = 0
+          self.player2_score = 0
+          
+          # Game state
+          self.game_over = False
+          self.winner = None
+          self.last_update = time.time()
+          self.rally_count = 0
+      
+      def reset_ball(self, direction=None):
+          """Reset ball to center with optional direction"""
+          self.ball_x = self.width // 2
+          self.ball_y = self.height // 2
+          
+          if direction == "left":
+              self.ball_dx = -1
+          elif direction == "right":
+              self.ball_dx = 1
+          else:
+              self.ball_dx = 1 if self.ball_dx > 0 else -1
+          
+          self.ball_dy = 1 if self.ball_y % 2 == 0 else -1
+          self.ball_speed = INITIAL_BALL_SPEED
+          self.rally_count = 0
+      
+      def move_player1_up(self):
+          """Move player 1 paddle up"""
+          if self.player1_y > 0:
+              self.player1_y -= 1
+      
+      def move_player1_down(self):
+          """Move player 1 paddle down"""
+          if self.player1_y < self.height - self.paddle_height:
+              self.player1_y += 1
+      
+      def move_player2_up(self):
+          """Move player 2 paddle up"""
+          if self.player2_y > 0:
+              self.player2_y -= 1
+      
+      def move_player2_down(self):
+          """Move player 2 paddle down"""
+          if self.player2_y < self.height - self.paddle_height:
+              self.player2_y += 1
+      
+      def update_ball(self):
+          """Update ball position and handle collisions"""
+          # Move ball
+          self.ball_x += self.ball_dx
+          self.ball_y += self.ball_dy
+          
+          # Top and bottom wall collision
+          if self.ball_y <= 0 or self.ball_y >= self.height - 1:
+              self.ball_dy *= -1
+              self.ball_y = max(0, min(self.ball_y, self.height - 1))
+          
+          # Player 1 paddle collision (left side)
+          if self.ball_x == 2 and self.ball_dx < 0:
+              if self.player1_y <= self.ball_y < self.player1_y + self.paddle_height:
+                  self.ball_dx *= -1
+                  self.rally_count += 1
+                  
+                  # Increase speed with each rally
+                  if self.rally_count % 3 == 0:
+                      self.ball_speed = max(MAX_SPEED, 
+                                          self.ball_speed - SPEED_INCREASE)
+                  
+                  # Add spin based on where ball hits paddle
+                  hit_pos = self.ball_y - self.player1_y
+                  if hit_pos < self.paddle_height // 2:
+                      self.ball_dy = -1
+                  else:
+                      self.ball_dy = 1
+          
+          # Player 2 paddle collision (right side)
+          if self.ball_x == self.width - 3 and self.ball_dx > 0:
+              if self.player2_y <= self.ball_y < self.player2_y + self.paddle_height:
+                  self.ball_dx *= -1
+                  self.rally_count += 1
+                  
+                  # Increase speed
+                  if self.rally_count % 3 == 0:
+                      self.ball_speed = max(MAX_SPEED, 
+                                          self.ball_speed - SPEED_INCREASE)
+                  
+                  # Add spin
+                  hit_pos = self.ball_y - self.player2_y
+                  if hit_pos < self.paddle_height // 2:
+                      self.ball_dy = -1
+                  else:
+                      self.ball_dy = 1
+          
+          # Scoring - Player 1 misses (left side)
+          if self.ball_x <= 0:
+              self.player2_score += 1
+              if self.player2_score >= WINNING_SCORE:
+                  self.game_over = True
+                  self.winner = "Player 2"
+              else:
+                  self.reset_ball("right")
+          
+          # Scoring - Player 2 misses (right side)
+          if self.ball_x >= self.width - 1:
+              self.player1_score += 1
+              if self.player1_score >= WINNING_SCORE:
+                  self.game_over = True
+                  self.winner = "Player 1"
+              else:
+                  self.reset_ball("left")
+      
+      def draw(self):
+          """Draw the game board"""
+          clear_screen()
+          
+          print("\\n" + "=" * 70)
+          print("                        ASCII PONG")
+          print("=" * 70 + "\\n")
+          
+          # Draw top border
+          print("  ┌" + "─" * (self.width) + "┐")
+          
+          # Draw game board
+          for y in range(self.height):
+              row = "  │"
+              
+              for x in range(self.width):
+                  # Draw player 1 paddle (left side)
+                  if x == 1 and self.player1_y <= y < self.player1_y + self.paddle_height:
+                      row += "█"
+                  # Draw player 2 paddle (right side)
+                  elif x == self.width - 2 and self.player2_y <= y < self.player2_y + self.paddle_height:
+                      row += "█"
+                  # Draw ball
+                  elif x == self.ball_x and y == self.ball_y:
+                      row += "●"
+                  # Draw center line
+                  elif x == self.width // 2 and y % 2 == 0:
+                      row += "┊"
+                  else:
+                      row += " "
+              
+              row += "│"
+              print(row)
+          
+          # Draw bottom border
+          print("  └" + "─" * (self.width) + "┘\\n")
+          
+          # Draw scores
+          score_padding = self.width // 2 - 10
+          print(f"  Player 1: {self.player1_score}" + " " * score_padding + 
+                f"Player 2: {self.player2_score}")
+          print(f"  First to {WINNING_SCORE} wins!\\n")
+          
+          # Draw controls
+          if HAS_MSVCRT:
+              print("  Player 1: W/S    |    Player 2: I/K    |    Q: Quit")
+          else:
+              print("  Demo Mode - Press Ctrl+C to quit")
+          
+          # Show rally counter
+          if self.rally_count > 0:
+              print(f"\\n  Rally: {self.rally_count}")
+      
+      def get_input(self):
+          """Get keyboard input"""
+          if not HAS_MSVCRT:
+              # Simple AI for demo mode
+              # Player 1 AI
+              if self.ball_y < self.player1_y + self.paddle_height // 2:
+                  self.move_player1_up()
+              elif self.ball_y > self.player1_y + self.paddle_height // 2:
+                  self.move_player1_down()
+              
+              # Player 2 AI
+              if self.ball_y < self.player2_y + self.paddle_height // 2:
+                  self.move_player2_up()
+              elif self.ball_y > self.player2_y + self.paddle_height // 2:
+                  self.move_player2_down()
+              
+              return True
+          
+          # Check for keyboard input
+          if msvcrt.kbhit():
+              key = msvcrt.getch()
+              
+              # Quit
+              if key == b'q' or key == b'Q':
+                  return False
+              
+              # Player 1 controls
+              if key == b'w' or key == b'W':
+                  self.move_player1_up()
+              elif key == b's' or key == b'S':
+                  self.move_player1_down()
+              
+              # Player 2 controls
+              if key == b'i' or key == b'I':
+                  self.move_player2_up()
+              elif key == b'k' or key == b'K':
+                  self.move_player2_down()
+          
+          return True
+      
+      def show_game_over(self):
+          """Display game over screen"""
+          clear_screen()
+          print("\\n" * 5)
+          print("  ╔" + "═" * 50 + "╗")
+          print("  ║" + " " * 50 + "║")
+          print(f"  ║{self.winner.center(50)}║")
+          print("  ║" + " " * 50 + "║")
+          print(f"  ║{'WINS!'.center(50)}║")
+          print("  ║" + " " * 50 + "║")
+          print(f"  ║{f'Final Score: {self.player1_score} - {self.player2_score}'.center(50)}║")
+          print("  ║" + " " * 50 + "║")
+          print("  ╚" + "═" * 50 + "╝")
+          print("\\n  Thanks for playing!\\n")
+
+  def main():
+      """Main game loop"""
+      game = PongGame()
+      
+      print("\\nPong Game Starting...")
+      print("=" * 70)
+      if HAS_MSVCRT:
+          print("Player 1 (Left): W=Up, S=Down")
+          print("Player 2 (Right): I=Up, K=Down")
+          print("Press Q to quit")
+      else:
+          print("Demo mode - Watch the AI play!")
+          print("Press Ctrl+C to quit")
+      print(f"First to {WINNING_SCORE} points wins!")
+      print("=" * 70)
+      time.sleep(2)
+      
+      try:
+          while not game.game_over:
+              current_time = time.time()
+              
+              # Update ball based on speed
+              if current_time - game.last_update >= game.ball_speed:
+                  game.update_ball()
+                  game.last_update = current_time
+              
+              game.draw()
+              
+              # Get input
+              if not game.get_input():
+                  print("\\nGame quit by user. Goodbye!")
+                  sys.exit(0)
+              
+              time.sleep(0.02)  # Small delay for smooth gameplay
+          
+          # Show game over screen
+          game.show_game_over()
+          
+      except KeyboardInterrupt:
+          print("\\n\\nGame interrupted by user. Goodbye!")
+          sys.exit(0)
+
+  if __name__ == '__main__':
+      main()`
   },
   {
     title: "ASCII Art Portrait Generator",
     category: "ascii",
-    description: "Convert photos into detailed ASCII art portraits.",
+    description: "Convert photos into detailed ASCII art with multiple character sets, color options, and export functionality.",
     tags: ["PIL", "ascii-art", "image-processing"],
     difficulty: 3,
-    lines: "~50 lines",
+    lines: "~180 lines",
     code: `from PIL import Image
-  chars = "@%#*+=-:. "
-  def resize(img, new_width=80):
-      w,h = img.size
-      ratio = h/w/1.65
-      return img.resize((new_width, int(new_width*ratio)))
-  def to_ascii(img):
-      img = img.convert("L")
-      pixels = img.getdata()
-      return "".join([chars[pixel*len(chars)//256] for pixel in pixels])
-  path = input("Enter image path: ")
-  img = Image.open(path)
-  img = resize(img,80)
-  ascii_str = to_ascii(img)
-  w,h = img.size
-  for i in range(0,len(ascii_str),w):
-      print(ascii_str[i:i+w])`
+  import os
+  import sys
+
+  # Different ASCII character sets for different effects
+  ASCII_CHARS = {
+      'standard': "@%#*+=-:. ",
+      'detailed': "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\\"^'. ",
+      'simple': "█▓▒░ ",
+      'blocks': "█▓▒░ ",
+      'minimal': "@#:. "
+  }
+
+  def clear_screen():
+      """Clear the terminal screen"""
+      os.system('cls' if os.name == 'nt' else 'clear')
+
+  class ASCIIArtGenerator:
+      def __init__(self):
+          self.char_set = ASCII_CHARS['standard']
+          self.width = 100
+          self.aspect_ratio = 1.65
+      
+      def resize_image(self, image, new_width=None):
+          """Resize image maintaining aspect ratio"""
+          if new_width is None:
+              new_width = self.width
+          
+          width, height = image.size
+          ratio = height / width / self.aspect_ratio
+          new_height = int(new_width * ratio)
+          
+          return image.resize((new_width, new_height))
+      
+      def grayscale_image(self, image):
+          """Convert image to grayscale"""
+          return image.convert("L")
+      
+      def pixels_to_ascii(self, image):
+          """Convert pixel values to ASCII characters"""
+          pixels = image.getdata()
+          ascii_str = ""
+          
+          for pixel in pixels:
+              # Map pixel value (0-255) to character index
+              ascii_str += self.char_set[pixel * len(self.char_set) // 256]
+          
+          return ascii_str
+      
+      def image_to_ascii(self, image_path):
+          """Convert image file to ASCII art"""
+          try:
+              # Open image
+              image = Image.open(image_path)
+          except Exception as e:
+              return None, f"Error opening image: {e}"
+          
+          # Resize image
+          image = self.resize_image(image)
+          
+          # Convert to grayscale
+          image = self.grayscale_image(image)
+          
+          # Convert to ASCII
+          ascii_str = self.pixels_to_ascii(image)
+          
+          # Get image dimensions
+          img_width = image.width
+          
+          # Split into lines
+          ascii_lines = []
+          for i in range(0, len(ascii_str), img_width):
+              ascii_lines.append(ascii_str[i:i + img_width])
+          
+          return "\\n".join(ascii_lines), None
+      
+      def save_to_file(self, ascii_art, output_path):
+          """Save ASCII art to text file"""
+          try:
+              with open(output_path, 'w', encoding='utf-8') as f:
+                  f.write(ascii_art)
+              return True, f"Saved to {output_path}"
+          except Exception as e:
+              return False, f"Error saving file: {e}"
+      
+      def set_character_set(self, set_name):
+          """Change the character set"""
+          if set_name in ASCII_CHARS:
+              self.char_set = ASCII_CHARS[set_name]
+              return True
+          return False
+      
+      def set_width(self, width):
+          """Set output width"""
+          if 20 <= width <= 300:
+              self.width = width
+              return True
+          return False
+
+  def display_menu():
+      """Display the main menu"""
+      clear_screen()
+      print("\\n" + "=" * 60)
+      print("           ASCII ART PORTRAIT GENERATOR")
+      print("=" * 60)
+      print("\\nConvert your images into ASCII art!")
+      print("\\nOptions:")
+      print("  1. Convert image")
+      print("  2. Change character set")
+      print("  3. Change width")
+      print("  4. Exit")
+      print("=" * 60)
+
+  def display_character_sets():
+      """Display available character sets"""
+      print("\\nAvailable character sets:")
+      for i, name in enumerate(ASCII_CHARS.keys(), 1):
+          print(f"  {i}. {name.capitalize()}: {ASCII_CHARS[name][:20]}...")
+
+  def main():
+      """Main application loop"""
+      generator = ASCIIArtGenerator()
+      
+      print("\\nASCII Art Generator Starting...")
+      print("Loading...")
+      
+      while True:
+          display_menu()
+          
+          choice = input("\\nEnter your choice (1-4): ").strip()
+          
+          if choice == '1':
+              # Convert image
+              clear_screen()
+              print("\\n" + "=" * 60)
+              print("                    CONVERT IMAGE")
+              print("=" * 60)
+              
+              image_path = input("\\nEnter image path: ").strip()
+              
+              if not os.path.exists(image_path):
+                  print(f"\\nError: File '{image_path}' not found!")
+                  input("\\nPress Enter to continue...")
+                  continue
+              
+              print("\\nConverting image to ASCII art...")
+              ascii_art, error = generator.image_to_ascii(image_path)
+              
+              if error:
+                  print(f"\\n{error}")
+                  input("\\nPress Enter to continue...")
+                  continue
+              
+              # Display result
+              clear_screen()
+              print("\\n" + "=" * 60)
+              print("                    RESULT")
+              print("=" * 60 + "\\n")
+              print(ascii_art)
+              print("\\n" + "=" * 60)
+              
+              # Ask to save
+              save_choice = input("\\nSave to file? (y/n): ").strip().lower()
+              
+              if save_choice == 'y':
+                  output_path = input("Enter output filename (e.g., output.txt): ").strip()
+                  
+                  if not output_path:
+                      output_path = "ascii_art.txt"
+                  
+                  success, message = generator.save_to_file(ascii_art, output_path)
+                  print(f"\\n{message}")
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '2':
+              # Change character set
+              clear_screen()
+              print("\\n" + "=" * 60)
+              print("                 CHARACTER SETS")
+              print("=" * 60)
+              
+              display_character_sets()
+              
+              set_choice = input("\\nSelect character set (1-5): ").strip()
+              
+              try:
+                  set_index = int(set_choice) - 1
+                  set_names = list(ASCII_CHARS.keys())
+                  
+                  if 0 <= set_index < len(set_names):
+                      generator.set_character_set(set_names[set_index])
+                      print(f"\\nCharacter set changed to: {set_names[set_index]}")
+                  else:
+                      print("\\nInvalid selection!")
+              except ValueError:
+                  print("\\nInvalid input!")
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '3':
+              # Change width
+              clear_screen()
+              print("\\n" + "=" * 60)
+              print("                   OUTPUT WIDTH")
+              print("=" * 60)
+              
+              print(f"\\nCurrent width: {generator.width}")
+              print("Valid range: 20-300 characters")
+              
+              width_input = input("\\nEnter new width: ").strip()
+              
+              try:
+                  new_width = int(width_input)
+                  
+                  if generator.set_width(new_width):
+                      print(f"\\nWidth changed to: {new_width}")
+                  else:
+                      print("\\nWidth must be between 20 and 300!")
+              except ValueError:
+                  print("\\nInvalid input!")
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '4':
+              # Exit
+              clear_screen()
+              print("\\nThank you for using ASCII Art Generator!")
+              print("Goodbye!\\n")
+              sys.exit(0)
+          
+          else:
+              print("\\nInvalid choice! Please enter 1-4.")
+              input("\\nPress Enter to continue...")
+
+  if __name__ == '__main__':
+      try:
+          main()
+      except KeyboardInterrupt:
+          print("\\n\\nProgram interrupted by user. Goodbye!")
+          sys.exit(0)
+      except Exception as e:
+          print(f"\\n\\nAn error occurred: {e}")
+          sys.exit(1)`
   },
   {
     title: "ASCII Animation Player",
     category: "ascii",
-    description: "Play ASCII art animations from text files with frame control.",
+    description: "Play ASCII art animations with playback controls, frame rate adjustment, and creation tools.",
     tags: ["console", "ascii-art", "animation"],
     difficulty: 2,
-    lines: "~60 lines",
-    code: `import time, os
-  frames=[]
-  path=input("Enter animation file path: ")
-  with open(path,"r") as f:
-      content=f.read().split("\n===FRAME===\n")
-      frames=[frame.split("\\n") for frame in content]
-  delay = 0.2
-  while True:
-      for frame in frames:
-          os.system("cls")
-          print("\\n".join(frame))
-          time.sleep(delay)`
+    lines: "~240 lines",
+    code: `import time
+  import os
+  import sys
+
+  def clear_screen():
+      """Clear the terminal screen"""
+      os.system('cls' if os.name == 'nt' else 'clear')
+
+  class ASCIIAnimationPlayer:
+      def __init__(self):
+          self.frames = []
+          self.current_frame = 0
+          self.fps = 10
+          self.delay = 1.0 / self.fps
+          self.loop = True
+          self.playing = False
+          self.animation_name = "Untitled"
+      
+      def load_animation(self, filepath):
+          """Load animation from file"""
+          try:
+              with open(filepath, 'r', encoding='utf-8') as f:
+                  content = f.read()
+              
+              # Split by frame separator
+              frame_separator = "===FRAME==="
+              raw_frames = content.split(frame_separator)
+              
+              # Clean and store frames
+              self.frames = []
+              for frame in raw_frames:
+                  if frame.strip():  # Skip empty frames
+                      self.frames.append(frame)
+              
+              if not self.frames:
+                  return False, "No frames found in file!"
+              
+              self.animation_name = os.path.basename(filepath)
+              return True, f"Loaded {len(self.frames)} frames"
+              
+          except FileNotFoundError:
+              return False, f"File not found: {filepath}"
+          except Exception as e:
+              return False, f"Error loading file: {e}"
+      
+      def save_animation(self, filepath):
+          """Save animation to file"""
+          try:
+              with open(filepath, 'w', encoding='utf-8') as f:
+                  for i, frame in enumerate(self.frames):
+                      if i > 0:
+                          f.write("\\n===FRAME===\\n")
+                      f.write(frame)
+              
+              return True, f"Animation saved to {filepath}"
+          except Exception as e:
+              return False, f"Error saving file: {e}"
+      
+      def play(self):
+          """Play the animation"""
+          if not self.frames:
+              return False, "No frames loaded!"
+          
+          self.playing = True
+          self.current_frame = 0
+          
+          try:
+              while self.playing:
+                  clear_screen()
+                  
+                  # Display frame
+                  print(self.frames[self.current_frame])
+                  
+                  # Display controls
+                  print("\\n" + "─" * 50)
+                  print(f"Frame: {self.current_frame + 1}/{len(self.frames)} | "
+                        f"FPS: {self.fps} | Loop: {self.loop}")
+                  print("Controls: [Space]=Pause [Q]=Quit [+/-]=Speed [L]=Loop")
+                  print("─" * 50)
+                  
+                  # Wait for frame delay
+                  time.sleep(self.delay)
+                  
+                  # Next frame
+                  self.current_frame += 1
+                  
+                  if self.current_frame >= len(self.frames):
+                      if self.loop:
+                          self.current_frame = 0
+                      else:
+                          self.playing = False
+                          return True, "Animation finished"
+              
+              return True, "Playback stopped"
+              
+          except KeyboardInterrupt:
+              self.playing = False
+              return True, "Playback interrupted"
+      
+      def set_fps(self, fps):
+          """Set frames per second"""
+          if 1 <= fps <= 60:
+              self.fps = fps
+              self.delay = 1.0 / self.fps
+              return True
+          return False
+      
+      def toggle_loop(self):
+          """Toggle loop mode"""
+          self.loop = not self.loop
+      
+      def create_simple_animation(self):
+          """Create a simple test animation"""
+          self.frames = [
+              """
+      ╔════════════════════╗
+      ║                    ║
+      ║        (●)         ║
+      ║                    ║
+      ╚════════════════════╝
+              """,
+              """
+      ╔════════════════════╗
+      ║                    ║
+      ║       (●)          ║
+      ║                    ║
+      ╚════════════════════╝
+              """,
+              """
+      ╔════════════════════╗
+      ║                    ║
+      ║      (●)           ║
+      ║                    ║
+      ╚════════════════════╝
+              """,
+              """
+      ╔════════════════════╗
+      ║                    ║
+      ║     (●)            ║
+      ║                    ║
+      ╚════════════════════╝
+              """,
+              """
+      ╔════════════════════╗
+      ║                    ║
+      ║    (●)             ║
+      ║                    ║
+      ╚════════════════════╝
+              """
+          ]
+          self.animation_name = "Bouncing Ball Demo"
+
+  def display_menu():
+      """Display main menu"""
+      clear_screen()
+      print("\\n" + "═" * 60)
+      print("            ASCII ANIMATION PLAYER")
+      print("═" * 60)
+      print("\\nOptions:")
+      print("  1. Load animation from file")
+      print("  2. Play animation")
+      print("  3. Set FPS (frames per second)")
+      print("  4. Toggle loop mode")
+      print("  5. View animation info")
+      print("  6. Create demo animation")
+      print("  7. Save animation")
+      print("  8. Exit")
+      print("═" * 60)
+
+  def main():
+      """Main application loop"""
+      player = ASCIIAnimationPlayer()
+      
+      print("\\nASCII Animation Player Starting...")
+      time.sleep(1)
+      
+      while True:
+          display_menu()
+          
+          choice = input("\\nEnter your choice (1-8): ").strip()
+          
+          if choice == '1':
+              # Load animation
+              clear_screen()
+              print("\\n" + "═" * 60)
+              print("                  LOAD ANIMATION")
+              print("═" * 60)
+              print("\\nAnimation file format:")
+              print("  - Text file with frames separated by '===FRAME==='")
+              print("  - Example: frame1.txt\\n")
+              
+              filepath = input("Enter animation file path: ").strip()
+              
+              success, message = player.load_animation(filepath)
+              print(f"\\n{message}")
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '2':
+              # Play animation
+              if not player.frames:
+                  print("\\nNo animation loaded! Load a file first.")
+                  input("\\nPress Enter to continue...")
+                  continue
+              
+              clear_screen()
+              print("\\nStarting playback...")
+              print("Press Ctrl+C to stop\\n")
+              time.sleep(1)
+              
+              success, message = player.play()
+              
+              clear_screen()
+              print(f"\\n{message}")
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '3':
+              # Set FPS
+              clear_screen()
+              print("\\n" + "═" * 60)
+              print("                    SET FPS")
+              print("═" * 60)
+              print(f"\\nCurrent FPS: {player.fps}")
+              print("Valid range: 1-60")
+              
+              fps_input = input("\\nEnter new FPS: ").strip()
+              
+              try:
+                  new_fps = int(fps_input)
+                  
+                  if player.set_fps(new_fps):
+                      print(f"\\nFPS set to: {new_fps}")
+                  else:
+                      print("\\nFPS must be between 1 and 60!")
+              except ValueError:
+                  print("\\nInvalid input!")
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '4':
+              # Toggle loop
+              player.toggle_loop()
+              clear_screen()
+              print(f"\\nLoop mode: {'ON' if player.loop else 'OFF'}")
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '5':
+              # View info
+              clear_screen()
+              print("\\n" + "═" * 60)
+              print("               ANIMATION INFO")
+              print("═" * 60)
+              print(f"\\nName: {player.animation_name}")
+              print(f"Total Frames: {len(player.frames)}")
+              print(f"FPS: {player.fps}")
+              print(f"Duration: {len(player.frames) / player.fps:.2f} seconds")
+              print(f"Loop Mode: {'ON' if player.loop else 'OFF'}")
+              
+              if player.frames:
+                  print("\\n" + "─" * 60)
+                  print("First Frame Preview:")
+                  print("─" * 60)
+                  print(player.frames[0][:500])  # Show first 500 chars
+                  if len(player.frames[0]) > 500:
+                      print("\\n... (truncated)")
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '6':
+              # Create demo
+              clear_screen()
+              print("\\nCreating demo animation...")
+              player.create_simple_animation()
+              print(f"\\nDemo animation created with {len(player.frames)} frames!")
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '7':
+              # Save animation
+              if not player.frames:
+                  print("\\nNo animation to save!")
+                  input("\\nPress Enter to continue...")
+                  continue
+              
+              clear_screen()
+              print("\\n" + "═" * 60)
+              print("                 SAVE ANIMATION")
+              print("═" * 60)
+              
+              filepath = input("\\nEnter output filename: ").strip()
+              
+              if not filepath:
+                  filepath = "animation.txt"
+              
+              success, message = player.save_animation(filepath)
+              print(f"\\n{message}")
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '8':
+              # Exit
+              clear_screen()
+              print("\\nThank you for using ASCII Animation Player!")
+              print("Goodbye!\\n")
+              sys.exit(0)
+          
+          else:
+              print("\\nInvalid choice! Please enter 1-8.")
+              input("\\nPress Enter to continue...")
+
+  if __name__ == '__main__':
+      try:
+          main()
+      except KeyboardInterrupt:
+          print("\\n\\nProgram interrupted by user. Goodbye!")
+          sys.exit(0)
+      except Exception as e:
+          print(f"\\n\\nAn error occurred: {e}")
+          sys.exit(1)`
   },
 
   {
     title: "ASCII Maze Game",
     category: "ascii",
-    description: "Navigate through ASCII mazes with enemies and power-ups.",
+    description: "Navigate procedurally generated mazes with enemies, power-ups, and multiple levels.",
     tags: ["console", "ascii-art", "maze"],
     difficulty: 3,
-    lines: "~120 lines",
-    code: `import os,msvcrt,random
-  w,h=20,10
-  maze=[["#" if x==0 or y==0 or x==w-1 or y==h-1 else " " for x in range(w)] for y in range(h)]
-  player=[1,1]
-  goal=[h-2,w-2]
-  enemies=[[random.randint(1,h-2),random.randint(1,w-2)] for _ in range(2)]
-  def draw():
-  os.system("cls")
-  for y,row in enumerate(maze):
-    line=""
-    for x,c in enumerate(row):
-    if [y,x]==player: line+="P"
-    elif [y,x]==goal: line+="G"
-    elif [y,x] in enemies: line+="E"
-    else: line+=c
-    print(line)
-  while True:
-  draw()
-  if player==goal:
-    print("You win!"); break
-  if msvcrt.kbhit():
-    k=msvcrt.getch()
-    ny,nx=player
-    if k==b'w': ny-=1
-    if k==b's': ny+=1
-    if k==b'a': nx-=1
-    if k==b'd': nx+=1
-    if maze[ny][nx]==" ": player=[ny,nx]
-  for e in enemies:
-    ey,ex=e
-    move=random.choice([[0,1],[0,-1],[1,0],[-1,0]])
-    if maze[ey+move[0]][ex+move[1]]==" ": e[0]+=move[0]; e[1]+=move[1]
-    if e==player:
-    draw(); print("Game Over!"); exit()`
+    lines: "~270 lines",
+    code: `import os
+  import random
+  import time
+  import sys
+
+  # Try to import keyboard module
+  try:
+      import msvcrt
+      HAS_MSVCRT = True
+  except ImportError:
+      HAS_MSVCRT = False
+
+  # Game Constants
+  MAZE_WIDTH = 25
+  MAZE_HEIGHT = 15
+
+  def clear_screen():
+      """Clear the terminal screen"""
+      os.system('cls' if os.name == 'nt' else 'clear')
+
+  class MazeGame:
+      def __init__(self, width=MAZE_WIDTH, height=MAZE_HEIGHT):
+          self.width = width
+          self.height = height
+          self.maze = []
+          self.player_pos = [1, 1]
+          self.goal_pos = [height - 2, width - 2]
+          self.enemies = []
+          self.powerups = []
+          self.score = 0
+          self.level = 1
+          self.lives = 3
+          self.invincible = False
+          self.invincible_timer = 0
+          self.game_over = False
+          self.won = False
+          
+          self.generate_maze()
+          self.place_enemies()
+          self.place_powerups()
+      
+      def generate_maze(self):
+          """Generate a simple maze"""
+          # Create bordered maze
+          self.maze = [['#' if x == 0 or y == 0 or x == self.width - 1 or y == self.height - 1 
+                      else ' ' for x in range(self.width)] 
+                      for y in range(self.height)]
+          
+          # Add some internal walls
+          for _ in range(self.width * self.height // 20):
+              wall_y = random.randint(2, self.height - 3)
+              wall_x = random.randint(2, self.width - 3)
+              wall_length = random.randint(2, 5)
+              
+              if random.choice([True, False]):
+                  # Horizontal wall
+                  for i in range(wall_length):
+                      if wall_x + i < self.width - 1:
+                          self.maze[wall_y][wall_x + i] = '#'
+              else:
+                  # Vertical wall
+                  for i in range(wall_length):
+                      if wall_y + i < self.height - 1:
+                          self.maze[wall_y + i][wall_x] = '#'
+          
+          # Ensure start and goal are clear
+          self.maze[1][1] = ' '
+          self.maze[self.height - 2][self.width - 2] = ' '
+      
+      def place_enemies(self):
+          """Place enemies in the maze"""
+          num_enemies = 2 + self.level
+          self.enemies = []
+          
+          for _ in range(num_enemies):
+              while True:
+                  y = random.randint(1, self.height - 2)
+                  x = random.randint(1, self.width - 2)
+                  
+                  if (self.maze[y][x] == ' ' and 
+                      [y, x] != self.player_pos and 
+                      [y, x] != self.goal_pos):
+                      self.enemies.append([y, x])
+                      break
+      
+      def place_powerups(self):
+          """Place power-ups in the maze"""
+          num_powerups = random.randint(1, 3)
+          self.powerups = []
+          
+          for _ in range(num_powerups):
+              while True:
+                  y = random.randint(1, self.height - 2)
+                  x = random.randint(1, self.width - 2)
+                  
+                  if (self.maze[y][x] == ' ' and 
+                      [y, x] != self.player_pos and 
+                      [y, x] != self.goal_pos and
+                      [y, x] not in self.enemies):
+                      powerup_type = random.choice(['invincibility', 'points'])
+                      self.powerups.append(([y, x], powerup_type))
+                      break
+      
+      def move_player(self, dy, dx):
+          """Move player in direction"""
+          new_y = self.player_pos[0] + dy
+          new_x = self.player_pos[1] + dx
+          
+          # Check if move is valid
+          if (0 <= new_y < self.height and 
+              0 <= new_x < self.width and 
+              self.maze[new_y][new_x] != '#'):
+              
+              self.player_pos = [new_y, new_x]
+              
+              # Check for power-up collection
+              for i, (pos, powerup_type) in enumerate(self.powerups):
+                  if pos == self.player_pos:
+                      if powerup_type == 'invincibility':
+                          self.invincible = True
+                          self.invincible_timer = 50  # 50 moves
+                      elif powerup_type == 'points':
+                          self.score += 50
+                      
+                      self.powerups.pop(i)
+                      break
+              
+              # Check for goal
+              if self.player_pos == self.goal_pos:
+                  self.won = True
+      
+      def move_enemies(self):
+          """Move all enemies"""
+          for enemy in self.enemies:
+              # Simple AI: move randomly, but prefer moving toward player
+              directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+              
+              # Calculate direction to player
+              dy = self.player_pos[0] - enemy[0]
+              dx = self.player_pos[1] - enemy[1]
+              
+              # 50% chance to move toward player
+              if random.random() < 0.5 and (abs(dy) + abs(dx) <= 5):
+                  if abs(dy) > abs(dx):
+                      preferred = [1 if dy > 0 else -1, 0]
+                  else:
+                      preferred = [0, 1 if dx > 0 else -1]
+                  directions.insert(0, preferred)
+              
+              random.shuffle(directions)
+              
+              for dy, dx in directions:
+                  new_y = enemy[0] + dy
+                  new_x = enemy[1] + dx
+                  
+                  if (0 <= new_y < self.height and 
+                      0 <= new_x < self.width and 
+                      self.maze[new_y][new_x] == ' '):
+                      enemy[0] = new_y
+                      enemy[1] = new_x
+                      break
+          
+          # Check collision with player
+          if not self.invincible and self.player_pos in self.enemies:
+              self.lives -= 1
+              if self.lives <= 0:
+                  self.game_over = True
+              else:
+                  # Reset player position
+                  self.player_pos = [1, 1]
+      
+      def update_invincibility(self):
+          """Update invincibility timer"""
+          if self.invincible:
+              self.invincible_timer -= 1
+              if self.invincible_timer <= 0:
+                  self.invincible = False
+      
+      def draw(self):
+          """Draw the game state"""
+          clear_screen()
+          
+          print("\\n" + "═" * 60)
+          print(f"         MAZE GAME - Level {self.level}")
+          print("═" * 60 + "\\n")
+          
+          # Draw maze
+          for y, row in enumerate(self.maze):
+              line = "  "
+              for x, cell in enumerate(row):
+                  pos = [y, x]
+                  
+                  if pos == self.player_pos:
+                      if self.invincible:
+                          line += "★"  # Invincible player
+                      else:
+                          line += "P"
+                  elif pos == self.goal_pos:
+                      line += "G"
+                  elif pos in self.enemies:
+                      line += "E"
+                  elif any(pos == p[0] for p in self.powerups):
+                      powerup_type = next(p[1] for p in self.powerups if p[0] == pos)
+                      if powerup_type == 'invincibility':
+                          line += "!"
+                      else:
+                          line += "$"
+                  else:
+                      line += cell
+                  
+                  line += " "
+              
+              print(line)
+          
+          # Draw stats
+          print("\\n" + "─" * 60)
+          status = f"  Lives: {'♥' * self.lives}"
+          status += f" | Score: {self.score}"
+          if self.invincible:
+              status += f" | INVINCIBLE: {self.invincible_timer}"
+          print(status)
+          print("─" * 60)
+          
+          # Draw legend and controls
+          print("\\n  Legend: P=Player E=Enemy G=Goal !=Invincibility $=Points")
+          
+          if HAS_MSVCRT:
+              print("  Controls: W/A/S/D=Move | Q=Quit")
+          else:
+              print("  Demo mode - Press Ctrl+C to quit")
+      
+      def get_input(self):
+          """Get keyboard input"""
+          if not HAS_MSVCRT:
+              # Simple AI for demo
+              dy = 1 if self.player_pos[0] < self.goal_pos[0] else -1
+              dx = 1 if self.player_pos[1] < self.goal_pos[1] else -1
+              
+              if random.random() < 0.5:
+                  self.move_player(dy, 0)
+              else:
+                  self.move_player(0, dx)
+              
+              time.sleep(0.2)
+              return True
+          
+          if msvcrt.kbhit():
+              key = msvcrt.getch()
+              
+              if key == b'q' or key == b'Q':
+                  return False
+              elif key == b'w' or key == b'W':
+                  self.move_player(-1, 0)
+              elif key == b's' or key == b'S':
+                  self.move_player(1, 0)
+              elif key == b'a' or key == b'A':
+                  self.move_player(0, -1)
+              elif key == b'd' or key == b'D':
+                  self.move_player(0, 1)
+          
+          return True
+      
+      def next_level(self):
+          """Progress to next level"""
+          self.level += 1
+          self.score += 100 * self.level
+          self.player_pos = [1, 1]
+          self.invincible = False
+          self.invincible_timer = 0
+          
+          # Increase difficulty
+          self.width = min(40, MAZE_WIDTH + self.level)
+          self.height = min(20, MAZE_HEIGHT + self.level)
+          self.goal_pos = [self.height - 2, self.width - 2]
+          
+          self.generate_maze()
+          self.place_enemies()
+          self.place_powerups()
+          
+          self.won = False
+      
+      def show_game_over(self):
+          """Display game over screen"""
+          clear_screen()
+          print("\\n" * 3)
+          print("  ╔" + "═" * 48 + "╗")
+          print("  ║" + " " * 48 + "║")
+          print("  ║" + "GAME OVER!".center(48) + "║")
+          print("  ║" + " " * 48 + "║")
+          print(f"  ║{'Final Score: ' + str(self.score).center(34)}║")
+          print(f"  ║{'Level Reached: ' + str(self.level).center(32)}║")
+          print("  ║" + " " * 48 + "║")
+          print("  ╚" + "═" * 48 + "╝")
+          print("\\n  Thanks for playing!\\n")
+      
+      def show_victory(self):
+          """Display level complete screen"""
+          clear_screen()
+          print("\\n" * 3)
+          print("  ╔" + "═" * 48 + "╗")
+          print("  ║" + " " * 48 + "║")
+          print("  ║" + f"LEVEL {self.level} COMPLETE!".center(48) + "║")
+          print("  ║" + " " * 48 + "║")
+          print(f"  ║{'Score: ' + str(self.score).center(40)}║")
+          print("  ║" + " " * 48 + "║")
+          print("  ╚" + "═" * 48 + "╝")
+          print("\\n  Proceeding to next level...")
+          time.sleep(2)
+
+  def main():
+      """Main game loop"""
+      game = MazeGame()
+      
+      print("\\nMaze Game Starting...")
+      print("Navigate to the goal (G) while avoiding enemies (E)!")
+      print("Collect power-ups for bonuses!")
+      time.sleep(2)
+      
+      try:
+          while not game.game_over:
+              game.draw()
+              
+              if game.won:
+                  game.show_victory()
+                  game.next_level()
+                  continue
+              
+              if not game.get_input():
+                  print("\\nGame quit by user. Goodbye!")
+                  sys.exit(0)
+              
+              game.move_enemies()
+              game.update_invincibility()
+              
+              if not HAS_MSVCRT:
+                  time.sleep(0.1)
+          
+          game.show_game_over()
+          
+      except KeyboardInterrupt:
+          print("\\n\\nGame interrupted by user. Goodbye!")
+          sys.exit(0)
+
+  if __name__ == '__main__':
+      main()`
   },
   {
     title: "ASCII Space Invaders",
     category: "ascii",
-    description: "Space shooter with ASCII aliens and player ship.",
+    description: "Classic space shooter with waves of aliens, scoring, lives, and progressive difficulty.",
     tags: ["console", "ascii-art", "shooter"],
     difficulty: 3,
-    lines: "~120 lines",
-    code: `import os,time,msvcrt,random
-  w,h=20,10
-  ship_x=w//2
-  aliens=[[0,x] for x in range(3,17,2)]
-  bullets=[]
-  def draw():
-  os.system("cls")
-  for y in range(h):
-    row=""
-    for x in range(w):
-    if [y,x] in aliens: row+="A"
-    elif [y,x] in bullets: row+="|"
-    elif y==h-1 and x==ship_x: row+="^"
-    else: row+=" "
-    print(row)
-  while True:
-  draw()
-  time.sleep(0.1)
-  if msvcrt.kbhit():
-    k=msvcrt.getch()
-    if k==b'a' and ship_x>0: ship_x-=1
-    if k==b'd' and ship_x<w-1: ship_x+=1
-    if k==b' ': bullets.append([h-2,ship_x])
-  new_bullets=[]
-  for b in bullets:
-    b[0]-=1
-    if b[0]>=0 and [b[0],b[1]] not in aliens: new_bullets.append(b)
-  bullets=new_bullets
-  new_aliens=[]
-  for a in aliens:
-    if [a[0],a[1]] not in bullets: new_aliens.append(a)
-  aliens=new_aliens
-  if not aliens:
-    draw(); print("You win!"); break
-  for a in aliens:
-    if a[0]==h-1:
-    draw(); print("Game Over!"); exit()`
-  },
+    lines: "~290 lines",
+    code: `import os
+  import time
+  import random
+  import sys
 
+  # Try to import keyboard module
+  try:
+      import msvcrt
+      HAS_MSVCRT = True
+  except ImportError:
+      HAS_MSVCRT = False
+
+  # Game Constants
+  SCREEN_WIDTH = 40
+  SCREEN_HEIGHT = 20
+  SHIP_Y = SCREEN_HEIGHT - 2
+
+  def clear_screen():
+      """Clear the terminal screen"""
+      os.system('cls' if os.name == 'nt' else 'clear')
+
+  class SpaceInvaders:
+      def __init__(self):
+          self.width = SCREEN_WIDTH
+          self.height = SCREEN_HEIGHT
+          self.ship_x = self.width // 2
+          self.ship_y = SHIP_Y
+          
+          self.aliens = []
+          self.alien_direction = 1
+          self.alien_speed = 0
+          self.alien_move_counter = 0
+          
+          self.bullets = []
+          self.alien_bullets = []
+          
+          self.score = 0
+          self.lives = 3
+          self.level = 1
+          self.game_over = False
+          self.won = False
+          
+          self.spawn_aliens()
+      
+      def spawn_aliens(self):
+          """Spawn a wave of aliens"""
+          self.aliens = []
+          rows = 3 + (self.level - 1) // 2
+          cols = 8
+          
+          start_y = 2
+          start_x = 5
+          
+          for row in range(min(rows, 5)):
+              for col in range(cols):
+                  x = start_x + col * 4
+                  y = start_y + row * 2
+                  if x < self.width - 5:
+                      alien_type = 'A' if row < 2 else 'B' if row < 4 else 'C'
+                      self.aliens.append({'x': x, 'y': y, 'type': alien_type})
+          
+          self.alien_direction = 1
+          self.alien_speed = max(5, 15 - self.level)
+      
+      def move_ship(self, direction):
+          """Move player ship"""
+          self.ship_x += direction
+          self.ship_x = max(1, min(self.ship_x, self.width - 2))
+      
+      def shoot_bullet(self):
+          """Fire a bullet from ship"""
+          self.bullets.append({'x': self.ship_x, 'y': self.ship_y - 1})
+      
+      def update_bullets(self):
+          """Update bullet positions"""
+          # Player bullets
+          new_bullets = []
+          for bullet in self.bullets:
+              bullet['y'] -= 1
+              if bullet['y'] >= 0:
+                  # Check collision with aliens
+                  hit = False
+                  for alien in self.aliens[:]:
+                      if bullet['x'] == alien['x'] and bullet['y'] == alien['y']:
+                          self.aliens.remove(alien)
+                          self.score += 10 if alien['type'] == 'A' else 20 if alien['type'] == 'B' else 30
+                          hit = True
+                          break
+                  
+                  if not hit:
+                      new_bullets.append(bullet)
+          
+          self.bullets = new_bullets
+          
+          # Alien bullets
+          new_alien_bullets = []
+          for bullet in self.alien_bullets:
+              bullet['y'] += 1
+              if bullet['y'] < self.height:
+                  # Check collision with ship
+                  if bullet['x'] == self.ship_x and bullet['y'] == self.ship_y:
+                      self.lives -= 1
+                      if self.lives <= 0:
+                          self.game_over = True
+                  else:
+                      new_alien_bullets.append(bullet)
+          
+          self.alien_bullets = new_alien_bullets
+      
+      def update_aliens(self):
+          """Update alien positions and fire bullets"""
+          self.alien_move_counter += 1
+          
+          if self.alien_move_counter >= self.alien_speed:
+              self.alien_move_counter = 0
+              
+              # Check if aliens hit edge
+              should_descend = False
+              for alien in self.aliens:
+                  if (alien['x'] <= 1 and self.alien_direction < 0) or \
+                    (alien['x'] >= self.width - 2 and self.alien_direction > 0):
+                      should_descend = True
+                      break
+              
+              if should_descend:
+                  # Move down and reverse direction
+                  for alien in self.aliens:
+                      alien['y'] += 1
+                      
+                      # Check if aliens reached bottom
+                      if alien['y'] >= self.ship_y:
+                          self.game_over = True
+                  
+                  self.alien_direction *= -1
+              else:
+                  # Move horizontally
+                  for alien in self.aliens:
+                      alien['x'] += self.alien_direction
+              
+              # Random alien shooting
+              if self.aliens and random.random() < 0.1:
+                  shooter = random.choice(self.aliens)
+                  self.alien_bullets.append({'x': shooter['x'], 'y': shooter['y'] + 1})
+          
+          # Check if all aliens destroyed
+          if not self.aliens:
+              self.won = True
+      
+      def draw(self):
+          """Draw the game state"""
+          clear_screen()
+          
+          print("\\n" + "═" * 50)
+          print(f"      SPACE INVADERS - Level {self.level}")
+          print("═" * 50 + "\\n")
+          
+          # Create screen buffer
+          screen = [[' ' for _ in range(self.width)] for _ in range(self.height)]
+          
+          # Draw aliens
+          for alien in self.aliens:
+              if 0 <= alien['y'] < self.height and 0 <= alien['x'] < self.width:
+                  screen[alien['y']][alien['x']] = alien['type']
+          
+          # Draw bullets
+          for bullet in self.bullets:
+              if 0 <= bullet['y'] < self.height and 0 <= bullet['x'] < self.width:
+                  screen[bullet['y']][bullet['x']] = '|'
+          
+          # Draw alien bullets
+          for bullet in self.alien_bullets:
+              if 0 <= bullet['y'] < self.height and 0 <= bullet['x'] < self.width:
+                  screen[bullet['y']][bullet['x']] = '!'
+          
+          # Draw ship
+          if 0 <= self.ship_y < self.height and 0 <= self.ship_x < self.width:
+              screen[self.ship_y][self.ship_x] = '^'
+          
+          # Draw borders and screen
+          print("  ┌" + "─" * self.width + "┐")
+          for row in screen:
+              print("  │" + "".join(row) + "│")
+          print("  └" + "─" * self.width + "┘\\n")
+          
+          # Draw HUD
+          lives_str = "♥" * self.lives
+          print(f"  Lives: {lives_str}  |  Score: {self.score}  |  Level: {self.level}")
+          
+          # Draw controls
+          if HAS_MSVCRT:
+              print("\\n  Controls: A/D=Move | Space=Shoot | Q=Quit")
+          else:
+              print("\\n  Demo Mode - Press Ctrl+C to quit")
+          
+          # Draw legend
+          print("\\n  Legend: ^=You A/B/C=Aliens |=Your Bullet !=Enemy Bullet")
+      
+      def get_input(self):
+          """Get keyboard input"""
+          if not HAS_MSVCRT:
+              # Simple AI for demo
+              if self.aliens:
+                  closest_alien = min(self.aliens, key=lambda a: abs(a['x'] - self.ship_x))
+                  if self.ship_x < closest_alien['x']:
+                      self.move_ship(1)
+                  elif self.ship_x > closest_alien['x']:
+                      self.move_ship(-1)
+                  
+                  if random.random() < 0.1:
+                      self.shoot_bullet()
+              
+              return True
+          
+          if msvcrt.kbhit():
+              key = msvcrt.getch()
+              
+              if key == b'q' or key == b'Q':
+                  return False
+              elif key == b'a' or key == b'A':
+                  self.move_ship(-1)
+              elif key == b'd' or key == b'D':
+                  self.move_ship(1)
+              elif key == b' ':
+                  self.shoot_bullet()
+          
+          return True
+      
+      def next_level(self):
+          """Progress to next level"""
+          self.level += 1
+          self.score += 100 * self.level
+          self.spawn_aliens()
+          self.bullets = []
+          self.alien_bullets = []
+          self.won = False
+      
+      def show_game_over(self):
+          """Display game over screen"""
+          clear_screen()
+          print("\\n" * 3)
+          print("  ╔" + "═" * 46 + "╗")
+          print("  ║" + " " * 46 + "║")
+          print("  ║" + "GAME OVER!".center(46) + "║")
+          print("  ║" + " " * 46 + "║")
+          print(f"  ║{'Final Score: ' + str(self.score).center(32)}║")
+          print(f"  ║{'Level Reached: ' + str(self.level).center(31)}║")
+          print("  ║" + " " * 46 + "║")
+          print("  ╚" + "═" * 46 + "╝")
+          print("\\n  The aliens have invaded Earth!\\n")
+      
+      def show_victory(self):
+          """Display level complete screen"""
+          clear_screen()
+          print("\\n" * 3)
+          print("  ╔" + "═" * 46 + "╗")
+          print("  ║" + " " * 46 + "║")
+          print("  ║" + f"LEVEL {self.level} COMPLETE!".center(46) + "║")
+          print("  ║" + " " * 46 + "║")
+          print(f"  ║{'Score: ' + str(self.score).center(38)}║")
+          print("  ║" + " " * 46 + "║")
+          print("  ╚" + "═" * 46 + "╝")
+          print("\\n  Preparing next wave...\\n")
+          time.sleep(2)
+
+  def main():
+      """Main game loop"""
+      game = SpaceInvaders()
+      
+      print("\\nSpace Invaders Starting...")
+      print("Defend Earth from the alien invasion!")
+      time.sleep(2)
+      
+      try:
+          while not game.game_over:
+              game.draw()
+              
+              if game.won:
+                  game.show_victory()
+                  game.next_level()
+                  continue
+              
+              if not game.get_input():
+                  print("\\nGame quit by user. Goodbye!")
+                  sys.exit(0)
+              
+              game.update_bullets()
+              game.update_aliens()
+              
+              time.sleep(0.05)
+          
+          game.show_game_over()
+          
+      except KeyboardInterrupt:
+          print("\\n\\nGame interrupted by user. Goodbye!")
+          sys.exit(0)
+
+  if __name__ == '__main__':
+      main()`
+  },
   {
     title: "ASCII Flappy Bird",
     category: "ascii",
-    description: "Flappy Bird clone in the terminal with ASCII graphics.",
+    description: "Flappy Bird with gravity physics, score tracking, difficulty progression, and high score saving.",
     tags: ["console", "ascii-art", "arcade"],
     difficulty: 2,
-    lines: "~100 lines",
-    code: `import os,time,msvcrt,random
-  w,h=20,10
-  bird_y=h//2
-  pipes=[]
-  score=0
-  tick=0
-  def draw():
-  os.system("cls")
-  for y in range(h):
-    row=""
-    for x in range(w):
-    if x==2 and y==bird_y: row="O"
-    else: row+=" "
-    for p in pipes:
-    if p[0]==x and (y<p[1] or y>p[1]+3): row="|"
-    print(row)
-  while True:
-  tick+=1
-  if tick%5==0: pipes.append([w-1,random.randint(1,h-5)])
-  if msvcrt.kbhit():
-    k=msvcrt.getch()
-    if k==b' ': bird_y-=1
-  bird_y+=1
-  for p in pipes: p[0]-=1
-  pipes=[p for p in pipes if p[0]>=0]
-  for p in pipes:
-    if p[0]==2 and not (p[1]<=bird_y<=p[1]+3):
-    draw(); print("Game Over! Score:",score); exit()
-  score+=1
-  draw()
-  time.sleep(0.2)`
+    lines: "~240 lines",
+    code: `import os
+  import time
+  import random
+  import sys
+  import json
+
+  # Try to import keyboard module
+  try:
+      import msvcrt
+      HAS_MSVCRT = True
+  except ImportError:
+      HAS_MSVCRT = False
+
+  # Game Constants
+  SCREEN_WIDTH = 50
+  SCREEN_HEIGHT = 20
+  BIRD_X = 8
+  PIPE_WIDTH = 2
+  PIPE_GAP = 5
+  GRAVITY = 1
+  JUMP_STRENGTH = -3
+  PIPE_SPEED = 1
+
+  def clear_screen():
+      """Clear the terminal screen"""
+      os.system('cls' if os.name == 'nt' else 'clear')
+
+  class HighScoreManager:
+      def __init__(self, filename='flappy_highscore.json'):
+          self.filename = filename
+          self.high_score = self.load_high_score()
+      
+      def load_high_score(self):
+          try:
+              if os.path.exists(self.filename):
+                  with open(self.filename, 'r') as f:
+                      data = json.load(f)
+                      return data.get('high_score', 0)
+          except:
+              pass
+          return 0
+      
+      def save_high_score(self, score):
+          if score > self.high_score:
+              self.high_score = score
+              try:
+                  with open(self.filename, 'w') as f:
+                      json.dump({'high_score': score}, f)
+                  return True
+              except:
+                  pass
+          return False
+
+  class FlappyBird:
+      def __init__(self):
+          self.width = SCREEN_WIDTH
+          self.height = SCREEN_HEIGHT
+          self.bird_x = BIRD_X
+          self.bird_y = self.height // 2
+          self.bird_velocity = 0
+          
+          self.pipes = []
+          self.pipe_spawn_timer = 0
+          self.pipe_spawn_interval = 25
+          
+          self.score = 0
+          self.game_over = False
+          self.frame_count = 0
+          
+          self.high_score_manager = HighScoreManager()
+      
+      def flap(self):
+          """Make the bird jump"""
+          self.bird_velocity = JUMP_STRENGTH
+      
+      def update(self):
+          """Update game state"""
+          self.frame_count += 1
+          
+          # Update bird physics
+          self.bird_velocity += GRAVITY
+          self.bird_y += self.bird_velocity
+          
+          # Check ceiling and floor collision
+          if self.bird_y <= 0 or self.bird_y >= self.height - 1:
+              self.game_over = True
+          
+          # Spawn new pipes
+          self.pipe_spawn_timer += 1
+          if self.pipe_spawn_timer >= self.pipe_spawn_interval:
+              self.pipe_spawn_timer = 0
+              gap_y = random.randint(3, self.height - PIPE_GAP - 3)
+              self.pipes.append({
+                  'x': self.width - 1,
+                  'gap_y': gap_y,
+                  'scored': False
+              })
+          
+          # Update pipes
+          for pipe in self.pipes:
+              pipe['x'] -= PIPE_SPEED
+              
+              # Check collision
+              if pipe['x'] <= self.bird_x <= pipe['x'] + PIPE_WIDTH:
+                  if self.bird_y < pipe['gap_y'] or self.bird_y > pipe['gap_y'] + PIPE_GAP:
+                      self.game_over = True
+              
+              # Score point when passing pipe
+              if pipe['x'] + PIPE_WIDTH < self.bird_x and not pipe['scored']:
+                  pipe['scored'] = True
+                  self.score += 1
+                  
+                  # Increase difficulty
+                  if self.score % 5 == 0 and self.pipe_spawn_interval > 15:
+                      self.pipe_spawn_interval -= 1
+          
+          # Remove off-screen pipes
+          self.pipes = [p for p in self.pipes if p['x'] > -PIPE_WIDTH]
+      
+      def draw(self):
+          """Draw the game state"""
+          clear_screen()
+          
+          print("\\n" + "═" * 60)
+          print("              ASCII FLAPPY BIRD")
+          print("═" * 60 + "\\n")
+          
+          # Create screen buffer
+          screen = [[' ' for _ in range(self.width)] for _ in range(self.height)]
+          
+          # Draw bird
+          if 0 <= self.bird_y < self.height:
+              screen[int(self.bird_y)][self.bird_x] = 'O'
+          
+          # Draw pipes
+          for pipe in self.pipes:
+              for x in range(pipe['x'], min(pipe['x'] + PIPE_WIDTH, self.width)):
+                  if 0 <= x < self.width:
+                      # Top pipe
+                      for y in range(pipe['gap_y']):
+                          if 0 <= y < self.height:
+                              screen[y][x] = '█'
+                      
+                      # Bottom pipe
+                      for y in range(pipe['gap_y'] + PIPE_GAP, self.height):
+                          if 0 <= y < self.height:
+                              screen[y][x] = '█'
+          
+          # Draw borders and screen
+          print("  ┌" + "─" * self.width + "┐")
+          for row in screen:
+              print("  │" + "".join(row) + "│")
+          print("  └" + "─" * self.width + "┘\\n")
+          
+          # Draw HUD
+          print(f"  Score: {self.score}  |  High Score: {self.high_score_manager.high_score}")
+          
+          # Draw controls
+          if HAS_MSVCRT:
+              print("\\n  Controls: Space=Flap | Q=Quit")
+          else:
+              print("\\n  Demo Mode - Press Ctrl+C to quit")
+      
+      def get_input(self):
+          """Get keyboard input"""
+          if not HAS_MSVCRT:
+              # Simple AI for demo
+              if self.pipes:
+                  nearest_pipe = min(self.pipes, key=lambda p: abs(p['x'] - self.bird_x))
+                  gap_center = nearest_pipe['gap_y'] + PIPE_GAP // 2
+                  
+                  if self.bird_y > gap_center + 1:
+                      self.flap()
+              
+              return True
+          
+          if msvcrt.kbhit():
+              key = msvcrt.getch()
+              
+              if key == b'q' or key == b'Q':
+                  return False
+              elif key == b' ':
+                  self.flap()
+          
+          return True
+      
+      def show_game_over(self):
+          """Display game over screen"""
+          clear_screen()
+          
+          is_new_high_score = self.high_score_manager.save_high_score(self.score)
+          
+          print("\\n" * 3)
+          print("  ╔" + "═" * 48 + "╗")
+          print("  ║" + " " * 48 + "║")
+          print("  ║" + "GAME OVER!".center(48) + "║")
+          print("  ║" + " " * 48 + "║")
+          print(f"  ║{'Final Score: ' + str(self.score).center(34)}║")
+          
+          if is_new_high_score:
+              print("  ║" + " " * 48 + "║")
+              print("  ║" + "★ NEW HIGH SCORE! ★".center(48) + "║")
+          else:
+              print(f"  ║{'High Score: ' + str(self.high_score_manager.high_score).center(34)}║")
+          
+          print("  ║" + " " * 48 + "║")
+          print("  ╚" + "═" * 48 + "╝")
+          print("\\n  Thanks for playing!\\n")
+
+  def show_start_screen():
+      """Show start screen with instructions"""
+      clear_screen()
+      print("\\n" * 2)
+      print("  ╔" + "═" * 48 + "╗")
+      print("  ║" + " " * 48 + "║")
+      print("  ║" + "ASCII FLAPPY BIRD".center(48) + "║")
+      print("  ║" + " " * 48 + "║")
+      print("  ╚" + "═" * 48 + "╝")
+      print("\\n  How to Play:")
+      print("  • Press SPACE to flap and stay airborne")
+      print("  • Avoid hitting the pipes or ground")
+      print("  • Each pipe you pass scores 1 point")
+      print("  • Difficulty increases every 5 points")
+      
+      if HAS_MSVCRT:
+          print("\\n  Press SPACE to start or Q to quit...")
+          while True:
+              if msvcrt.kbhit():
+                  key = msvcrt.getch()
+                  if key == b' ':
+                      return True
+                  elif key == b'q' or key == b'Q':
+                      return False
+      else:
+          print("\\n  Demo Mode - Starting in 3 seconds...")
+          time.sleep(3)
+          return True
+
+  def main():
+      """Main game loop"""
+      if not show_start_screen():
+          print("\\nGoodbye!\\n")
+          sys.exit(0)
+      
+      game = FlappyBird()
+      
+      try:
+          while not game.game_over:
+              game.draw()
+              
+              if not game.get_input():
+                  print("\\nGame quit by user. Goodbye!")
+                  sys.exit(0)
+              
+              game.update()
+              
+              time.sleep(0.05)
+          
+          game.show_game_over()
+          
+      except KeyboardInterrupt:
+          print("\\n\\nGame interrupted by user. Goodbye!")
+          sys.exit(0)
+
+  if __name__ == '__main__':
+      main()`
   },
   {
     title: "ASCII Text Banner Creator",
     category: "ascii",
-    description: "Create large ASCII text banners with various fonts.",
+    description: "Create stylized ASCII text banners with multiple fonts, colors, and export options.",
     tags: ["pyfiglet", "ascii-art", "text"],
     difficulty: 1,
-    lines: "~20 lines",
-    code: `import pyfiglet
-  text=input("Enter text: ")
-  font=input("Enter font (or leave blank): ")
-  if font=="": font="slant"
-  ascii_banner=pyfiglet.figlet_format(text,font=font)
-  print(ascii_banner)`
+    lines: "~200 lines",
+    code: `import sys
+  import os
+
+  # Try to import pyfiglet
+  try:
+      import pyfiglet
+      HAS_PYFIGLET = True
+  except ImportError:
+      HAS_PYFIGLET = False
+      print("Error: pyfiglet not installed!")
+      print("Install with: pip install pyfiglet")
+      sys.exit(1)
+
+  def clear_screen():
+      """Clear the terminal screen"""
+      os.system('cls' if os.name == 'nt' else 'clear')
+
+  class BannerCreator:
+      def __init__(self):
+          self.available_fonts = pyfiglet.FigletFont.getFonts()[:50]  # Limit to 50 popular fonts
+          self.current_font = 'slant'
+          self.last_banner = None
+          self.last_text = None
+      
+      def list_fonts(self, category=None):
+          """List available fonts"""
+          print("\\nPopular Fonts (showing 50 of " + str(len(pyfiglet.FigletFont.getFonts())) + "):")
+          print("=" * 60)
+          
+          fonts_to_show = [
+              'standard', 'slant', 'banner', 'big', 'block', 'bubble',
+              'digital', 'ivrit', 'lean', 'mini', 'script', 'shadow',
+              'small', 'smscript', 'smshadow', 'smslant', 'speed',
+              'starwars', 'stop', 'thin', '3-d', '3x5', '5lineoblique',
+              'alphabet', 'banner3-D', 'banner3', 'banner4', 'barbwire',
+              'basic', 'bell', 'bigchief', 'binary', 'broadway',
+              'bulbhead', 'calgphy2', 'caligraphy', 'colossal', 'computer',
+              'cosmic', 'crawford', 'cricket', 'cursive', 'cyberlarge',
+              'cybermedium', 'cybersmall', 'diamond', 'doh', 'doom',
+              'dotmatrix', 'drpepper', 'eftichess'
+          ]
+          
+          for i, font in enumerate(fonts_to_show, 1):
+              print(f"{i:2}. {font:20}", end="")
+              if i % 3 == 0:
+                  print()
+          print("\\n" + "=" * 60)
+      
+      def show_font_preview(self, font_name):
+          """Show a preview of a font"""
+          try:
+              preview = pyfiglet.figlet_format("Preview", font=font_name)
+              print(f"\\nFont: {font_name}")
+              print("─" * 60)
+              print(preview)
+              print("─" * 60)
+              return True
+          except Exception as e:
+              print(f"\\nError with font '{font_name}': {e}")
+              return False
+      
+      def create_banner(self, text, font=None):
+          """Create ASCII banner"""
+          if font is None:
+              font = self.current_font
+          
+          try:
+              banner = pyfiglet.figlet_format(text, font=font)
+              self.last_banner = banner
+              self.last_text = text
+              self.current_font = font
+              return banner, None
+          except Exception as e:
+              return None, f"Error creating banner: {e}"
+      
+      def save_banner(self, filename):
+          """Save banner to file"""
+          if not self.last_banner:
+              return False, "No banner to save!"
+          
+          try:
+              with open(filename, 'w', encoding='utf-8') as f:
+                  f.write(self.last_banner)
+              return True, f"Banner saved to {filename}"
+          except Exception as e:
+              return False, f"Error saving file: {e}"
+
+  def display_menu():
+      """Display main menu"""
+      clear_screen()
+      print("\\n" + "═" * 60)
+      print("           ASCII TEXT BANNER CREATOR")
+      print("═" * 60)
+      print("\\nCreate stylized text banners with ASCII art fonts!")
+      print("\\nOptions:")
+      print("  1. Create banner")
+      print("  2. List available fonts")
+      print("  3. Preview a font")
+      print("  4. Change default font")
+      print("  5. Save last banner to file")
+      print("  6. Exit")
+      print("═" * 60)
+
+  def main():
+      """Main application loop"""
+      creator = BannerCreator()
+      
+      print("\\nASCII Banner Creator Starting...")
+      print(f"Using pyfiglet v{pyfiglet.__version__ if hasattr(pyfiglet, '__version__') else 'unknown'}")
+      print(f"Default font: {creator.current_font}")
+      
+      input("\\nPress Enter to continue...")
+      
+      while True:
+          display_menu()
+          
+          choice = input(f"\\nCurrent font: {creator.current_font} | Enter choice (1-6): ").strip()
+          
+          if choice == '1':
+              # Create banner
+              clear_screen()
+              print("\\n" + "═" * 60)
+              print("                  CREATE BANNER")
+              print("═" * 60)
+              
+              text = input("\\nEnter text for banner: ").strip()
+              
+              if not text:
+                  print("\\nError: Text cannot be empty!")
+                  input("\\nPress Enter to continue...")
+                  continue
+              
+              use_custom_font = input("Use custom font? (y/N): ").strip().lower()
+              
+              font = None
+              if use_custom_font == 'y':
+                  font_name = input("Enter font name: ").strip()
+                  if font_name:
+                      font = font_name
+              
+              print("\\nGenerating banner...")
+              banner, error = creator.create_banner(text, font)
+              
+              if error:
+                  print(f"\\n{error}")
+              else:
+                  clear_screen()
+                  print("\\n" + "═" * 60)
+                  print("                    RESULT")
+                  print("═" * 60 + "\\n")
+                  print(banner)
+                  print("═" * 60)
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '2':
+              # List fonts
+              clear_screen()
+              print("\\n" + "═" * 60)
+              print("               AVAILABLE FONTS")
+              print("═" * 60)
+              
+              creator.list_fonts()
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '3':
+              # Preview font
+              clear_screen()
+              print("\\n" + "═" * 60)
+              print("                 FONT PREVIEW")
+              print("═" * 60)
+              
+              font_name = input("\\nEnter font name to preview: ").strip()
+              
+              if font_name:
+                  creator.show_font_preview(font_name)
+              else:
+                  print("\\nNo font name entered!")
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '4':
+              # Change default font
+              clear_screen()
+              print("\\n" + "═" * 60)
+              print("              CHANGE DEFAULT FONT")
+              print("═" * 60)
+              
+              print(f"\\nCurrent default font: {creator.current_font}")
+              new_font = input("Enter new default font: ").strip()
+              
+              if new_font:
+                  # Test if font works
+                  try:
+                      pyfiglet.figlet_format("Test", font=new_font)
+                      creator.current_font = new_font
+                      print(f"\\nDefault font changed to: {new_font}")
+                  except:
+                      print(f"\\nError: Font '{new_font}' not found or invalid!")
+              else:
+                  print("\\nNo font name entered!")
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '5':
+              # Save banner
+              if not creator.last_banner:
+                  clear_screen()
+                  print("\\nNo banner to save! Create a banner first.")
+                  input("\\nPress Enter to continue...")
+                  continue
+              
+              clear_screen()
+              print("\\n" + "═" * 60)
+              print("                  SAVE BANNER")
+              print("═" * 60)
+              
+              print(f"\\nLast banner text: '{creator.last_text}'")
+              print(f"Font used: {creator.current_font}")
+              
+              filename = input("\\nEnter filename (e.g., banner.txt): ").strip()
+              
+              if not filename:
+                  filename = "banner.txt"
+              
+              success, message = creator.save_banner(filename)
+              print(f"\\n{message}")
+              
+              input("\\nPress Enter to continue...")
+          
+          elif choice == '6':
+              # Exit
+              clear_screen()
+              print("\\nThank you for using ASCII Banner Creator!")
+              print("Goodbye!\\n")
+              sys.exit(0)
+          
+          else:
+              print("\\nInvalid choice! Please enter 1-6.")
+              input("\\nPress Enter to continue...")
+
+  if __name__ == '__main__':
+      try:
+          main()
+      except KeyboardInterrupt:
+          print("\\n\\nProgram interrupted by user. Goodbye!")
+          sys.exit(0)
+      except Exception as e:
+          print(f"\\n\\nAn unexpected error occurred: {e}")
+          sys.exit(1)`
   },
   {
     title: "ASCII Breakout",
     category: "ascii",
-    description: "Brick breaker game rendered in ASCII in the terminal.",
+    description: "Classic brick breaker with multiple levels, power-ups, and score tracking.",
     tags: ["console", "ascii-art", "arcade"],
     difficulty: 3,
-    lines: "~150 lines",
-    code: `import os, time, msvcrt
-  w,h=20,15
-  paddle_x=w//2
-  ball=[h-2,w//2]
-  dx,dy=-1,-1
-  bricks=[[1+i,j] for i in range(6) for j in range(3)]
-  def draw():
-  os.system("cls")
-  for y in range(h):
-    row=""
-    for x in range(w):
-    if [y,x]==ball: row="O"
-    elif y==h-1 and abs(x-paddle_x)<=2: row="="
-    elif [y,x] in bricks: row="#"
-    else: row=" "
-    print(row)
-  while True:
-  draw()
-  time.sleep(0.1)
-  if msvcrt.kbhit():
-    k=msvcrt.getch()
-    if k==b'a' and paddle_x>2: paddle_x-=1
-    if k==b'd' and paddle_x<w-3: paddle_x+=1
-  ball[0]+=dy; ball[1]+=dx
-  if ball[1]<=0 or ball[1]>=w-1: dx*=-1
-  if ball[0]<=0: dy*=-1
-  if ball[0]==h-1: 
-    if abs(ball[1]-paddle_x)<=2: dy*=-1
-    else: print("Game Over!"); break
-  if ball in bricks: bricks.remove(ball); dy*=-1
-  if not bricks: print("You Win!"); break`
+    lines: "~280 lines",
+    code: `import os
+  import time
+  import random
+  import sys
+
+  # Try to import keyboard module
+  try:
+      import msvcrt
+      HAS_MSVCRT = True
+  except ImportError:
+      HAS_MSVCRT = False
+
+  # Game Constants
+  SCREEN_WIDTH = 40
+  SCREEN_HEIGHT = 25
+  PADDLE_WIDTH = 6
+
+  def clear_screen():
+      """Clear the terminal screen"""
+      os.system('cls' if os.name == 'nt' else 'clear')
+
+  class Breakout:
+      def __init__(self):
+          self.width = SCREEN_WIDTH
+          self.height = SCREEN_HEIGHT
+          self.paddle_width = PADDLE_WIDTH
+          self.paddle_x = self.width // 2 - self.paddle_width // 2
+          self.paddle_y = self.height - 2
+          
+          self.ball_x = self.width // 2
+          self.ball_y = self.paddle_y - 1
+          self.ball_dx = random.choice([-1, 1])
+          self.ball_dy = -1
+          self.ball_speed = 0.08
+          
+          self.bricks = []
+          self.powerups = []
+          
+          self.score = 0
+          self.lives = 3
+          self.level = 1
+          self.game_over = False
+          self.level_complete = False
+          
+          self.last_update = time.time()
+          
+          self.generate_bricks()
+      
+      def generate_bricks(self):
+          """Generate brick layout for current level"""
+          self.bricks = []
+          rows = min(5 + self.level, 8)
+          cols = 8
+          
+          start_y = 3
+          start_x = 3
+          brick_width = 4
+          
+          for row in range(rows):
+              for col in range(cols):
+                  x = start_x + col * (brick_width + 1)
+                  y = start_y + row * 2
+                  
+                  if x + brick_width < self.width - 2:
+                      # Assign brick types based on row
+                      if row < 2:
+                          brick_type = 3  # 30 points
+                      elif row < 4:
+                          brick_type = 2  # 20 points
+                      else:
+                          brick_type = 1  # 10 points
+                      
+                      self.bricks.append({
+                          'x': x,
+                          'y': y,
+                          'width': brick_width,
+                          'type': brick_type,
+                          'char': '█' if brick_type == 3 else '▓' if brick_type == 2 else '▒'
+                      })
+      
+      def move_paddle(self, direction):
+          """Move paddle left or right"""
+          self.paddle_x += direction
+          self.paddle_x = max(1, min(self.paddle_x, self.width - self.paddle_width - 1))
+      
+      def update_ball(self):
+          """Update ball position and handle collisions"""
+          self.ball_x += self.ball_dx
+          self.ball_y += self.ball_dy
+          
+          # Wall collisions (left and right)
+          if self.ball_x <= 0 or self.ball_x >= self.width - 1:
+              self.ball_dx *= -1
+              self.ball_x = max(0, min(self.ball_x, self.width - 1))
+          
+          # Ceiling collision
+          if self.ball_y <= 0:
+              self.ball_dy *= -1
+              self.ball_y = 0
+          
+          # Paddle collision
+          if (self.ball_y == self.paddle_y and 
+              self.paddle_x <= self.ball_x < self.paddle_x + self.paddle_width):
+              
+              self.ball_dy = -1
+              
+              # Add spin based on where ball hits paddle
+              hit_pos = self.ball_x - self.paddle_x
+              if hit_pos < self.paddle_width // 3:
+                  self.ball_dx = -1
+              elif hit_pos > 2 * self.paddle_width // 3:
+                  self.ball_dx = 1
+          
+          # Bottom - lose life
+          if self.ball_y >= self.height - 1:
+              self.lives -= 1
+              if self.lives <= 0:
+                  self.game_over = True
+              else:
+                  self.reset_ball()
+          
+          # Brick collisions
+          for brick in self.bricks[:]:
+              if (brick['y'] == self.ball_y and 
+                  brick['x'] <= self.ball_x < brick['x'] + brick['width']):
+                  
+                  self.bricks.remove(brick)
+                  self.score += brick['type'] * 10
+                  self.ball_dy *= -1
+                  
+                  # Chance to spawn power-up
+                  if random.random() < 0.1:
+                      self.powerups.append({
+                          'x': brick['x'] + brick['width'] // 2,
+                          'y': brick['y'],
+                          'type': random.choice(['expand', 'slow', 'multi'])
+                      })
+                  
+                  break
+          
+          # Update power-ups
+          for powerup in self.powerups[:]:
+              powerup['y'] += 1
+              
+              # Collect power-up
+              if (powerup['y'] == self.paddle_y and 
+                  self.paddle_x <= powerup['x'] < self.paddle_x + self.paddle_width):
+                  
+                  self.apply_powerup(powerup['type'])
+                  self.powerups.remove(powerup)
+              
+              # Remove if off screen
+              elif powerup['y'] >= self.height:
+                  self.powerups.remove(powerup)
+          
+          # Check level complete
+          if not self.bricks:
+              self.level_complete = True
+      
+      def apply_powerup(self, powerup_type):
+          """Apply power-up effect"""
+          if powerup_type == 'expand':
+              self.paddle_width = min(10, self.paddle_width + 2)
+          elif powerup_type == 'slow':
+              self.ball_speed = min(0.15, self.ball_speed + 0.02)
+          elif powerup_type == 'multi':
+              self.score += 50
+      
+      def reset_ball(self):
+          """Reset ball to starting position"""
+          self.ball_x = self.width // 2
+          self.ball_y = self.paddle_y - 1
+          self.ball_dx = random.choice([-1, 1])
+          self.ball_dy = -1
+      
+      def next_level(self):
+          """Progress to next level"""
+          self.level += 1
+          self.score += 100 * self.level
+          self.paddle_width = PADDLE_WIDTH
+          self.ball_speed = max(0.05, 0.08 - (self.level - 1) * 0.005)
+          self.generate_bricks()
+          self.reset_ball()
+          self.powerups = []
+          self.level_complete = False
+      
+      def draw(self):
+          """Draw the game state"""
+          clear_screen()
+          
+          print("\\n" + "═" * 50)
+          print(f"         BREAKOUT - Level {self.level}")
+          print("═" * 50 + "\\n")
+          
+          # Create screen buffer
+          screen = [[' ' for _ in range(self.width)] for _ in range(self.height)]
+          
+          # Draw bricks
+          for brick in self.bricks:
+              for i in range(brick['width']):
+                  x = brick['x'] + i
+                  if 0 <= x < self.width and 0 <= brick['y'] < self.height:
+                      screen[brick['y']][x] = brick['char']
+          
+          # Draw power-ups
+          for powerup in self.powerups:
+              if 0 <= powerup['y'] < self.height and 0 <= powerup['x'] < self.width:
+                  screen[powerup['y']][powerup['x']] = '●'
+          
+          # Draw ball
+          if 0 <= self.ball_y < self.height and 0 <= self.ball_x < self.width:
+              screen[int(self.ball_y)][int(self.ball_x)] = 'O'
+          
+          # Draw paddle
+          for i in range(self.paddle_width):
+              x = self.paddle_x + i
+              if 0 <= x < self.width and 0 <= self.paddle_y < self.height:
+                  screen[self.paddle_y][x] = '='
+          
+          # Draw borders and screen
+          print("  ┌" + "─" * self.width + "┐")
+          for row in screen:
+              print("  │" + "".join(row) + "│")
+          print("  └" + "─" * self.width + "┘\\n")
+          
+          # Draw HUD
+          lives_str = "♥" * self.lives
+          print(f"  Lives: {lives_str}  |  Score: {self.score}  |  Level: {self.level}")
+          
+          # Draw controls
+          if HAS_MSVCRT:
+              print("\\n  Controls: A/D=Move | Q=Quit")
+          else:
+              print("\\n  Demo Mode - Press Ctrl+C to quit")
+      
+      def get_input(self):
+          """Get keyboard input"""
+          if not HAS_MSVCRT:
+              # Simple AI for demo
+              if self.ball_x < self.paddle_x + self.paddle_width // 2:
+                  self.move_paddle(-1)
+              elif self.ball_x > self.paddle_x + self.paddle_width // 2:
+                  self.move_paddle(1)
+              return True
+          
+          if msvcrt.kbhit():
+              key = msvcrt.getch()
+              
+              if key == b'q' or key == b'Q':
+                  return False
+              elif key == b'a' or key == b'A':
+                  self.move_paddle(-1)
+              elif key == b'd' or key == b'D':
+                  self.move_paddle(1)
+          
+          return True
+      
+      def show_game_over(self):
+          """Display game over screen"""
+          clear_screen()
+          print("\\n" * 3)
+          print("  ╔" + "═" * 46 + "╗")
+          print("  ║" + " " * 46 + "║")
+          print("  ║" + "GAME OVER!".center(46) + "║")
+          print("  ║" + " " * 46 + "║")
+          print(f"  ║{'Final Score: ' + str(self.score).center(32)}║")
+          print(f"  ║{'Level Reached: ' + str(self.level).center(31)}║")
+          print("  ║" + " " * 46 + "║")
+          print("  ╚" + "═" * 46 + "╝")
+          print("\\n  Thanks for playing!\\n")
+      
+      def show_level_complete(self):
+          """Display level complete screen"""
+          clear_screen()
+          print("\\n" * 3)
+          print("  ╔" + "═" * 46 + "╗")
+          print("  ║" + " " * 46 + "║")
+          print("  ║" + f"LEVEL {self.level} COMPLETE!".center(46) + "║")
+          print("  ║" + " " * 46 + "║")
+          print(f"  ║{'Score: ' + str(self.score).center(38)}║")
+          print("  ║" + " " * 46 + "║")
+          print("  ╚" + "═" * 46 + "╝")
+          print("\\n  Loading next level...\\n")
+          time.sleep(2)
+
+  def main():
+      """Main game loop"""
+      game = Breakout()
+      
+      print("\\nBreakout Starting...")
+      print("Break all the bricks to advance!")
+      time.sleep(2)
+      
+      try:
+          while not game.game_over:
+              game.draw()
+              
+              if game.level_complete:
+                  game.show_level_complete()
+                  game.next_level()
+                  continue
+              
+              if not game.get_input():
+                  print("\\nGame quit by user. Goodbye!")
+                  sys.exit(0)
+              
+              current_time = time.time()
+              if current_time - game.last_update >= game.ball_speed:
+                  game.update_ball()
+                  game.last_update = current_time
+              
+              time.sleep(0.02)
+          
+          game.show_game_over()
+          
+      except KeyboardInterrupt:
+          print("\\n\\nGame interrupted by user. Goodbye!")
+          sys.exit(0)
+
+  if __name__ == '__main__':
+      main()`
   },
     {
       title: "ASCII Tic Tac Toe",
@@ -674,45 +3882,166 @@ const projects = [
       tags: ["console", "ascii-art", "board-game"],
       difficulty: 2,
       lines: "~100 lines",
-      code: `# ASCII Tic Tac Toe
-  def print_board(board):
-      print("\\n")
-      print(f" {board[0]} | {board[1]} | {board[2]} ")
-      print("---|---|---")
-      print(f" {board[3]} | {board[4]} | {board[5]} ")
-      print("---|---|---")
-      print(f" {board[6]} | {board[7]} | {board[8]} ")
-      print("\\n")
+      code: `# ASCII Tic Tac Toe with AI Opponent
+import random
 
-  def check_winner(board, player):
-      wins = [[0,1,2], [3,4,5], [6,7,8], 
-              [0,3,6], [1,4,7], [2,5,8],
-              [0,4,8], [2,4,6]]
-      return any(all(board[i] == player for i in combo) for combo in wins)
+def print_board(board):
+    """Display the current game board in ASCII format"""
+    print("\n")
+    print(f" {board[0]} | {board[1]} | {board[2]} ")
+    print("---|---|---")
+    print(f" {board[3]} | {board[4]} | {board[5]} ")
+    print("---|---|---")
+    print(f" {board[6]} | {board[7]} | {board[8]} ")
+    print("\n")
 
-  def main():
-      board = [str(i+1) for i in range(9)]
-      current_player = 'X'
-      
-      for turn in range(9):
-          print_board(board)
-          move = int(input(f"Player {current_player}, enter position (1-9): ")) - 1
-          
-          if 0 <= move < 9 and board[move] not in ['X', 'O']:
-              board[move] = current_player
-              if check_winner(board, current_player):
-                  print_board(board)
-                  print(f"Player {current_player} wins!")
-                  return
-              current_player = 'O' if current_player == 'X' else 'X'
-          else:
-              print("Invalid move!")
-      
-      print_board(board)
-      print("It's a tie!")
 
-  if __name__ == '__main__':
-      main()`
+def check_winner(board, player):
+    """Check if the specified player has won the game"""
+    # All possible winning combinations
+    winning_combinations = [
+        [0, 1, 2],  # Top row
+        [3, 4, 5],  # Middle row
+        [6, 7, 8],  # Bottom row
+        [0, 3, 6],  # Left column
+        [1, 4, 7],  # Middle column
+        [2, 5, 8],  # Right column
+        [0, 4, 8],  # Diagonal top-left to bottom-right
+        [2, 4, 6]   # Diagonal top-right to bottom-left
+    ]
+    
+    # Check each winning combination
+    for combo in winning_combinations:
+        if all(board[i] == player for i in combo):
+            return True
+    return False
+
+
+def is_board_full(board):
+    """Check if the board is completely filled"""
+    return all(cell in ['X', 'O'] for cell in board)
+
+
+def get_available_moves(board):
+    """Return a list of available positions on the board"""
+    available = []
+    for i in range(9):
+        if board[i] not in ['X', 'O']:
+            available.append(i)
+    return available
+
+
+def ai_move(board):
+    """AI makes a move using simple strategy"""
+    # Strategy 1: Try to win
+    for move in get_available_moves(board):
+        board_copy = board.copy()
+        board_copy[move] = 'O'
+        if check_winner(board_copy, 'O'):
+            return move
+    
+    # Strategy 2: Block player from winning
+    for move in get_available_moves(board):
+        board_copy = board.copy()
+        board_copy[move] = 'X'
+        if check_winner(board_copy, 'X'):
+            return move
+    
+    # Strategy 3: Take center if available
+    if 4 in get_available_moves(board):
+        return 4
+    
+    # Strategy 4: Take a corner
+    corners = [0, 2, 6, 8]
+    available_corners = [c for c in corners if c in get_available_moves(board)]
+    if available_corners:
+        return random.choice(available_corners)
+    
+    # Strategy 5: Take any available space
+    return random.choice(get_available_moves(board))
+
+
+def get_player_move(board):
+    """Get a valid move from the human player"""
+    while True:
+        try:
+            move = int(input("Enter position (1-9): ")) - 1
+            
+            if move < 0 or move > 8:
+                print("Please enter a number between 1 and 9!")
+                continue
+            
+            if board[move] in ['X', 'O']:
+                print("That position is already taken! Choose another.")
+                continue
+            
+            return move
+            
+        except ValueError:
+            print("Invalid input! Please enter a number.")
+        except (KeyboardInterrupt, EOFError):
+            print("\nGame cancelled.")
+            exit()
+
+
+def main():
+    """Main game loop"""
+    print("=" * 40)
+    print("  Welcome to ASCII Tic Tac Toe!")
+    print("=" * 40)
+    print("\nYou are X, AI is O")
+    print("Positions are numbered 1-9:")
+    print("\n 1 | 2 | 3 ")
+    print("---|---|---")
+    print(" 4 | 5 | 6 ")
+    print("---|---|---")
+    print(" 7 | 8 | 9 ")
+    print("\n")
+    
+    # Initialize the board with position numbers
+    board = [str(i + 1) for i in range(9)]
+    
+    # Game loop
+    while True:
+        # Player's turn (X)
+        print_board(board)
+        print("Your turn (X):")
+        player_move = get_player_move(board)
+        board[player_move] = 'X'
+        
+        # Check if player won
+        if check_winner(board, 'X'):
+            print_board(board)
+            print("🎉 Congratulations! You win! 🎉")
+            break
+        
+        # Check for tie
+        if is_board_full(board):
+            print_board(board)
+            print("It's a tie! Well played!")
+            break
+        
+        # AI's turn (O)
+        print("AI is thinking...")
+        ai_position = ai_move(board)
+        board[ai_position] = 'O'
+        print(f"AI chose position {ai_position + 1}")
+        
+        # Check if AI won
+        if check_winner(board, 'O'):
+            print_board(board)
+            print("AI wins! Better luck next time!")
+            break
+        
+        # Check for tie
+        if is_board_full(board):
+            print_board(board)
+            print("It's a tie! Well played!")
+            break
+
+
+if __name__ == '__main__':
+    main()`
     },
   {
     title: "ASCII Connect Four",
@@ -721,42 +4050,171 @@ const projects = [
     tags: ["console", "ascii-art", "strategy"],
     difficulty: 2,
     lines: "~80 lines",
-    code: `import os
-  w,h=7,6
-  board=[[" "]*w for _ in range(h)]
-  def draw():
-      os.system("cls")
-      for row in board:
-          print("|"+"|".join(row)+"|")
-      print(" "+" ".join(str(i) for i in range(w)))
-  def drop(col,player):
-      for r in reversed(range(h)):
-          if board[r][col]==" ":
-              board[r][col]=player
-              return True
-      return False
-  def check():
-      for y in range(h):
-          for x in range(w-3):
-              if board[y][x]!=" " and all(board[y][x+i]==board[y][x] for i in range(4)): return board[y][x]
-      for x in range(w):
-          for y in range(h-3):
-              if board[y][x]!=" " and all(board[y+i][x]==board[y][x] for i in range(4)): return board[y][x]
-      for y in range(h-3):
-          for x in range(w-3):
-              if board[y][x]!=" " and all(board[y+i][x+i]==board[y][x] for i in range(4)): return board[y][x]
-              if board[y+3][x]!=" " and all(board[y+3-i][x+i]==board[y+3][x] for i in range(4)): return board[y+3][x]
-      return None
-  turn="X"
-  while True:
-      draw()
-      col=input(f"{turn}'s turn (0-{w-1}): ")
-      if not col.isdigit() or not 0<=int(col)<w: continue
-      if not drop(int(col),turn): continue
-      winner=check()
-      if winner:
-          draw(); print(winner,"wins!"); break
-      turn="O" if turn=="X" else "X"`
+    code: `# ASCII Connect Four Game
+import os
+
+# Board dimensions
+WIDTH = 7
+HEIGHT = 6
+
+# Initialize empty board
+board = [[" " for _ in range(WIDTH)] for _ in range(HEIGHT)]
+
+
+def clear_screen():
+    """Clear the console screen"""
+    os.system("cls" if os.name == "nt" else "clear")
+
+
+def draw_board():
+    """Display the current game board"""
+    clear_screen()
+    print("\n" + "=" * 30)
+    print("    ASCII Connect Four")
+    print("=" * 30 + "\n")
+    
+    # Draw the board
+    for row in board:
+        print("|" + "|".join(row) + "|")
+    
+    # Draw column numbers
+    print(" " + " ".join(str(i) for i in range(WIDTH)))
+    print()
+
+
+def drop_piece(column, player):
+    """Drop a piece in the specified column"""
+    # Start from bottom row and work up
+    for row in reversed(range(HEIGHT)):
+        if board[row][column] == " ":
+            board[row][column] = player
+            return True
+    # Column is full
+    return False
+
+
+def check_horizontal_win():
+    """Check for four in a row horizontally"""
+    for y in range(HEIGHT):
+        for x in range(WIDTH - 3):
+            piece = board[y][x]
+            if piece != " ":
+                if all(board[y][x + i] == piece for i in range(4)):
+                    return piece
+    return None
+
+
+def check_vertical_win():
+    """Check for four in a row vertically"""
+    for x in range(WIDTH):
+        for y in range(HEIGHT - 3):
+            piece = board[y][x]
+            if piece != " ":
+                if all(board[y + i][x] == piece for i in range(4)):
+                    return piece
+    return None
+
+
+def check_diagonal_win():
+    """Check for four in a row diagonally"""
+    # Check down-right diagonals
+    for y in range(HEIGHT - 3):
+        for x in range(WIDTH - 3):
+            piece = board[y][x]
+            if piece != " ":
+                if all(board[y + i][x + i] == piece for i in range(4)):
+                    return piece
+    
+    # Check down-left diagonals
+    for y in range(HEIGHT - 3):
+        for x in range(3, WIDTH):
+            piece = board[y][x]
+            if piece != " ":
+                if all(board[y + i][x - i] == piece for i in range(4)):
+                    return piece
+    
+    return None
+
+
+def check_winner():
+    """Check all win conditions"""
+    # Check horizontal
+    winner = check_horizontal_win()
+    if winner:
+        return winner
+    
+    # Check vertical
+    winner = check_vertical_win()
+    if winner:
+        return winner
+    
+    # Check diagonal
+    winner = check_diagonal_win()
+    if winner:
+        return winner
+    
+    return None
+
+
+def is_board_full():
+    """Check if the board is completely filled"""
+    return all(board[0][col] != " " for col in range(WIDTH))
+
+
+def main():
+    """Main game loop"""
+    current_player = "X"
+    
+    print("\nWelcome to ASCII Connect Four!")
+    print("Players alternate dropping pieces (X and O)")
+    print("First to connect 4 wins!\n")
+    input("Press Enter to start...")
+    
+    while True:
+        draw_board()
+        
+        # Get player input
+        print(f"Player {current_player}'s turn")
+        column_input = input(f"Choose column (0-{WIDTH - 1}): ")
+        
+        # Validate input
+        if not column_input.isdigit():
+            print("Please enter a number!")
+            input("Press Enter to continue...")
+            continue
+        
+        column = int(column_input)
+        
+        if not (0 <= column < WIDTH):
+            print(f"Column must be between 0 and {WIDTH - 1}!")
+            input("Press Enter to continue...")
+            continue
+        
+        # Try to drop piece
+        if not drop_piece(column, current_player):
+            print("That column is full! Choose another.")
+            input("Press Enter to continue...")
+            continue
+        
+        # Check for winner
+        winner = check_winner()
+        if winner:
+            draw_board()
+            print(f"🎉 Player {winner} wins! 🎉")
+            break
+        
+        # Check for tie
+        if is_board_full():
+            draw_board()
+            print("It's a tie! The board is full.")
+            break
+        
+        # Switch players
+        current_player = "O" if current_player == "X" else "X"
+
+
+if __name__ == "__main__":
+    main()`
   },
   {
     title: "ASCII Battleship",
@@ -765,204 +4223,292 @@ const projects = [
     tags: ["console", "ascii-art", "strategy"],
     difficulty: 3,
     lines: "~150 lines",
-    code: `import os,random
-  w,h=8,8
-  ships=[(0,1),(2,3),(4,4),(6,0),(7,7)]
-  hits=[]
-  def draw():
-      os.system("cls")
-      print("  "+" ".join(str(i) for i in range(w)))
-      for y in range(h):
-          row=""
-          for x in range(w):
-              if (y,x) in hits:
-                  row+="X"
-              else:
-                  row+="~"
-          print(str(y)+" "+row)
-  while ships:
-      draw()
-      move=input("Enter coordinates yx (e.g., 12): ")
-      if len(move)!=2 or not move.isdigit(): continue
-      y,x=int(move[0]),int(move[1])
-      if (y,x) in hits: continue
-      hits.append((y,x))
-      if (y,x) in ships:
-          print("Hit!"); ships.remove((y,x))
-      else:
-          print("Miss!")`
-  },
+    code: `# ASCII Battleship Game
+import os
+import random
 
-    {
-      title: "ASCII Minesweeper",
-      category: "ascii",
-      description: "Classic minesweeper in the terminal with ASCII graphics.",
-      tags: ["console", "ascii-art", "puzzle"],
-      difficulty: 3,
-      lines: "~250 lines"
-    },
-    {
-      title: "ASCII Sudoku",
-      category: "ascii",
-      description: "Play and solve Sudoku puzzles in ASCII format.",
-      tags: ["console", "ascii-art", "puzzle"],
-      difficulty: 3,
-      lines: "~200 lines"
-    },
-    {
-      title: "ASCII RPG Battle System",
-      category: "ascii",
-      description: "Turn-based RPG combat with ASCII characters and monsters.",
-      tags: ["console", "ascii-art", "rpg"],
-      difficulty: 4,
-      lines: "~400 lines"
-    },
-    {
-      title: "ASCII Weather Display",
-      category: "ascii",
-      description: "Show weather conditions with ASCII art icons.",
-      tags: ["console", "ascii-art", "api"],
-      difficulty: 2,
-      lines: "~120 lines"
-    },
+# Game settings
+GRID_SIZE = 8
+EMPTY = "~"
+HIT = "X"
+MISS = "O"
+
+# Ship definitions (name, size)
+SHIP_TYPES = [
+    ("Carrier", 4),
+    ("Battleship", 3),
+    ("Destroyer", 2),
+    ("Submarine", 2)
+]
+
+
+def clear_screen():
+    """Clear the console screen"""
+    os.system("cls" if os.name == "nt" else "clear")
+
+
+def create_empty_grid():
+    """Create an empty game grid"""
+    return [[EMPTY for _ in range(GRID_SIZE)] for _ in range(GRID_SIZE)]
+
+
+def draw_grid(grid, show_ships=False):
+    """Display the game grid"""
+    print("\n  " + " ".join(str(i) for i in range(GRID_SIZE)))
+    for y in range(GRID_SIZE):
+        row = ""
+        for x in range(GRID_SIZE):
+            cell = grid[y][x]
+            if cell == "S" and not show_ships:
+                row += EMPTY + " "
+            else:
+                row += cell + " "
+        print(str(y) + " " + row)
+    print()
+
+
+def can_place_ship(grid, row, col, size, horizontal):
+    """Check if a ship can be placed at the given position"""
+    if horizontal:
+        if col + size > GRID_SIZE:
+            return False
+        for x in range(col, col + size):
+            if grid[row][x] != EMPTY:
+                return False
+    else:
+        if row + size > GRID_SIZE:
+            return False
+        for y in range(row, row + size):
+            if grid[y][col] != EMPTY:
+                return False
+    return True
+
+
+def place_ship(grid, row, col, size, horizontal):
+    """Place a ship on the grid"""
+    positions = []
+    if horizontal:
+        for x in range(col, col + size):
+            grid[row][x] = "S"
+            positions.append((row, x))
+    else:
+        for y in range(row, row + size):
+            grid[y][col] = "S"
+            positions.append((y, col))
+    return positions
+
+
+def place_ships_randomly(grid):
+    """Randomly place all ships on the grid"""
+    all_ship_positions = []
+    
+    for ship_name, ship_size in SHIP_TYPES:
+        placed = False
+        attempts = 0
+        
+        while not placed and attempts < 100:
+            row = random.randint(0, GRID_SIZE - 1)
+            col = random.randint(0, GRID_SIZE - 1)
+            horizontal = random.choice([True, False])
+            
+            if can_place_ship(grid, row, col, ship_size, horizontal):
+                positions = place_ship(grid, row, col, ship_size, horizontal)
+                all_ship_positions.append({
+                    "name": ship_name,
+                    "positions": positions,
+                    "hits": []
+                })
+                placed = True
+            
+            attempts += 1
+    
+    return all_ship_positions
+
+
+def is_valid_coordinate(row, col):
+    """Check if coordinates are within the grid"""
+    return 0 <= row < GRID_SIZE and 0 <= col < GRID_SIZE
+
+
+def check_ship_sunk(ship):
+    """Check if a ship has been completely destroyed"""
+    return len(ship["hits"]) == len(ship["positions"])
+
+
+def main():
+    """Main game loop"""
+    clear_screen()
+    print("=" * 40)
+    print("      ASCII BATTLESHIP")
+    print("=" * 40)
+    print("\nWelcome to Battleship!")
+    print("Sink all enemy ships to win!")
+    print(f"\nShips to find:")
+    for name, size in SHIP_TYPES:
+        print(f"  - {name} (size {size})")
+    print(f"\nGrid: {GRID_SIZE}x{GRID_SIZE}")
+    print("Enter coordinates as row then column (e.g., 23 for row 2, col 3)")
+    input("\nPress Enter to start...")
+    
+    # Setup game
+    player_grid = create_empty_grid()
+    ships = place_ships_randomly(player_grid)
+    shots_fired = 0
+    hits = 0
+    
+    # Game loop
+    while ships:
+        clear_screen()
+        print("=" * 40)
+        print(f"Shots fired: {shots_fired} | Hits: {hits}")
+        print("=" * 40)
+        draw_grid(player_grid, show_ships=False)
+        
+        # Show remaining ships
+        active_ships = [s for s in ships if not check_ship_sunk(s)]
+        print(f"Ships remaining: {len(active_ships)}")
+        for ship in active_ships:
+            hits_count = len(ship["hits"])
+            size = len(ship["positions"])
+            print(f"  - {ship['name']}: {hits_count}/{size} hits")
+        
+        # Get player input
+        move = input("\nEnter coordinates (e.g., 23): ")
+        
+        # Validate input
+        if len(move) != 2 or not move.isdigit():
+            print("Invalid input! Use two digits (e.g., 23)")
+            input("Press Enter to continue...")
+            continue
+        
+        row, col = int(move[0]), int(move[1])
+        
+        if not is_valid_coordinate(row, col):
+            print(f"Coordinates must be between 0-{GRID_SIZE-1}!")
+            input("Press Enter to continue...")
+            continue
+        
+        if player_grid[row][col] in [HIT, MISS]:
+            print("You already shot there!")
+            input("Press Enter to continue...")
+            continue
+        
+        shots_fired += 1
+        
+        # Check if hit or miss
+        if player_grid[row][col] == "S":
+            player_grid[row][col] = HIT
+            hits += 1
+            print("\n💥 HIT! 💥")
+            
+            # Find which ship was hit
+            for ship in ships:
+                if (row, col) in ship["positions"]:
+                    ship["hits"].append((row, col))
+                    
+                    if check_ship_sunk(ship):
+                        print(f"You sunk the {ship['name']}!")
+                        ships.remove(ship)
+                    break
+        else:
+            player_grid[row][col] = MISS
+            print("\n💧 Miss! 💧")
+        
+        input("Press Enter to continue...")
+    
+    # Game over - victory!
+    clear_screen()
+    print("=" * 40)
+    print("      🎉 VICTORY! 🎉")
+    print("=" * 40)
+    print(f"\nYou sunk all the ships!")
+    print(f"Shots fired: {shots_fired}")
+    print(f"Accuracy: {hits}/{shots_fired} ({int(hits/shots_fired*100)}%)")
+    print("\nFinal board:")
+    draw_grid(player_grid, show_ships=True)
+
+
+if __name__ == "__main__":
+    main()`
+  },
   {
     title: "ASCII Minesweeper",
     category: "ascii",
     description: "Classic minesweeper in the terminal with ASCII graphics.",
     tags: ["console", "ascii-art", "puzzle"],
     difficulty: 3,
-    lines: "~100 lines",
-    code: `import os, random
-  w,h,m=8,8,10
-  board=[[" "]*w for _ in range(h)]
-  mines=[(random.randint(0,h-1),random.randint(0,w-1)) for _ in range(m)]
-  def count_adj(y,x):
-      return sum((ny,nx) in mines for ny in range(y-1,y+2) for nx in range(x-1,x+2) if 0<=ny<h and 0<=nx<w)
-  def draw():
-      os.system("cls")
-      print("  "+" ".join(str(i) for i in range(w)))
-      for y,row in enumerate(board):
-          print(str(y)+" "+" ".join(row))
-  while True:
-      draw()
-      move=input("Enter coordinates yx (e.g., 12): ")
-      if len(move)!=2 or not move.isdigit(): continue
-      y,x=int(move[0]),int(move[1])
-      if (y,x) in mines: draw(); print("Boom! Game Over"); break
-      board[y][x]=str(count_adj(y,x))`
-  },
-  {
-    title: "ASCII Sudoku",
-    category: "ascii",
-    description: "Play and solve Sudoku puzzles in ASCII format.",
-    tags: ["console", "ascii-art", "puzzle"],
-    difficulty: 3,
-    lines: "~100 lines",
-    code: `import os
-  board=[[5,3,0,0,7,0,0,0,0],
-        [6,0,0,1,9,5,0,0,0],
-        [0,9,8,0,0,0,0,6,0],
-        [8,0,0,0,6,0,0,0,3],
-        [4,0,0,8,0,3,0,0,1],
-        [7,0,0,0,2,0,0,0,6],
-        [0,6,0,0,0,0,2,8,0],
-        [0,0,0,4,1,9,0,0,5],
-        [0,0,0,0,8,0,0,7,9]]
-  def draw():
-      os.system("cls")
-      for r in board:
-          print(" ".join(str(c) if c!=0 else "." for c in r))
-  while True:
-      draw()
-      move=input("Enter y x value (e.g., 012): ")
-      if len(move)!=3 or not move.isdigit(): continue
-      y,x,v=int(move[0]),int(move[1]),int(move[2])
-      if board[y][x]==0: board[y][x]=v`
-  },
-  {
-    title: "ASCII RPG Battle System",
-    category: "ascii",
-    description: "Turn-based RPG combat with ASCII characters and monsters.",
-    tags: ["console", "ascii-art", "rpg"],
-    difficulty: 4,
-    lines: "~150 lines",
-    code: `import os,random,time
-  player={"hp":50,"atk":10}
-  enemy={"hp":30,"atk":8}
-  def draw():
-      os.system("cls")
-      print("Player HP:",player["hp"]," Enemy HP:",enemy["hp"])
-  while player["hp"]>0 and enemy["hp"]>0:
-      draw()
-      print("Choose action: 1=Attack 2=Heal")
-      move=input()
-      if move=="1": enemy["hp"]-=player["atk"]
-      if move=="2": player["hp"]+=5
-      if enemy["hp"]>0:
-          player["hp"]-=enemy["atk"]
-      time.sleep(0.5)
-  draw()
-  if player["hp"]>0: print("You won!")
-  else: print("You lost!")`
-  },
-  {
-    title: "ASCII Weather Display",
-    category: "ascii",
-    description: "Show weather conditions with ASCII art icons.",
-    tags: ["console", "ascii-art", "api"],
-    difficulty: 2,
-    lines: "~50 lines",
-    code: `import os
-  weather=input("Enter weather (sun/rain/cloud): ")
-  os.system("cls")
-  if weather=="sun":
-      print(" \\   / ")
-      print("  .-.  ")
-      print(" ―(   )―")
-      print("  '-'  ")
-      print(" /   \\ ")
-  elif weather=="rain":
-      print("     .-.     ")
-      print("    (   ).   ")
-      print("   (___(__)  ")
-      print("   ‚‘‚‘‚‘‚‘  ")
-      print("   ‚’‚’‚’‚’  ")
-  elif weather=="cloud":
-      print("      .--.   ")
-      print("   .-(    ). ")
-      print("  (___.__)__)")`
-  },
-  {
-    title: "ASCII Fireworks",
-    category: "ascii",
-    description: "Animated fireworks display in ASCII art.",
-    tags: ["console", "ascii-art", "animation"],
-    difficulty: 3,
-    lines: "~100 lines",
-    code: `import os,time,random
-  w,h=40,10
-  chars="*+x@"
-  def draw(fireworks):
-      os.system("cls")
-      for y in range(h):
-          row=""
-          for x in range(w):
-              c=" "
-              for fx,fy,ch in fireworks:
-                  if fy==y and fx==x: c=ch
-              row+=c
-          print(row)
-  fireworks=[]
-  while True:
-      if random.random()<0.2:
-          fireworks.append([random.randint(0,w-1),h-1,random.choice(chars)])
-      new_fireworks=[]
-      for fx,fy,ch in fireworks:
-          fy-=1
-          if fy>=0: new_fireworks.append([fx,fy,ch])
-      fireworks=new_fireworks
-      draw(fireworks)
-      time.sleep(0.1)`
+    lines: "~250 lines",
+    code: `import os,random
+w,h,m=10,10,15
+g=[[0]*w for _ in range(h)]
+v=[[0]*w for _ in range(h)]
+f=[[0]*w for _ in range(h)]
+first=1
+def place():
+    global first
+    placed=0
+    while placed<m:
+        r,c=random.randint(0,h-1),random.randint(0,w-1)
+        if g[r][c]!=-1:
+            g[r][c]=-1
+            placed+=1
+    for r in range(h):
+        for c in range(w):
+            if g[r][c]!=-1:
+                cnt=0
+                for dr in[-1,0,1]:
+                    for dc in[-1,0,1]:
+                        nr,nc=r+dr,c+dc
+                        if 0<=nr<h and 0<=nc<w and g[nr][nc]==-1:
+                            cnt+=1
+                g[r][c]=cnt
+def reveal(r,c):
+    if not(0<=r<h and 0<=c<w)or v[r][c]or f[r][c]:return
+    v[r][c]=1
+    if g[r][c]==0:
+        for dr in[-1,0,1]:
+            for dc in[-1,0,1]:
+                reveal(r+dr,c+dc)
+def draw():
+    os.system("cls"if os.name=="nt"else"clear")
+    print("  "+" ".join(str(i)for i in range(w)))
+    for r in range(h):
+        row=str(r)+" "
+        for c in range(w):
+            if f[r][c]:row+="F "
+            elif not v[r][c]:row+="■ "
+            elif g[r][c]==-1:row+="* "
+            elif g[r][c]==0:row+="  "
+            else:row+=str(g[r][c])+" "
+        print(row)
+def check():
+    for r in range(h):
+        for c in range(w):
+            if g[r][c]!=-1 and not v[r][c]:return 0
+    return 1
+place()
+lost=0
+while not lost and not check():
+    draw()
+    cmd=input("Enter command (rc or frc): ").strip()
+    if cmd[0]=='f':
+        action,coords='flag',cmd[1:]
+    else:
+        action,coords='reveal',cmd
+    if len(coords)<2 or not coords.isdigit():continue
+    r,c=int(coords[0]),int(coords[1:])if len(coords)>2 else int(coords[1])
+    if not(0<=r<h and 0<=c<w):continue
+    if action=='flag':
+        f[r][c]=not f[r][c]
+    else:
+        reveal(r,c)
+        if g[r][c]==-1:
+            lost=1
+            for r in range(h):
+                for c in range(w):
+                    if g[r][c]==-1:v[r][c]=1
+draw()
+print("You win!"if not lost else"Game over!")`
   },
   {
     title: "ASCII Racing Game",
@@ -971,32 +4517,243 @@ const projects = [
     tags: ["console", "ascii-art", "racing"],
     difficulty: 3,
     lines: "~120 lines",
-    code: `import os,msvcrt,time,random
-  w,h=20,10
-  track=[" "*w for _ in range(h)]
-  car_x=w//2
-  def draw():
-      os.system("cls")
-      for y,row in enumerate(track):
-          row2=list(row)
-          if y==h-1: row2[car_x]="A"
-          print("".join(row2))
-  while True:
-      track.pop(0)
-      line=[" "]*w
-      for i in range(random.randint(1,3)):
-          line[random.randint(0,w-1)]="#"
-      track.append("".join(line))
-      draw()
-      time.sleep(0.2)
-      if msvcrt.kbhit():
-          k=msvcrt.getch()
-          if k==b'a' and car_x>0: car_x-=1
-          if k==b'd' and car_x<w-1: car_x+=1
-      if track[-1][car_x]=="#":
-          draw()
-          print("Crash! Game Over")
-          break`
+    code: `# ASCII Racing Game
+import os
+import time
+import random
+import sys
+import select
+import termios
+import tty
+
+# Game settings
+TRACK_WIDTH = 20
+TRACK_HEIGHT = 12
+PLAYER_ROW = TRACK_HEIGHT - 2
+OBSTACLE = "#"
+PLAYER = "A"
+ROAD = "."
+EMPTY = " "
+
+# Game state
+score = 0
+speed = 0.15
+game_over = False
+
+
+def clear_screen():
+    """Clear the console screen"""
+    os.system("cls" if os.name == "nt" else "clear")
+
+
+def get_key_nonblocking():
+    """Get keyboard input without blocking (Unix/Mac)"""
+    if sys.platform == "win32":
+        import msvcrt
+        if msvcrt.kbhit():
+            return msvcrt.getch().decode('utf-8').lower()
+        return None
+    else:
+        # Unix/Mac
+        dr, dw, de = select.select([sys.stdin], [], [], 0)
+        if dr:
+            return sys.stdin.read(1).lower()
+        return None
+
+
+def setup_terminal():
+    """Setup terminal for non-blocking input (Unix/Mac)"""
+    if sys.platform != "win32":
+        # Save terminal settings
+        old_settings = termios.tcgetattr(sys.stdin)
+        try:
+            # Set terminal to raw mode
+            tty.setcbreak(sys.stdin.fileno())
+            return old_settings
+        except:
+            return None
+    return None
+
+
+def restore_terminal(old_settings):
+    """Restore terminal settings (Unix/Mac)"""
+    if sys.platform != "win32" and old_settings:
+        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_settings)
+
+
+def create_empty_track():
+    """Create initial empty track"""
+    track = []
+    for _ in range(TRACK_HEIGHT):
+        row = [EMPTY] * TRACK_WIDTH
+        # Add road markers on edges
+        row[0] = "|"
+        row[TRACK_WIDTH - 1] = "|"
+        track.append(row)
+    return track
+
+
+def generate_obstacles(difficulty):
+    """Generate a new row with obstacles"""
+    row = [EMPTY] * TRACK_WIDTH
+    row[0] = "|"
+    row[TRACK_WIDTH - 1] = "|"
+    
+    # Random number of obstacles based on difficulty
+    num_obstacles = random.randint(1, min(3, difficulty))
+    
+    for _ in range(num_obstacles):
+        pos = random.randint(2, TRACK_WIDTH - 3)
+        row[pos] = OBSTACLE
+    
+    return row
+
+
+def draw_game(track, car_x, score, speed):
+    """Display the game screen"""
+    clear_screen()
+    print("=" * (TRACK_WIDTH + 10))
+    print("    ASCII RACING GAME")
+    print("=" * (TRACK_WIDTH + 10))
+    print(f"Score: {score} | Speed: {speed:.2f}")
+    print()
+    
+    for y in range(TRACK_HEIGHT):
+        row_display = ""
+        for x in range(TRACK_WIDTH):
+            # Draw player car
+            if y == PLAYER_ROW and x == car_x:
+                row_display += PLAYER
+            else:
+                row_display += track[y][x]
+        print(row_display)
+    
+    print()
+    print("Controls: A/D or ←/→ to move | Q to quit")
+
+
+def check_collision(track, car_x):
+    """Check if player hit an obstacle"""
+    return track[PLAYER_ROW][car_x] == OBSTACLE
+
+
+def main():
+    """Main game loop"""
+    global score, speed, game_over
+    
+    # Setup
+    clear_screen()
+    print("=" * 40)
+    print("      ASCII RACING GAME")
+    print("=" * 40)
+    print("\n🏎️  Welcome to ASCII Racing!")
+    print("\nHow to play:")
+    print("  - Use A/D or arrow keys to move left/right")
+    print("  - Avoid obstacles (#)")
+    print("  - Stay between the road barriers (|)")
+    print("  - Speed increases as you survive!")
+    print("  - Press Q to quit anytime")
+    
+    input("\nPress Enter to start your engines...")
+    
+    # Initialize game
+    track = create_empty_track()
+    car_x = TRACK_WIDTH // 2
+    difficulty = 1
+    frame_count = 0
+    
+    # Setup terminal for input
+    old_settings = setup_terminal()
+    
+    try:
+        # Main game loop
+        while not game_over:
+            # Scroll track upward
+            track.pop(0)
+            
+            # Add new row with obstacles
+            if frame_count % 2 == 0:  # Add obstacles every other frame
+                new_row = generate_obstacles(difficulty)
+            else:
+                new_row = [EMPTY] * TRACK_WIDTH
+                new_row[0] = "|"
+                new_row[TRACK_WIDTH - 1] = "|"
+            
+            track.append(new_row)
+            
+            # Draw game
+            draw_game(track, car_x, score, speed)
+            
+            # Get input
+            key = get_key_nonblocking()
+            
+            if key:
+                if key in ['a', '\x1b']:  # 'a' or arrow key sequence
+                    if key == '\x1b':
+                        # Read arrow key sequence
+                        next_key = get_key_nonblocking()
+                        if next_key == '[':
+                            arrow = get_key_nonblocking()
+                            if arrow == 'D':  # Left arrow
+                                key = 'a'
+                            elif arrow == 'C':  # Right arrow
+                                key = 'd'
+                    
+                    if key == 'a' and car_x > 1:
+                        car_x -= 1
+                
+                elif key == 'd' and car_x < TRACK_WIDTH - 2:
+                    car_x += 1
+                
+                elif key == 'q':
+                    print("\n\nThanks for playing!")
+                    break
+            
+            # Check collision
+            if check_collision(track, car_x):
+                game_over = True
+                draw_game(track, car_x, score, speed)
+                print("\n💥" * 10)
+                print("      CRASH! GAME OVER!")
+                print("💥" * 10)
+                print(f"\nFinal Score: {score}")
+                break
+            
+            # Check boundary collision
+            if car_x == 0 or car_x == TRACK_WIDTH - 1:
+                game_over = True
+                draw_game(track, car_x, score, speed)
+                print("\n🚧" * 10)
+                print("   HIT THE BARRIER! GAME OVER!")
+                print("🚧" * 10)
+                print(f"\nFinal Score: {score}")
+                break
+            
+            # Update game state
+            score += 1
+            frame_count += 1
+            
+            # Increase difficulty over time
+            if score % 50 == 0 and speed > 0.05:
+                speed -= 0.01
+                difficulty = min(difficulty + 1, 5)
+            
+            # Control game speed
+            time.sleep(speed)
+    
+    finally:
+        # Restore terminal settings
+        restore_terminal(old_settings)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print("\n\nGame interrupted. Thanks for playing!")
+    except Exception as e:
+        print(f"\nAn error occurred: {e}")
+        print("Thanks for playing!")`
   },
 
 
@@ -2238,7 +5995,7 @@ while True:
  if move=="a": player[0]-=1
  if move=="d": player[0]+=1
  asteroids=[a for a in asteroids if a!=player]`
-}
+},
 
 
   // Graphics & Art Category
