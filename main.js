@@ -1,6 +1,512 @@
 // Project data with 150+ Python projects
 const projects = [
-  // Games Category
+  // ASCII Art & Terminal Games Category
+  {
+    title: "ASCII Snake Game",
+    category: "ascii",
+    description: "Classic snake game rendered entirely in ASCII characters in the terminal.",
+    tags: ["console", "ascii-art", "terminal"],
+    difficulty: 2,
+    lines: "~120 lines",
+    code: `import random
+import time
+import os
+import sys
+
+# Snake game in ASCII
+WIDTH = 40
+HEIGHT = 20
+
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def print_board(snake, food):
+    clear_screen()
+    board = [[' ' for _ in range(WIDTH)] for _ in range(HEIGHT)]
+    
+    # Place food
+    board[food[1]][food[0]] = '●'
+    
+    # Place snake
+    for i, segment in enumerate(snake):
+        if i == 0:
+            board[segment[1]][segment[0]] = '◉'  # Head
+        else:
+            board[segment[1]][segment[0]] = '○'  # Body
+    
+    # Print border and board
+    print('╔' + '═' * WIDTH + '╗')
+    for row in board:
+        print('║' + ''.join(row) + '║')
+    print('╚' + '═' * WIDTH + '╝')
+    print(f'Score: {len(snake) - 3}')
+
+def main():
+    snake = [[20, 10], [19, 10], [18, 10]]
+    direction = [1, 0]
+    food = [random.randint(0, WIDTH-1), random.randint(0, HEIGHT-1)]
+    
+    while True:
+        print_board(snake, food)
+        
+        # Move snake
+        new_head = [snake[0][0] + direction[0], snake[0][1] + direction[1]]
+        
+        # Check collisions
+        if (new_head[0] < 0 or new_head[0] >= WIDTH or 
+            new_head[1] < 0 or new_head[1] >= HEIGHT or 
+            new_head in snake):
+            print("Game Over!")
+            break
+        
+        snake.insert(0, new_head)
+        
+        # Check if food eaten
+        if new_head == food:
+            food = [random.randint(0, WIDTH-1), random.randint(0, HEIGHT-1)]
+        else:
+            snake.pop()
+        
+        time.sleep(0.1)
+
+if __name__ == '__main__':
+    main()`
+  },
+  {
+    title: "ASCII Dungeon Crawler",
+    category: "ascii",
+    description: "Explore dungeons, fight monsters, and collect loot in ASCII graphics.",
+    tags: ["console", "ascii-art", "roguelike"],
+    difficulty: 4,
+    lines: "~500 lines"
+  },
+  {
+    title: "ASCII Chess",
+    category: "ascii",
+    description: "Full chess game with ASCII board and piece representation.",
+    tags: ["console", "ascii-art", "board-game"],
+    difficulty: 4,
+    lines: "~400 lines"
+  },
+  {
+    title: "ASCII Tetris",
+    category: "ascii",
+    description: "Tetris game using ASCII blocks in the terminal.",
+    tags: ["console", "ascii-art", "puzzle"],
+    difficulty: 3,
+    lines: "~250 lines"
+  },
+  {
+    title: "ASCII Pong",
+    category: "ascii",
+    description: "Two-player Pong rendered with ASCII characters.",
+    tags: ["console", "ascii-art", "arcade"],
+    difficulty: 2,
+    lines: "~150 lines"
+  },
+  {
+    title: "ASCII Art Portrait Generator",
+    category: "ascii",
+    description: "Convert photos into detailed ASCII art portraits.",
+    tags: ["PIL", "ascii-art", "image-processing"],
+    difficulty: 3,
+    lines: "~180 lines"
+  },
+  {
+    title: "ASCII Animation Player",
+    category: "ascii",
+    description: "Play ASCII art animations from text files with frame control.",
+    tags: ["console", "ascii-art", "animation"],
+    difficulty: 2,
+    lines: "~120 lines"
+  },
+  {
+    title: "ASCII Maze Game",
+    category: "ascii",
+    description: "Navigate through ASCII mazes with enemies and power-ups.",
+    tags: ["console", "ascii-art", "maze"],
+    difficulty: 3,
+    lines: "~300 lines"
+  },
+  {
+    title: "ASCII Space Invaders",
+    category: "ascii",
+    description: "Space shooter with ASCII aliens and player ship.",
+    tags: ["console", "ascii-art", "shooter"],
+    difficulty: 3,
+    lines: "~280 lines"
+  },
+  {
+    title: "ASCII Flappy Bird",
+    category: "ascii",
+    description: "Flappy Bird clone in the terminal with ASCII graphics.",
+    tags: ["console", "ascii-art", "arcade"],
+    difficulty: 2,
+    lines: "~180 lines"
+  },
+  {
+    title: "ASCII Text Banner Creator",
+    category: "ascii",
+    description: "Create large ASCII text banners with various fonts.",
+    tags: ["pyfiglet", "ascii-art", "text"],
+    difficulty: 1,
+    lines: "~60 lines"
+  },
+  {
+    title: "ASCII Breakout",
+    category: "ascii",
+    description: "Brick breaker game rendered in ASCII in the terminal.",
+    tags: ["console", "ascii-art", "arcade"],
+    difficulty: 3,
+    lines: "~220 lines"
+  },
+  {
+    title: "ASCII Tic Tac Toe",
+    category: "ascii",
+    description: "Simple tic tac toe with ASCII board and AI opponent.",
+    tags: ["console", "ascii-art", "board-game"],
+    difficulty: 2,
+    lines: "~100 lines",
+    code: `# ASCII Tic Tac Toe
+def print_board(board):
+    print("\\n")
+    print(f" {board[0]} | {board[1]} | {board[2]} ")
+    print("---|---|---")
+    print(f" {board[3]} | {board[4]} | {board[5]} ")
+    print("---|---|---")
+    print(f" {board[6]} | {board[7]} | {board[8]} ")
+    print("\\n")
+
+def check_winner(board, player):
+    wins = [[0,1,2], [3,4,5], [6,7,8], 
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]]
+    return any(all(board[i] == player for i in combo) for combo in wins)
+
+def main():
+    board = [str(i+1) for i in range(9)]
+    current_player = 'X'
+    
+    for turn in range(9):
+        print_board(board)
+        move = int(input(f"Player {current_player}, enter position (1-9): ")) - 1
+        
+        if 0 <= move < 9 and board[move] not in ['X', 'O']:
+            board[move] = current_player
+            if check_winner(board, current_player):
+                print_board(board)
+                print(f"Player {current_player} wins!")
+                return
+            current_player = 'O' if current_player == 'X' else 'X'
+        else:
+            print("Invalid move!")
+    
+    print_board(board)
+    print("It's a tie!")
+
+if __name__ == '__main__':
+    main()`
+  },
+  {
+    title: "ASCII Connect Four",
+    category: "ascii",
+    description: "Drop pieces in ASCII columns to connect four.",
+    tags: ["console", "ascii-art", "strategy"],
+    difficulty: 2,
+    lines: "~150 lines"
+  },
+  {
+    title: "ASCII Battleship",
+    category: "ascii",
+    description: "Naval combat game with ASCII grid and ships.",
+    tags: ["console", "ascii-art", "strategy"],
+    difficulty: 3,
+    lines: "~320 lines"
+  },
+  {
+    title: "ASCII Minesweeper",
+    category: "ascii",
+    description: "Classic minesweeper in the terminal with ASCII graphics.",
+    tags: ["console", "ascii-art", "puzzle"],
+    difficulty: 3,
+    lines: "~250 lines"
+  },
+  {
+    title: "ASCII Sudoku",
+    category: "ascii",
+    description: "Play and solve Sudoku puzzles in ASCII format.",
+    tags: ["console", "ascii-art", "puzzle"],
+    difficulty: 3,
+    lines: "~200 lines"
+  },
+  {
+    title: "ASCII RPG Battle System",
+    category: "ascii",
+    description: "Turn-based RPG combat with ASCII characters and monsters.",
+    tags: ["console", "ascii-art", "rpg"],
+    difficulty: 4,
+    lines: "~400 lines"
+  },
+  {
+    title: "ASCII Weather Display",
+    category: "ascii",
+    description: "Show weather conditions with ASCII art icons.",
+    tags: ["console", "ascii-art", "api"],
+    difficulty: 2,
+    lines: "~120 lines"
+  },
+  {
+    title: "ASCII Progress Bars",
+    category: "ascii",
+    description: "Create customizable progress bars with ASCII characters.",
+    tags: ["console", "ascii-art", "utility"],
+    difficulty: 1,
+    lines: "~80 lines"
+  },
+  {
+    title: "ASCII Hangman",
+    category: "ascii",
+    description: "Word guessing game with ASCII hangman drawings.",
+    tags: ["console", "ascii-art", "word-game"],
+    difficulty: 2,
+    lines: "~150 lines"
+  },
+  {
+    title: "ASCII Logo Designer",
+    category: "ascii",
+    description: "Design ASCII art logos with various tools and effects.",
+    tags: ["console", "ascii-art", "design"],
+    difficulty: 3,
+    lines: "~280 lines"
+  },
+  {
+    title: "ASCII Chart Plotter",
+    category: "ascii",
+    description: "Plot data as ASCII charts and graphs in terminal.",
+    tags: ["console", "ascii-art", "data-viz"],
+    difficulty: 2,
+    lines: "~180 lines"
+  },
+  {
+    title: "ASCII Fireworks",
+    category: "ascii",
+    description: "Animated fireworks display in ASCII art.",
+    tags: ["console", "ascii-art", "animation"],
+    difficulty: 3,
+    lines: "~200 lines"
+  },
+  {
+    title: "ASCII Racing Game",
+    category: "ascii",
+    description: "Top-down racing game with ASCII track and cars.",
+    tags: ["console", "ascii-art", "racing"],
+    difficulty: 3,
+    lines: "~280 lines"
+  },
+
+  // Turtle Graphics Category
+  {
+    title: "Turtle Race Simulator",
+    category: "turtle",
+    description: "Watch colorful turtles race across the screen.",
+    tags: ["turtle", "animation", "game"],
+    difficulty: 2,
+    lines: "~120 lines"
+  },
+  {
+    title: "Turtle Spirograph",
+    category: "turtle",
+    description: "Create mesmerizing spirograph patterns with turtle graphics.",
+    tags: ["turtle", "mathematics", "patterns"],
+    difficulty: 2,
+    lines: "~100 lines"
+  },
+  {
+    title: "Turtle Fractal Tree",
+    category: "turtle",
+    description: "Generate beautiful fractal trees with recursion.",
+    tags: ["turtle", "fractals", "recursion"],
+    difficulty: 3,
+    lines: "~80 lines"
+  },
+  {
+    title: "Turtle Mandala Creator",
+    category: "turtle",
+    description: "Draw intricate mandala patterns with symmetry.",
+    tags: ["turtle", "geometry", "patterns"],
+    difficulty: 3,
+    lines: "~150 lines"
+  },
+  {
+    title: "Turtle Snake Game",
+    category: "turtle",
+    description: "Classic snake game implemented with turtle graphics.",
+    tags: ["turtle", "game", "arcade"],
+    difficulty: 3,
+    lines: "~200 lines"
+  },
+  {
+    title: "Turtle Pong Game",
+    category: "turtle",
+    description: "Two-player pong using turtle graphics.",
+    tags: ["turtle", "game", "arcade"],
+    difficulty: 3,
+    lines: "~180 lines"
+  },
+  {
+    title: "Turtle Drawing App",
+    category: "turtle",
+    description: "Interactive drawing application with color picker.",
+    tags: ["turtle", "drawing", "interactive"],
+    difficulty: 2,
+    lines: "~150 lines"
+  },
+  {
+    title: "Turtle Clock",
+    category: "turtle",
+    description: "Animated analog clock with turtle graphics.",
+    tags: ["turtle", "animation", "time"],
+    difficulty: 3,
+    lines: "~200 lines"
+  },
+  {
+    title: "Turtle Maze Solver",
+    category: "turtle",
+    description: "Visualize maze solving algorithms with turtle.",
+    tags: ["turtle", "algorithms", "visualization"],
+    difficulty: 4,
+    lines: "~250 lines"
+  },
+  {
+    title: "Turtle Snowflake Generator",
+    category: "turtle",
+    description: "Generate unique snowflake patterns using turtle.",
+    tags: ["turtle", "fractals", "patterns"],
+    difficulty: 2,
+    lines: "~100 lines"
+  },
+  {
+    title: "Turtle Kaleidoscope",
+    category: "turtle",
+    description: "Create kaleidoscope effects with symmetrical patterns.",
+    tags: ["turtle", "symmetry", "art"],
+    difficulty: 3,
+    lines: "~180 lines"
+  },
+  {
+    title: "Turtle Polygon Designer",
+    category: "turtle",
+    description: "Draw and animate various polygon shapes.",
+    tags: ["turtle", "geometry", "shapes"],
+    difficulty: 2,
+    lines: "~120 lines"
+  },
+  {
+    title: "Turtle Tic Tac Toe",
+    category: "turtle",
+    description: "Play tic tac toe with turtle graphics interface.",
+    tags: ["turtle", "game", "board-game"],
+    difficulty: 3,
+    lines: "~220 lines"
+  },
+  {
+    title: "Turtle Star Patterns",
+    category: "turtle",
+    description: "Generate various star and polygon patterns.",
+    tags: ["turtle", "geometry", "patterns"],
+    difficulty: 2,
+    lines: "~100 lines"
+  },
+  {
+    title: "Turtle Circle Art",
+    category: "turtle",
+    description: "Create art with overlapping circles and arcs.",
+    tags: ["turtle", "art", "circles"],
+    difficulty: 2,
+    lines: "~130 lines"
+  },
+  {
+    title: "Turtle Bouncing Ball",
+    category: "turtle",
+    description: "Simulate physics with bouncing ball animation.",
+    tags: ["turtle", "physics", "animation"],
+    difficulty: 2,
+    lines: "~120 lines"
+  },
+  {
+    title: "Turtle Rainbow Spiral",
+    category: "turtle",
+    description: "Draw colorful spiral patterns with gradient colors.",
+    tags: ["turtle", "colors", "spirals"],
+    difficulty: 2,
+    lines: "~90 lines"
+  },
+  {
+    title: "Turtle Brick Breaker",
+    category: "turtle",
+    description: "Classic brick breaker game with turtle graphics.",
+    tags: ["turtle", "game", "arcade"],
+    difficulty: 4,
+    lines: "~300 lines"
+  },
+  {
+    title: "Turtle Fireworks",
+    category: "turtle",
+    description: "Animated fireworks display with particle effects.",
+    tags: ["turtle", "animation", "particles"],
+    difficulty: 3,
+    lines: "~200 lines"
+  },
+  {
+    title: "Turtle Sierpinski Triangle",
+    category: "turtle",
+    description: "Draw the famous Sierpinski triangle fractal.",
+    tags: ["turtle", "fractals", "mathematics"],
+    difficulty: 3,
+    lines: "~100 lines"
+  },
+  {
+    title: "Turtle Olympic Rings",
+    category: "turtle",
+    description: "Draw the Olympic rings with precise positioning.",
+    tags: ["turtle", "shapes", "art"],
+    difficulty: 2,
+    lines: "~80 lines"
+  },
+  {
+    title: "Turtle Chess Board",
+    category: "turtle",
+    description: "Draw a chess board with alternating colors.",
+    tags: ["turtle", "patterns", "grid"],
+    difficulty: 2,
+    lines: "~100 lines"
+  },
+  {
+    title: "Turtle Random Walk",
+    category: "turtle",
+    description: "Visualize random walk algorithms with turtle.",
+    tags: ["turtle", "random", "simulation"],
+    difficulty: 2,
+    lines: "~90 lines"
+  },
+  {
+    title: "Turtle Heart Shape",
+    category: "turtle",
+    description: "Draw a heart using mathematical curves.",
+    tags: ["turtle", "shapes", "mathematics"],
+    difficulty: 2,
+    lines: "~80 lines"
+  },
+  {
+    title: "Turtle Grid Pattern",
+    category: "turtle",
+    description: "Create various grid-based patterns and designs.",
+    tags: ["turtle", "patterns", "grid"],
+    difficulty: 2,
+    lines: "~110 lines"
+  },
+
+  // GUI/Pygame Games Category
   {
     title: "Snake Game",
     category: "games",
@@ -112,14 +618,6 @@ const projects = [
     tags: ["pygame", "memory", "card-game"],
     difficulty: 2,
     lines: "~200 lines"
-  },
-  {
-    title: "Hangman Game",
-    category: "games",
-    description: "Word guessing game with ASCII art and word categories.",
-    tags: ["console", "word-game", "ascii-art"],
-    difficulty: 2,
-    lines: "~150 lines"
   },
   {
     title: "Rock Paper Scissors",
@@ -1280,4 +1778,235 @@ const projects = [
     lines: "~300 lines"
   },
   {
-    title: "Fraction
+    title: "Fraction Calculator",
+    category: "educational",
+    description: "Perform operations on fractions with step-by-step explanations.",
+    tags: ["tkinter", "fractions", "math"],
+    difficulty: 2,
+    lines: "~180 lines"
+  },
+  {
+    title: "Drawing Tutor",
+    category: "educational",
+    description: "Learn to draw with guided tutorials and practice exercises.",
+    tags: ["pygame", "drawing", "tutorial"],
+    difficulty: 3,
+    lines: "~320 lines"
+  }
+];
+
+// Scroll function
+function scrollToProjects() {
+  document.getElementById('projects').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Render projects
+function renderProjects(projectsToRender) {
+  const grid = document.getElementById('projectsGrid');
+  grid.innerHTML = '';
+  
+  projectsToRender.forEach(project => {
+    const card = document.createElement('div');
+    card.className = 'project-card';
+    card.setAttribute('data-category', project.category);
+    
+    const difficultyDots = Array(5).fill(0).map((_, i) => 
+      `<span class="difficulty-dot ${i < project.difficulty ? 'active' : ''}"></span>`
+    ).join('');
+    
+    const tagsHTML = project.tags.map(tag => 
+      `<span class="project-tag">${tag}</span>`
+    ).join('');
+    
+    // Add click event to show code
+    const hasCode = project.code && project.code.trim().length > 0;
+    const codeIndicator = hasCode ? '<span class="code-available">📝 Code Available</span>' : '';
+    
+    card.innerHTML = `
+      <div class="project-header">
+        <h3 class="project-title">${project.title}</h3>
+        <span class="project-category">${project.category}</span>
+      </div>
+      <p class="project-description">${project.description}</p>
+      ${codeIndicator}
+      <div class="project-tags">${tagsHTML}</div>
+      <div class="project-footer">
+        <div class="project-difficulty">
+          <div class="difficulty-dots">${difficultyDots}</div>
+        </div>
+        <span class="project-lines">${project.lines}</span>
+      </div>
+    `;
+    
+    // Add click event to open modal
+    if (hasCode) {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', () => openModal(project));
+    }
+    
+    grid.appendChild(card);
+  });
+}
+
+// Modal functionality
+const modal = document.getElementById('codeModal');
+const closeBtn = document.querySelector('.close');
+const copyBtn = document.getElementById('copyBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+
+function openModal(project) {
+  const modalTitle = document.getElementById('modalTitle');
+  const codeContent = document.getElementById('codeContent');
+  
+  modalTitle.textContent = project.title;
+  codeContent.textContent = project.code || '# Code coming soon!';
+  
+  modal.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  
+  // Store current project for download
+  modal.currentProject = project;
+}
+
+function closeModal() {
+  modal.style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+
+// Close modal when clicking X
+closeBtn.onclick = closeModal;
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+  if (event.target == modal) {
+    closeModal();
+  }
+}
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape' && modal.style.display === 'block') {
+    closeModal();
+  }
+});
+
+// Copy code functionality
+copyBtn.onclick = function() {
+  const codeContent = document.getElementById('codeContent');
+  const text = codeContent.textContent;
+  
+  navigator.clipboard.writeText(text).then(() => {
+    // Show success message
+    const successMsg = document.createElement('div');
+    successMsg.className = 'copy-success';
+    successMsg.textContent = '✓ Code copied to clipboard!';
+    document.body.appendChild(successMsg);
+    
+    setTimeout(() => {
+      successMsg.remove();
+    }, 2000);
+    
+    // Animate button
+    copyBtn.innerHTML = '<span class="btn-icon">✓</span> Copied!';
+    setTimeout(() => {
+      copyBtn.innerHTML = '<span class="btn-icon">📋</span> Copy Code';
+    }, 2000);
+  });
+}
+
+// Download code functionality
+downloadBtn.onclick = function() {
+  const project = modal.currentProject;
+  const code = project.code;
+  const filename = project.title.toLowerCase().replace(/\s+/g, '_') + '.py';
+  
+  const blob = new Blob([code], { type: 'text/plain' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  document.body.removeChild(a);
+  
+  // Animate button
+  downloadBtn.innerHTML = '<span class="btn-icon">✓</span> Downloaded!';
+  setTimeout(() => {
+    downloadBtn.innerHTML = '<span class="btn-icon">⬇️</span> Download';
+  }, 2000);
+}
+
+// Filter functionality
+const filterButtons = document.querySelectorAll('.filter-btn');
+filterButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    const category = btn.getAttribute('data-category');
+    const filteredProjects = category === 'all' 
+      ? projects 
+      : projects.filter(p => p.category === category);
+    
+    renderProjects(filteredProjects);
+  });
+});
+
+// Search functionality
+const searchInput = document.getElementById('searchInput');
+searchInput.addEventListener('input', (e) => {
+  const searchTerm = e.target.value.toLowerCase();
+  const activeCategory = document.querySelector('.filter-btn.active').getAttribute('data-category');
+  
+  let filteredProjects = activeCategory === 'all' 
+    ? projects 
+    : projects.filter(p => p.category === activeCategory);
+  
+  if (searchTerm) {
+    filteredProjects = filteredProjects.filter(p => 
+      p.title.toLowerCase().includes(searchTerm) ||
+      p.description.toLowerCase().includes(searchTerm) ||
+      p.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+    );
+  }
+  
+  renderProjects(filteredProjects);
+});
+
+// Navigation
+const navLinks = document.querySelectorAll('.nav-link');
+navLinks.forEach(link => {
+  link.addEventListener('click', (e) => {
+    e.preventDefault();
+    navLinks.forEach(l => l.classList.remove('active'));
+    link.classList.add('active');
+    
+    const target = link.getAttribute('href');
+    document.querySelector(target).scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+// Smooth scroll spy for navigation
+window.addEventListener('scroll', () => {
+  const sections = document.querySelectorAll('section[id]');
+  const scrollY = window.pageYOffset;
+  
+  sections.forEach(section => {
+    const sectionHeight = section.offsetHeight;
+    const sectionTop = section.offsetTop - 100;
+    const sectionId = section.getAttribute('id');
+    
+    if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${sectionId}`) {
+          link.classList.add('active');
+        }
+      });
+    }
+  });
+});
+
+// Initial render
+renderProjects(projects);
