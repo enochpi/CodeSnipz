@@ -20,10 +20,18 @@
   </nav>
 
   <section class="contact-section">
-    <div class="container">
+    <div class="contact-container">
       <h1>Contact Me</h1>
-      <p>If you have questions, ideas, or collab requests, you can reach me at:</p>
-      <p>📧 Email: <a href="mailto:enoch@codesnipz.com">enoch@codesnipz.com</a></p>
+      <p>Have questions, ideas, or collabs? Send me a message below:</p>
+
+      <form id="contactForm">
+        <input type="text" id="name" placeholder="Your Name" required>
+        <input type="email" id="email" placeholder="Your Email" required>
+        <textarea id="message" placeholder="Your Message" required></textarea>
+        <button type="submit">Send Message</button>
+      </form>
+      
+      <p id="formMessage" class="form-message"></p>
     </div>
   </section>
 
@@ -34,5 +42,18 @@
       <a href="../index.html">Back to Home</a>
     </div>
   </footer>
+
+  <script>
+    const form = document.getElementById('contactForm');
+    const formMessage = document.getElementById('formMessage');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      // Here you would send data to a backend, for now just simulate
+      formMessage.textContent = "Thanks! Your message has been submitted.";
+      formMessage.style.color = "#4caf50";
+      form.reset();
+    });
+  </script>
 </body>
 </html>
