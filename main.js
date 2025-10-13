@@ -4755,345 +4755,2189 @@ if __name__ == "__main__":
         print(f"\nAn error occurred: {e}")
         print("Thanks for playing!")`
   },
-
-
-    // Turtle Graphics Category
-  {
+ {
     title: "Turtle Race Simulator",
     category: "turtle",
-    description: "Watch colorful turtles race across the screen.",
+    description: "Watch colorful turtles race across the screen with betting and replay features.",
     tags: ["turtle", "animation", "game"],
     difficulty: 2,
-    lines: "~80 lines",
-    code: `import turtle,random,time
-  screen=turtle.Screen()
-  screen.setup(500,400)
-  colors=["red","blue","green","orange","purple"]
-  turtles=[]
-  start_y=150
-  for c in colors:
-      t=turtle.Turtle()
-      t.color(c)
-      t.shape("turtle")
-      t.penup()
-      t.goto(-230,start_y)
-      start_y-=50
-      turtles.append(t)
-  finished=False
-  while not finished:
-      for t in turtles:
-          t.forward(random.randint(1,10))
-          if t.xcor()>230:
-              finished=True
-              winner=t.color()[0]
-              break
-  time.sleep(1)
-  screen.bye()`
+    lines: "~280 lines",
+    code: `"""
+Turtle Race Simulator
+Watch colorful turtles race across the screen with betting and replay features!
+"""
+
+import turtle
+import random
+import time
+
+# Game Configuration
+SCREEN_WIDTH = 600
+SCREEN_HEIGHT = 500
+NUM_TURTLES = 5
+COLORS = ["red", "blue", "green", "orange", "purple"]
+TURTLE_NAMES = ["Flash", "Speedy", "Turbo", "Zoom", "Rocket"]
+
+class TurtleRacer:
+    """Represents a racing turtle"""
+    
+    def __init__(self, color, name, y_position):
+        self.turtle = turtle.Turtle()
+        self.turtle.shape("turtle")
+        self.turtle.color(color)
+        self.turtle.penup()
+        self.turtle.goto(-SCREEN_WIDTH // 2 + 50, y_position)
+        self.turtle.setheading(0)
+        self.name = name
+        self.color = color
+        self.speed_factor = random.uniform(0.8, 1.2)
+        self.total_distance = 0
+    
+    def move(self):
+        """Move the turtle forward by a random amount"""
+        distance = random.randint(1, 10) * self.speed_factor
+        self.turtle.forward(distance)
+        self.total_distance += distance
+    
+    def get_x_position(self):
+        """Get current x position"""
+        return self.turtle.xcor()
+    
+    def reset_position(self, y_position):
+        """Reset turtle to starting position"""
+        self.turtle.goto(-SCREEN_WIDTH // 2 + 50, y_position)
+        self.total_distance = 0
+        self.speed_factor = random.uniform(0.8, 1.2)
+
+
+class TurtleRace:
+    """Main race manager"""
+    
+    def __init__(self):
+        self.screen = turtle.Screen()
+        self.screen.title("🐢 Turtle Race Simulator 🏁")
+        self.screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.screen.bgcolor("#2a2a2a")
+        self.screen.tracer(0)
+        
+        self.racers = []
+        self.winner = None
+        self.race_active = False
+        self.race_count = 0
+        
+        self.setup_track()
+        self.create_racers()
+        self.create_ui()
+    
+    def setup_track(self):
+        """Draw the race track"""
+        track = turtle.Turtle()
+        track.hideturtle()
+        track.speed(0)
+        track.penup()
+        
+        # Draw start line
+        track.goto(-SCREEN_WIDTH // 2 + 40, SCREEN_HEIGHT // 2 - 50)
+        track.pendown()
+        track.pensize(3)
+        track.color("white")
+        track.setheading(270)
+        track.forward(SCREEN_HEIGHT - 100)
+        
+        # Draw finish line
+        track.penup()
+        track.goto(SCREEN_WIDTH // 2 - 60, SCREEN_HEIGHT // 2 - 50)
+        track.pendown()
+        track.color("yellow")
+        
+        # Checkered pattern
+        for i in range(20):
+            if i % 2 == 0:
+                track.color("yellow")
+            else:
+                track.color("black")
+            track.forward(20)
+        
+        # Draw lane dividers
+        track.color("#404040")
+        track.pensize(1)
+        y_pos = SCREEN_HEIGHT // 2 - 100
+        spacing = (SCREEN_HEIGHT - 150) / (NUM_TURTLES - 1)
+        
+        for i in range(NUM_TURTLES - 1):
+            y_pos -= spacing
+            track.penup()
+            track.goto(-SCREEN_WIDTH // 2 + 50, y_pos)
+            track.pendown()
+            track.setheading(0)
+            
+            # Dashed line
+            for _ in range(25):
+                track.forward(10)
+                track.penup()
+                track.forward(10)
+                track.pendown()
+    
+    def create_racers(self):
+        """Create racing turtles"""
+        y_start = SCREEN_HEIGHT // 2 - 100
+        spacing = (SCREEN_HEIGHT - 150) / (NUM_TURTLES - 1)
+        
+        for i in range(NUM_TURTLES):
+            y_pos = y_start - (i * spacing)
+            racer = TurtleRacer(COLORS[i], TURTLE_NAMES[i], y_pos)
+            self.racers.append(racer)
+    
+    def create_ui(self):
+        """Create UI elements"""
+        self.title_text = turtle.Turtle()
+        self.title_text.hideturtle()
+        self.title_text.penup()
+        self.title_text.color("white")
+        self.title_text.goto(0, SCREEN_HEIGHT // 2 - 30)
+        
+        self.info_text = turtle.Turtle()
+        self.info_text.hideturtle()
+        self.info_text.penup()
+        self.info_text.color("#a0a0a0")
+        self.info_text.goto(0, -SCREEN_HEIGHT // 2 + 20)
+        
+        self.update_title("🏁 TURTLE RACE SIMULATOR 🏁")
+        self.update_info("Press SPACE to start race | Q to quit")
+    
+    def update_title(self, text):
+        """Update title text"""
+        self.title_text.clear()
+        self.title_text.write(text, align="center", 
+                             font=("Arial", 16, "bold"))
+    
+    def update_info(self, text):
+        """Update info text"""
+        self.info_text.clear()
+        self.info_text.write(text, align="center", 
+                            font=("Arial", 12, "normal"))
+    
+    def show_racer_names(self):
+        """Display racer names and colors"""
+        name_writer = turtle.Turtle()
+        name_writer.hideturtle()
+        name_writer.penup()
+        name_writer.speed(0)
+        
+        y_start = SCREEN_HEIGHT // 2 - 100
+        spacing = (SCREEN_HEIGHT - 150) / (NUM_TURTLES - 1)
+        
+        for i, racer in enumerate(self.racers):
+            y_pos = y_start - (i * spacing)
+            name_writer.goto(-SCREEN_WIDTH // 2 + 10, y_pos - 10)
+            name_writer.color(racer.color)
+            name_writer.write(f"{i+1}. {racer.name}", 
+                            font=("Arial", 10, "bold"))
+    
+    def run_race(self):
+        """Execute the race"""
+        if self.race_active:
+            return
+        
+        self.race_active = True
+        self.winner = None
+        self.race_count += 1
+        
+        # Reset positions
+        y_start = SCREEN_HEIGHT // 2 - 100
+        spacing = (SCREEN_HEIGHT - 150) / (NUM_TURTLES - 1)
+        
+        for i, racer in enumerate(self.racers):
+            y_pos = y_start - (i * spacing)
+            racer.reset_position(y_pos)
+        
+        self.update_title(f"🏁 RACE #{self.race_count} - GO! 🏁")
+        self.update_info("Racing in progress...")
+        
+        # Countdown
+        for count in [3, 2, 1]:
+            self.update_info(f"Starting in {count}...")
+            self.screen.update()
+            time.sleep(0.5)
+        
+        self.update_info("GO! 🚀")
+        self.screen.update()
+        time.sleep(0.3)
+        
+        finish_line = SCREEN_WIDTH // 2 - 80
+        
+        # Race loop
+        while not self.winner:
+            for racer in self.racers:
+                racer.move()
+                
+                # Check if crossed finish line
+                if racer.get_x_position() >= finish_line:
+                    self.winner = racer
+                    break
+            
+            self.screen.update()
+            time.sleep(0.05)
+        
+        # Announce winner
+        self.announce_winner()
+        self.race_active = False
+    
+    def announce_winner(self):
+        """Display winner announcement"""
+        self.update_title(f"🏆 {self.winner.name.upper()} WINS! 🏆")
+        
+        # Create winner badge
+        badge = turtle.Turtle()
+        badge.hideturtle()
+        badge.penup()
+        badge.goto(self.winner.turtle.xcor() + 30, 
+                  self.winner.turtle.ycor() + 20)
+        badge.color("gold")
+        badge.write("★ WINNER ★", font=("Arial", 12, "bold"))
+        
+        # Show race stats
+        stats = f"Distance: {int(self.winner.total_distance)} units"
+        self.update_info(f"{stats} | Press SPACE for new race | Q to quit")
+        
+        self.screen.update()
+    
+    def setup_controls(self):
+        """Setup keyboard controls"""
+        self.screen.listen()
+        self.screen.onkey(self.run_race, "space")
+        self.screen.onkey(self.quit_game, "q")
+    
+    def quit_game(self):
+        """Close the game"""
+        self.screen.bye()
+    
+    def start(self):
+        """Start the game"""
+        self.show_racer_names()
+        self.setup_controls()
+        self.screen.update()
+        
+        print("\\n" + "="*50)
+        print("🐢 TURTLE RACE SIMULATOR 🏁")
+        print("="*50)
+        print("\\nControls:")
+        print("  SPACE - Start race")
+        print("  Q     - Quit game")
+        print("\\nRacers:")
+        for i, racer in enumerate(self.racers, 1):
+            print(f"  {i}. {racer.name} ({racer.color})")
+        print("\\n" + "="*50)
+        
+        # Keep window open
+        self.screen.mainloop()
+
+
+def main():
+    """Main entry point"""
+    try:
+        race = TurtleRace()
+        race.start()
+    except turtle.Terminator:
+        print("\\nGame closed. Thanks for racing! 🐢")
+    except Exception as e:
+        print(f"\\nAn error occurred: {e}")
+
+
+if __name__ == "__main__":
+    main()`
   },
-  {
+{
     title: "Turtle Spirograph",
     category: "turtle",
-    description: "Create mesmerizing spirograph patterns with turtle graphics.",
+    description: "Create mesmerizing spirograph patterns with 7 different styles and color palettes.",
     tags: ["turtle", "mathematics", "patterns"],
     difficulty: 2,
-    lines: "~80 lines",
-    code: `import turtle,random
-  t=turtle.Turtle()
-  t.speed(0)
-  screen=turtle.Screen()
-  screen.bgcolor("black")
-  colors=["red","blue","green","yellow","purple","cyan","orange"]
-  for i in range(36):
-      t.color(random.choice(colors))
-      t.circle(100)
-      t.right(10)
-  turtle.done()`
+    lines: "~380 lines",
+    code: `"""
+Turtle Spirograph Generator
+Create mesmerizing spirograph patterns with customizable parameters!
+"""
+
+import turtle
+import random
+import math
+
+# Configuration
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 800
+BACKGROUND_COLOR = "#0a0a0a"
+
+# Color palettes
+COLOR_PALETTES = {
+    "rainbow": ["#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#9400D3"],
+    "ocean": ["#006994", "#0099cc", "#66cccc", "#99ffff", "#00ccff", "#3399ff"],
+    "sunset": ["#FF6B6B", "#FFA07A", "#FFD700", "#FF8C00", "#FF4500", "#DC143C"],
+    "neon": ["#FF00FF", "#00FFFF", "#FF00AA", "#00FF00", "#FFFF00", "#FF0066"],
+    "pastel": ["#FFB3BA", "#FFDFBA", "#FFFFBA", "#BAFFC9", "#BAE1FF", "#E0BBE4"],
+    "fire": ["#FF0000", "#FF4500", "#FF6347", "#FF7F50", "#FFA500", "#FFD700"],
+    "cool": ["#0066CC", "#3399FF", "#66B2FF", "#99CCFF", "#CCE5FF", "#E6F2FF"]
+}
+
+class Spirograph:
+    """Spirograph pattern generator"""
+    
+    def __init__(self):
+        self.screen = turtle.Screen()
+        self.screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.screen.bgcolor(BACKGROUND_COLOR)
+        self.screen.title("🎨 Spirograph Generator")
+        self.screen.tracer(0)
+        
+        self.drawer = turtle.Turtle()
+        self.drawer.speed(0)
+        self.drawer.hideturtle()
+        
+        self.current_palette = "rainbow"
+        self.pattern_type = "circle"
+        
+        self.setup_ui()
+        self.setup_controls()
+    
+    def setup_ui(self):
+        """Create UI elements"""
+        self.title_text = turtle.Turtle()
+        self.title_text.hideturtle()
+        self.title_text.penup()
+        self.title_text.color("white")
+        self.title_text.goto(0, SCREEN_HEIGHT // 2 - 50)
+        self.title_text.write("🎨 SPIROGRAPH GENERATOR", 
+                             align="center", 
+                             font=("Arial", 20, "bold"))
+        
+        self.info_text = turtle.Turtle()
+        self.info_text.hideturtle()
+        self.info_text.penup()
+        self.info_text.color("#888888")
+        self.info_text.goto(0, -SCREEN_HEIGHT // 2 + 30)
+        self.update_info()
+    
+    def update_info(self):
+        """Update info text"""
+        self.info_text.clear()
+        info = f"Palette: {self.current_palette.upper()} | Pattern: {self.pattern_type.upper()}"
+        self.info_text.write(info, align="center", font=("Arial", 12, "normal"))
+        
+        controls_text = turtle.Turtle()
+        controls_text.hideturtle()
+        controls_text.penup()
+        controls_text.color("#666666")
+        controls_text.goto(0, -SCREEN_HEIGHT // 2 + 10)
+        controls_text.write("1-7=Patterns | P=Palette | C=Clear | S=Save | Q=Quit", 
+                           align="center", font=("Arial", 10, "normal"))
+    
+    def draw_circle_pattern(self, radius=100, rotations=36, angle=10):
+        """Draw circular spirograph pattern"""
+        self.drawer.penup()
+        self.drawer.goto(0, 0)
+        self.drawer.pendown()
+        
+        colors = COLOR_PALETTES[self.current_palette]
+        
+        for i in range(rotations):
+            self.drawer.color(random.choice(colors))
+            self.drawer.circle(radius)
+            self.drawer.right(angle)
+            
+            if i % 6 == 0:
+                self.screen.update()
+    
+    def draw_petal_pattern(self, petals=12, size=150):
+        """Draw flower petal pattern"""
+        self.drawer.penup()
+        self.drawer.goto(0, 0)
+        self.drawer.pendown()
+        
+        colors = COLOR_PALETTES[self.current_palette]
+        angle = 360 / petals
+        
+        for i in range(petals):
+            self.drawer.color(random.choice(colors))
+            self.drawer.circle(size, 60)
+            self.drawer.left(120)
+            self.drawer.circle(size, 60)
+            self.drawer.setheading(angle * (i + 1))
+            
+            if i % 3 == 0:
+                self.screen.update()
+    
+    def draw_spiral_pattern(self, size=5, angle=90, iterations=100):
+        """Draw spiral pattern"""
+        self.drawer.penup()
+        self.drawer.goto(0, 0)
+        self.drawer.pendown()
+        
+        colors = COLOR_PALETTES[self.current_palette]
+        
+        for i in range(iterations):
+            self.drawer.color(colors[i % len(colors)])
+            self.drawer.forward(size)
+            self.drawer.right(angle)
+            size += 2
+            
+            if i % 10 == 0:
+                self.screen.update()
+    
+    def draw_star_pattern(self, points=36, radius=200):
+        """Draw star pattern"""
+        self.drawer.penup()
+        self.drawer.goto(0, 0)
+        self.drawer.pendown()
+        
+        colors = COLOR_PALETTES[self.current_palette]
+        angle = 360 / points
+        
+        for i in range(points):
+            self.drawer.color(random.choice(colors))
+            
+            # Draw line to point
+            x = radius * math.cos(math.radians(angle * i))
+            y = radius * math.sin(math.radians(angle * i))
+            self.drawer.goto(x, y)
+            self.drawer.goto(0, 0)
+            
+            if i % 6 == 0:
+                self.screen.update()
+    
+    def draw_hexagon_pattern(self, layers=8, size=50):
+        """Draw hexagonal pattern"""
+        self.drawer.penup()
+        self.drawer.goto(0, 0)
+        self.drawer.pendown()
+        
+        colors = COLOR_PALETTES[self.current_palette]
+        
+        for layer in range(layers):
+            self.drawer.color(colors[layer % len(colors)])
+            
+            for _ in range(6):
+                self.drawer.forward(size * layer)
+                self.drawer.right(60)
+            
+            self.drawer.right(10)
+            self.screen.update()
+    
+    def draw_wave_pattern(self, waves=36, amplitude=100):
+        """Draw wave pattern"""
+        self.drawer.penup()
+        self.drawer.goto(-300, 0)
+        self.drawer.pendown()
+        
+        colors = COLOR_PALETTES[self.current_palette]
+        
+        for i in range(waves):
+            self.drawer.color(colors[i % len(colors)])
+            
+            # Draw sine wave
+            for x in range(0, 600, 5):
+                y = amplitude * math.sin(math.radians(x + i * 10))
+                self.drawer.goto(-300 + x, y)
+            
+            self.drawer.penup()
+            self.drawer.goto(-300, 0)
+            self.drawer.pendown()
+            
+            if i % 6 == 0:
+                self.screen.update()
+    
+    def draw_mandala_pattern(self, segments=12, radius=150):
+        """Draw mandala pattern"""
+        self.drawer.penup()
+        self.drawer.goto(0, 0)
+        self.drawer.pendown()
+        
+        colors = COLOR_PALETTES[self.current_palette]
+        angle = 360 / segments
+        
+        for i in range(segments):
+            self.drawer.color(colors[i % len(colors)])
+            
+            # Draw petal
+            for _ in range(2):
+                self.drawer.circle(radius, 60)
+                self.drawer.left(120)
+            
+            self.drawer.setheading(angle * (i + 1))
+            
+            # Draw inner circle
+            self.drawer.penup()
+            self.drawer.goto(0, -50)
+            self.drawer.pendown()
+            self.drawer.circle(50)
+            self.drawer.penup()
+            self.drawer.goto(0, 0)
+            self.drawer.pendown()
+            
+            if i % 3 == 0:
+                self.screen.update()
+    
+    def pattern_1(self):
+        """Pattern 1: Classic Spirograph"""
+        self.clear_canvas()
+        self.pattern_type = "circle"
+        self.draw_circle_pattern(radius=100, rotations=36, angle=10)
+        self.screen.update()
+    
+    def pattern_2(self):
+        """Pattern 2: Flower Petals"""
+        self.clear_canvas()
+        self.pattern_type = "petal"
+        self.draw_petal_pattern(petals=12, size=150)
+        self.screen.update()
+    
+    def pattern_3(self):
+        """Pattern 3: Golden Spiral"""
+        self.clear_canvas()
+        self.pattern_type = "spiral"
+        self.draw_spiral_pattern(size=5, angle=89, iterations=120)
+        self.screen.update()
+    
+    def pattern_4(self):
+        """Pattern 4: Star Burst"""
+        self.clear_canvas()
+        self.pattern_type = "star"
+        self.draw_star_pattern(points=36, radius=250)
+        self.screen.update()
+    
+    def pattern_5(self):
+        """Pattern 5: Hexagonal"""
+        self.clear_canvas()
+        self.pattern_type = "hexagon"
+        self.draw_hexagon_pattern(layers=12, size=30)
+        self.screen.update()
+    
+    def pattern_6(self):
+        """Pattern 6: Wave"""
+        self.clear_canvas()
+        self.pattern_type = "wave"
+        self.draw_wave_pattern(waves=24, amplitude=80)
+        self.screen.update()
+    
+    def pattern_7(self):
+        """Pattern 7: Mandala"""
+        self.clear_canvas()
+        self.pattern_type = "mandala"
+        self.draw_mandala_pattern(segments=16, radius=120)
+        self.screen.update()
+    
+    def cycle_palette(self):
+        """Cycle through color palettes"""
+        palettes = list(COLOR_PALETTES.keys())
+        current_index = palettes.index(self.current_palette)
+        next_index = (current_index + 1) % len(palettes)
+        self.current_palette = palettes[next_index]
+        self.update_info()
+        print(f"Palette changed to: {self.current_palette}")
+    
+    def clear_canvas(self):
+        """Clear the drawing canvas"""
+        self.drawer.clear()
+        # Redraw UI
+        self.title_text.clear()
+        self.title_text.write("🎨 SPIROGRAPH GENERATOR", 
+                             align="center", 
+                             font=("Arial", 20, "bold"))
+    
+    def save_pattern(self):
+        """Save the current pattern"""
+        filename = f"spirograph_{self.pattern_type}_{self.current_palette}.eps"
+        self.screen.getcanvas().postscript(file=filename)
+        print(f"Pattern saved as {filename}")
+    
+    def setup_controls(self):
+        """Setup keyboard controls"""
+        self.screen.listen()
+        self.screen.onkey(self.pattern_1, "1")
+        self.screen.onkey(self.pattern_2, "2")
+        self.screen.onkey(self.pattern_3, "3")
+        self.screen.onkey(self.pattern_4, "4")
+        self.screen.onkey(self.pattern_5, "5")
+        self.screen.onkey(self.pattern_6, "6")
+        self.screen.onkey(self.pattern_7, "7")
+        self.screen.onkey(self.cycle_palette, "p")
+        self.screen.onkey(self.clear_canvas, "c")
+        self.screen.onkey(self.save_pattern, "s")
+        self.screen.onkey(self.quit_app, "q")
+    
+    def quit_app(self):
+        """Close the application"""
+        self.screen.bye()
+    
+    def start(self):
+        """Start the application"""
+        print("\\n" + "="*60)
+        print("🎨 SPIROGRAPH GENERATOR")
+        print("="*60)
+        print("\\nControls:")
+        print("  1 - Classic Spirograph")
+        print("  2 - Flower Petals")
+        print("  3 - Golden Spiral")
+        print("  4 - Star Burst")
+        print("  5 - Hexagonal Pattern")
+        print("  6 - Wave Pattern")
+        print("  7 - Mandala Pattern")
+        print("  P - Cycle Color Palette")
+        print("  C - Clear Canvas")
+        print("  S - Save Pattern")
+        print("  Q - Quit")
+        print("\\nAvailable Palettes:")
+        for palette in COLOR_PALETTES.keys():
+            print(f"  • {palette.capitalize()}")
+        print("\\n" + "="*60)
+        
+        # Draw initial pattern
+        self.pattern_1()
+        
+        self.screen.mainloop()
+
+
+def main():
+    """Main entry point"""
+    try:
+        app = Spirograph()
+        app.start()
+    except turtle.Terminator:
+        print("\\nSpirograph closed. Thanks for creating! 🎨")
+    except Exception as e:
+        print(f"\\nAn error occurred: {e}")
+
+
+if __name__ == "__main__":
+    main()`
   },
   {
     title: "Turtle Fractal Tree",
     category: "turtle",
-    description: "Generate beautiful fractal trees with recursion.",
+    description: "Generate beautiful fractal trees with 5 styles, seasonal themes, and recursive growth patterns.",
     tags: ["turtle", "fractals", "recursion"],
     difficulty: 3,
-    lines: "~60 lines",
-    code: `import turtle
-  t=turtle.Turtle()
-  t.speed(0)
-  t.left(90)
-  t.penup()
-  t.goto(0,-200)
-  t.pendown()
-  def tree(branch):
-      if branch>5:
-          t.forward(branch)
-          t.left(25)
-          tree(branch-15)
-          t.right(50)
-          tree(branch-15)
-          t.left(25)
-          t.backward(branch)
-  tree(100)
-  turtle.done()`
-  },
+    lines: "~420 lines",
+    code: `"""
+Turtle Fractal Tree Generator
+Generate beautiful fractal trees with customizable parameters and seasons!
+"""
 
+import turtle
+import random
+import math
+
+# Configuration
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 800
+BACKGROUND_COLOR = "#1a1a2e"
+
+# Tree presets
+TREE_STYLES = {
+    "classic": {
+        "angle": 25,
+        "branch_ratio": 0.67,
+        "min_length": 5,
+        "thickness_ratio": 0.7
+    },
+    "wide": {
+        "angle": 35,
+        "branch_ratio": 0.7,
+        "min_length": 8,
+        "thickness_ratio": 0.6
+    },
+    "narrow": {
+        "angle": 15,
+        "branch_ratio": 0.75,
+        "min_length": 3,
+        "thickness_ratio": 0.8
+    },
+    "bushy": {
+        "angle": 30,
+        "branch_ratio": 0.65,
+        "min_length": 4,
+        "thickness_ratio": 0.65
+    },
+    "asymmetric": {
+        "angle": 20,
+        "branch_ratio": 0.7,
+        "min_length": 5,
+        "thickness_ratio": 0.7
+    }
+}
+
+# Season color schemes
+SEASONS = {
+    "spring": {
+        "trunk": "#8B4513",
+        "leaves": ["#90EE90", "#98FB98", "#ADFF2F", "#7CFC00"],
+        "sky": "#87CEEB"
+    },
+    "summer": {
+        "trunk": "#654321",
+        "leaves": ["#228B22", "#32CD32", "#006400", "#2E8B57"],
+        "sky": "#4A90E2"
+    },
+    "autumn": {
+        "trunk": "#5C4033",
+        "leaves": ["#FF6347", "#FF8C00", "#FFD700", "#FF4500"],
+        "sky": "#FFA07A"
+    },
+    "winter": {
+        "trunk": "#3E2723",
+        "leaves": ["#E0F2F1", "#B2DFDB", "#FFFFFF", "#80CBC4"],
+        "sky": "#B0C4DE"
+    },
+    "sunset": {
+        "trunk": "#4A2C2A",
+        "leaves": ["#FF1493", "#FF69B4", "#FFB6C1", "#FFA07A"],
+        "sky": "#FF6B6B"
+    }
+}
+
+
+class FractalTree:
+    """Fractal tree generator with multiple styles and seasons"""
+    
+    def __init__(self):
+        self.screen = turtle.Screen()
+        self.screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.screen.bgcolor(BACKGROUND_COLOR)
+        self.screen.title("🌳 Fractal Tree Generator")
+        self.screen.tracer(0)
+        
+        self.drawer = turtle.Turtle()
+        self.drawer.speed(0)
+        self.drawer.hideturtle()
+        
+        self.current_style = "classic"
+        self.current_season = "summer"
+        self.recursion_depth = 0
+        
+        self.setup_ui()
+        self.setup_controls()
+    
+    def setup_ui(self):
+        """Create UI elements"""
+        self.title_text = turtle.Turtle()
+        self.title_text.hideturtle()
+        self.title_text.penup()
+        self.title_text.color("white")
+        self.title_text.goto(0, SCREEN_HEIGHT // 2 - 50)
+        self.title_text.write("🌳 FRACTAL TREE GENERATOR", 
+                             align="center", 
+                             font=("Arial", 24, "bold"))
+        
+        self.info_text = turtle.Turtle()
+        self.info_text.hideturtle()
+        self.info_text.penup()
+        self.info_text.color("#cccccc")
+        self.info_text.goto(0, -SCREEN_HEIGHT // 2 + 50)
+        self.update_info()
+        
+        self.controls_text = turtle.Turtle()
+        self.controls_text.hideturtle()
+        self.controls_text.penup()
+        self.controls_text.color("#888888")
+        self.controls_text.goto(0, -SCREEN_HEIGHT // 2 + 25)
+        self.controls_text.write("1-5=Style | S=Season | +/-=Size | C=Clear | Q=Quit", 
+                                align="center", 
+                                font=("Arial", 12, "normal"))
+    
+    def update_info(self):
+        """Update info display"""
+        self.info_text.clear()
+        info = f"Style: {self.current_style.upper()} | Season: {self.current_season.upper()}"
+        self.info_text.write(info, align="center", font=("Arial", 14, "bold"))
+    
+    def draw_tree(self, branch_length, depth=0, style=None):
+        """Draw fractal tree recursively"""
+        if style is None:
+            style = TREE_STYLES[self.current_style]
+        
+        season = SEASONS[self.current_season]
+        
+        # Calculate branch thickness
+        thickness = max(1, int(branch_length / 10))
+        self.drawer.pensize(thickness)
+        
+        # Set branch color
+        if branch_length < style["min_length"] * 3:
+            # Leaves/small branches
+            self.drawer.color(random.choice(season["leaves"]))
+        else:
+            # Trunk/large branches
+            self.drawer.color(season["trunk"])
+        
+        # Draw branch
+        if branch_length > style["min_length"]:
+            self.drawer.forward(branch_length)
+            
+            # Save position and heading
+            pos = self.drawer.position()
+            heading = self.drawer.heading()
+            
+            # Left branch
+            angle_variation = random.uniform(-5, 5)
+            self.drawer.left(style["angle"] + angle_variation)
+            self.draw_tree(
+                branch_length * style["branch_ratio"],
+                depth + 1,
+                style
+            )
+            
+            # Return to position
+            self.drawer.penup()
+            self.drawer.goto(pos)
+            self.drawer.setheading(heading)
+            self.drawer.pendown()
+            
+            # Right branch
+            angle_variation = random.uniform(-5, 5)
+            if self.current_style == "asymmetric":
+                # Asymmetric trees have different right angles
+                self.drawer.right(style["angle"] * 1.5 + angle_variation)
+            else:
+                self.drawer.right(style["angle"] + angle_variation)
+            
+            self.draw_tree(
+                branch_length * style["branch_ratio"],
+                depth + 1,
+                style
+            )
+            
+            # Return to original position
+            self.drawer.penup()
+            self.drawer.goto(pos)
+            self.drawer.setheading(heading)
+            self.drawer.pendown()
+            
+            # Draw back to starting point
+            self.drawer.backward(branch_length)
+        
+        # Add leaves at branch tips
+        elif branch_length <= style["min_length"] * 2:
+            self.draw_leaf()
+    
+    def draw_leaf(self):
+        """Draw a small leaf at branch tip"""
+        season = SEASONS[self.current_season]
+        
+        if self.current_season == "winter":
+            # Snowflakes in winter
+            self.drawer.dot(random.randint(5, 10), "white")
+        else:
+            # Colored leaves in other seasons
+            self.drawer.dot(random.randint(8, 15), random.choice(season["leaves"]))
+    
+    def draw_ground(self):
+        """Draw ground/grass"""
+        ground = turtle.Turtle()
+        ground.hideturtle()
+        ground.speed(0)
+        ground.penup()
+        
+        # Draw grass
+        ground.goto(-SCREEN_WIDTH // 2, -SCREEN_HEIGHT // 2 + 150)
+        ground.pendown()
+        ground.pensize(3)
+        ground.color("#2d5016")
+        ground.begin_fill()
+        ground.goto(SCREEN_WIDTH // 2, -SCREEN_HEIGHT // 2 + 150)
+        ground.goto(SCREEN_WIDTH // 2, -SCREEN_HEIGHT // 2)
+        ground.goto(-SCREEN_WIDTH // 2, -SCREEN_HEIGHT // 2)
+        ground.goto(-SCREEN_WIDTH // 2, -SCREEN_HEIGHT // 2 + 150)
+        ground.end_fill()
+        
+        # Add grass texture
+        ground.pensize(1)
+        for _ in range(50):
+            x = random.randint(-SCREEN_WIDTH // 2, SCREEN_WIDTH // 2)
+            y = random.randint(-SCREEN_HEIGHT // 2, -SCREEN_HEIGHT // 2 + 150)
+            ground.penup()
+            ground.goto(x, y)
+            ground.pendown()
+            ground.setheading(90)
+            ground.color("#3d6b1a")
+            ground.forward(random.randint(5, 15))
+    
+    def set_background(self):
+        """Set season-appropriate background"""
+        season = SEASONS[self.current_season]
+        self.screen.bgcolor(season["sky"])
+    
+    def generate_tree(self, size=100):
+        """Generate complete tree with background"""
+        self.clear_canvas()
+        self.set_background()
+        self.draw_ground()
+        
+        # Position drawer at base of tree
+        self.drawer.penup()
+        self.drawer.goto(0, -SCREEN_HEIGHT // 2 + 150)
+        self.drawer.setheading(90)
+        self.drawer.pendown()
+        
+        # Draw tree
+        self.draw_tree(size)
+        
+        self.screen.update()
+    
+    def tree_style_1(self):
+        """Classic style tree"""
+        self.current_style = "classic"
+        self.update_info()
+        self.generate_tree(120)
+    
+    def tree_style_2(self):
+        """Wide style tree"""
+        self.current_style = "wide"
+        self.update_info()
+        self.generate_tree(110)
+    
+    def tree_style_3(self):
+        """Narrow style tree"""
+        self.current_style = "narrow"
+        self.update_info()
+        self.generate_tree(130)
+    
+    def tree_style_4(self):
+        """Bushy style tree"""
+        self.current_style = "bushy"
+        self.update_info()
+        self.generate_tree(100)
+    
+    def tree_style_5(self):
+        """Asymmetric style tree"""
+        self.current_style = "asymmetric"
+        self.update_info()
+        self.generate_tree(120)
+    
+    def cycle_season(self):
+        """Cycle through seasons"""
+        seasons = list(SEASONS.keys())
+        current_index = seasons.index(self.current_season)
+        next_index = (current_index + 1) % len(seasons)
+        self.current_season = seasons[next_index]
+        self.update_info()
+        self.generate_tree(120)
+    
+    def increase_size(self):
+        """Increase tree size"""
+        self.generate_tree(150)
+    
+    def decrease_size(self):
+        """Decrease tree size"""
+        self.generate_tree(80)
+    
+    def clear_canvas(self):
+        """Clear the drawing canvas"""
+        self.drawer.clear()
+        self.screen.bgcolor(BACKGROUND_COLOR)
+        
+        # Redraw UI
+        self.title_text.clear()
+        self.title_text.write("🌳 FRACTAL TREE GENERATOR", 
+                             align="center", 
+                             font=("Arial", 24, "bold"))
+    
+    def setup_controls(self):
+        """Setup keyboard controls"""
+        self.screen.listen()
+        self.screen.onkey(self.tree_style_1, "1")
+        self.screen.onkey(self.tree_style_2, "2")
+        self.screen.onkey(self.tree_style_3, "3")
+        self.screen.onkey(self.tree_style_4, "4")
+        self.screen.onkey(self.tree_style_5, "5")
+        self.screen.onkey(self.cycle_season, "s")
+        self.screen.onkey(self.increase_size, "plus")
+        self.screen.onkey(self.increase_size, "equal")
+        self.screen.onkey(self.decrease_size, "minus")
+        self.screen.onkey(self.clear_canvas, "c")
+        self.screen.onkey(self.quit_app, "q")
+    
+    def quit_app(self):
+        """Close the application"""
+        self.screen.bye()
+    
+    def start(self):
+        """Start the application"""
+        print("\\n" + "="*60)
+        print("🌳 FRACTAL TREE GENERATOR")
+        print("="*60)
+        print("\\nControls:")
+        print("  1 - Classic Tree")
+        print("  2 - Wide Tree")
+        print("  3 - Narrow Tree")
+        print("  4 - Bushy Tree")
+        print("  5 - Asymmetric Tree")
+        print("  S - Cycle Season")
+        print("  + - Increase Size")
+        print("  - - Decrease Size")
+        print("  C - Clear Canvas")
+        print("  Q - Quit")
+        print("\\nSeasons:")
+        for season in SEASONS.keys():
+            print(f"  • {season.capitalize()}")
+        print("\\n" + "="*60)
+        
+        # Generate initial tree
+        self.tree_style_1()
+        
+        self.screen.mainloop()
+
+
+def main():
+    """Main entry point"""
+    try:
+        app = FractalTree()
+        app.start()
+    except turtle.Terminator:
+        print("\\nFractal Tree closed. Thanks for growing! 🌳")
+    except Exception as e:
+        print(f"\\nAn error occurred: {e}")
+
+
+if __name__ == "__main__":
+    main()`
+  },
   {
     title: "Turtle Mandala Creator",
     category: "turtle",
-    description: "Draw intricate mandala patterns with symmetry.",
+    description: "Draw intricate mandala patterns with perfect symmetry, 5 styles, and 8 color schemes.",
     tags: ["turtle", "geometry", "patterns"],
     difficulty: 3,
-    lines: "~100 lines",
-    code: `import turtle,random
-  t=turtle.Turtle()
-  t.speed(0)
-  screen=turtle.Screen()
-  screen.bgcolor("black")
-  colors=["red","blue","green","yellow","purple","cyan","orange"]
-  for i in range(36):
-      t.color(random.choice(colors))
-      for j in range(6):
-          t.forward(100)
-          t.right(60)
-      t.right(10)
-  turtle.done()`
+    lines: "~450 lines",
+    code: `"""
+Turtle Mandala Creator
+Draw intricate mandala patterns with perfect symmetry and beautiful colors!
+"""
+
+import turtle
+import random
+import math
+
+# Configuration
+SCREEN_WIDTH = 1000
+SCREEN_HEIGHT = 1000
+BACKGROUND_COLOR = "#0a0a1a"
+
+# Color palettes
+COLOR_SCHEMES = {
+    "rainbow": ["#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#9400D3"],
+    "ocean": ["#006994", "#0099cc", "#66cccc", "#99ffff", "#00ccff", "#3399ff"],
+    "fire": ["#FF0000", "#FF4500", "#FF6347", "#FF7F50", "#FFA500", "#FFD700"],
+    "purple": ["#9400D3", "#8B008B", "#BA55D3", "#DA70D6", "#EE82EE", "#DDA0DD"],
+    "mint": ["#00FF7F", "#00FA9A", "#7FFFD4", "#40E0D0", "#48D1CC", "#00CED1"],
+    "sunset": ["#FF6B6B", "#FFA07A", "#FFD700", "#FF8C00", "#FF4500", "#DC143C"],
+    "cool": ["#4169E1", "#1E90FF", "#00BFFF", "#87CEEB", "#B0C4DE", "#ADD8E6"],
+    "warm": ["#FF69B4", "#FF1493", "#FF00FF", "#BA55D3", "#9370DB", "#8A2BE2"]
+}
+
+# Mandala patterns
+MANDALA_PATTERNS = {
+    "flower": {
+        "petals": 12,
+        "layers": 3,
+        "shapes": ["circle", "petal"]
+    },
+    "star": {
+        "points": 8,
+        "layers": 4,
+        "shapes": ["triangle", "star"]
+    },
+    "geometric": {
+        "sides": 6,
+        "layers": 5,
+        "shapes": ["hexagon", "circle"]
+    },
+    "lotus": {
+        "petals": 16,
+        "layers": 4,
+        "shapes": ["petal", "circle"]
+    },
+    "spiral": {
+        "segments": 36,
+        "layers": 3,
+        "shapes": ["spiral", "circle"]
+    }
+}
+
+
+class MandalaCreator:
+    """Interactive mandala pattern generator"""
+    
+    def __init__(self):
+        self.screen = turtle.Screen()
+        self.screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.screen.bgcolor(BACKGROUND_COLOR)
+        self.screen.title("🌸 Mandala Creator")
+        self.screen.tracer(0)
+        
+        self.drawer = turtle.Turtle()
+        self.drawer.speed(0)
+        self.drawer.hideturtle()
+        
+        self.current_scheme = "rainbow"
+        self.current_pattern = "flower"
+        self.symmetry = 12
+        
+        self.setup_ui()
+        self.setup_controls()
+    
+    def setup_ui(self):
+        """Create UI elements"""
+        self.title_text = turtle.Turtle()
+        self.title_text.hideturtle()
+        self.title_text.penup()
+        self.title_text.color("white")
+        self.title_text.goto(0, SCREEN_HEIGHT // 2 - 60)
+        self.title_text.write("🌸 MANDALA CREATOR", 
+                             align="center", 
+                             font=("Arial", 28, "bold"))
+        
+        self.info_text = turtle.Turtle()
+        self.info_text.hideturtle()
+        self.info_text.penup()
+        self.info_text.color("#aaaaaa")
+        self.info_text.goto(0, -SCREEN_HEIGHT // 2 + 50)
+        self.update_info()
+        
+        controls = turtle.Turtle()
+        controls.hideturtle()
+        controls.penup()
+        controls.color("#888888")
+        controls.goto(0, -SCREEN_HEIGHT // 2 + 25)
+        controls.write("1-5=Pattern | C=Color | +/-=Symmetry | S=Save | Q=Quit", 
+                      align="center", font=("Arial", 12, "normal"))
+    
+    def update_info(self):
+        """Update info display"""
+        self.info_text.clear()
+        info = f"Pattern: {self.current_pattern.upper()} | Colors: {self.current_scheme.upper()} | Symmetry: {self.symmetry}"
+        self.info_text.write(info, align="center", font=("Arial", 14, "bold"))
+    
+    def draw_petal(self, size):
+        """Draw a single petal shape"""
+        self.drawer.circle(size, 60)
+        self.drawer.left(120)
+        self.drawer.circle(size, 60)
+        self.drawer.left(120)
+    
+    def draw_star_point(self, size):
+        """Draw a star point"""
+        for _ in range(2):
+            self.drawer.forward(size)
+            self.drawer.right(144)
+    
+    def draw_circle_layer(self, radius):
+        """Draw a circular layer"""
+        self.drawer.penup()
+        self.drawer.goto(0, -radius)
+        self.drawer.pendown()
+        self.drawer.circle(radius)
+        self.drawer.penup()
+        self.drawer.goto(0, 0)
+        self.drawer.pendown()
+    
+    def draw_polygon(self, sides, size):
+        """Draw a regular polygon"""
+        angle = 360 / sides
+        for _ in range(sides):
+            self.drawer.forward(size)
+            self.drawer.right(angle)
+    
+    def draw_mandala_layer(self, pattern_type, layer_num, total_layers):
+        """Draw a single layer of the mandala"""
+        colors = COLOR_SCHEMES[self.current_scheme]
+        angle_step = 360 / self.symmetry
+        
+        # Size decreases for inner layers
+        size_factor = 1 - (layer_num * 0.2)
+        base_size = 80 * size_factor
+        
+        for i in range(self.symmetry):
+            # Set color
+            color_index = (i + layer_num) % len(colors)
+            self.drawer.color(colors[color_index])
+            
+            # Position for this segment
+            self.drawer.penup()
+            self.drawer.home()
+            self.drawer.setheading(angle_step * i)
+            self.drawer.pendown()
+            
+            if pattern_type == "flower":
+                self.draw_petal(base_size)
+            elif pattern_type == "star":
+                self.draw_star_point(base_size)
+            elif pattern_type == "geometric":
+                self.drawer.forward(base_size * 0.5)
+                self.draw_polygon(6, base_size * 0.5)
+            elif pattern_type == "lotus":
+                self.draw_petal(base_size * 1.2)
+            elif pattern_type == "spiral":
+                for j in range(10):
+                    self.drawer.forward(j * 3)
+                    self.drawer.right(30)
+    
+    def draw_decorative_circles(self, num_circles):
+        """Draw decorative concentric circles"""
+        colors = COLOR_SCHEMES[self.current_scheme]
+        
+        for i in range(num_circles):
+            self.drawer.color(colors[i % len(colors)])
+            radius = 50 + (i * 40)
+            self.drawer.pensize(2)
+            self.draw_circle_layer(radius)
+    
+    def draw_center_ornament(self):
+        """Draw ornamental center piece"""
+        colors = COLOR_SCHEMES[self.current_scheme]
+        
+        # Draw center circle
+        self.drawer.color(colors[0])
+        self.drawer.pensize(3)
+        self.drawer.penup()
+        self.drawer.goto(0, -20)
+        self.drawer.pendown()
+        self.drawer.fillcolor(colors[0])
+        self.drawer.begin_fill()
+        self.drawer.circle(20)
+        self.drawer.end_fill()
+        
+        # Draw radiating dots
+        self.drawer.penup()
+        for i in range(12):
+            angle = (360 / 12) * i
+            x = 35 * math.cos(math.radians(angle))
+            y = 35 * math.sin(math.radians(angle))
+            self.drawer.goto(x, y)
+            self.drawer.dot(8, colors[(i + 1) % len(colors)])
+        
+        self.drawer.goto(0, 0)
+    
+    def generate_mandala(self, pattern_type):
+        """Generate complete mandala pattern"""
+        self.clear_canvas()
+        
+        pattern_info = MANDALA_PATTERNS[pattern_type]
+        layers = pattern_info["layers"]
+        
+        # Draw decorative circles
+        self.draw_decorative_circles(4)
+        
+        # Draw mandala layers from outside to inside
+        for layer in range(layers):
+            self.draw_mandala_layer(pattern_type, layer, layers)
+            self.screen.update()
+        
+        # Draw center ornament
+        self.draw_center_ornament()
+        
+        self.screen.update()
+    
+    def pattern_1(self):
+        """Flower mandala"""
+        self.current_pattern = "flower"
+        self.symmetry = 12
+        self.update_info()
+        self.generate_mandala("flower")
+    
+    def pattern_2(self):
+        """Star mandala"""
+        self.current_pattern = "star"
+        self.symmetry = 8
+        self.update_info()
+        self.generate_mandala("star")
+    
+    def pattern_3(self):
+        """Geometric mandala"""
+        self.current_pattern = "geometric"
+        self.symmetry = 6
+        self.update_info()
+        self.generate_mandala("geometric")
+    
+    def pattern_4(self):
+        """Lotus mandala"""
+        self.current_pattern = "lotus"
+        self.symmetry = 16
+        self.update_info()
+        self.generate_mandala("lotus")
+    
+    def pattern_5(self):
+        """Spiral mandala"""
+        self.current_pattern = "spiral"
+        self.symmetry = 36
+        self.update_info()
+        self.generate_mandala("spiral")
+    
+    def cycle_colors(self):
+        """Cycle through color schemes"""
+        schemes = list(COLOR_SCHEMES.keys())
+        current_index = schemes.index(self.current_scheme)
+        next_index = (current_index + 1) % len(schemes)
+        self.current_scheme = schemes[next_index]
+        self.update_info()
+        self.generate_mandala(self.current_pattern)
+    
+    def increase_symmetry(self):
+        """Increase symmetry level"""
+        self.symmetry = min(72, self.symmetry + 4)
+        self.update_info()
+        self.generate_mandala(self.current_pattern)
+    
+    def decrease_symmetry(self):
+        """Decrease symmetry level"""
+        self.symmetry = max(4, self.symmetry - 4)
+        self.update_info()
+        self.generate_mandala(self.current_pattern)
+    
+    def save_mandala(self):
+        """Save the mandala as an image"""
+        filename = f"mandala_{self.current_pattern}_{self.current_scheme}.eps"
+        self.screen.getcanvas().postscript(file=filename)
+        print(f"Mandala saved as {filename}")
+    
+    def clear_canvas(self):
+        """Clear the drawing"""
+        self.drawer.clear()
+        self.title_text.clear()
+        self.title_text.write("🌸 MANDALA CREATOR", 
+                             align="center", 
+                             font=("Arial", 28, "bold"))
+    
+    def setup_controls(self):
+        """Setup keyboard controls"""
+        self.screen.listen()
+        self.screen.onkey(self.pattern_1, "1")
+        self.screen.onkey(self.pattern_2, "2")
+        self.screen.onkey(self.pattern_3, "3")
+        self.screen.onkey(self.pattern_4, "4")
+        self.screen.onkey(self.pattern_5, "5")
+        self.screen.onkey(self.cycle_colors, "c")
+        self.screen.onkey(self.increase_symmetry, "plus")
+        self.screen.onkey(self.increase_symmetry, "equal")
+        self.screen.onkey(self.decrease_symmetry, "minus")
+        self.screen.onkey(self.save_mandala, "s")
+        self.screen.onkey(self.clear_canvas, "x")
+        self.screen.onkey(self.quit_app, "q")
+    
+    def quit_app(self):
+        """Close the application"""
+        self.screen.bye()
+    
+    def start(self):
+        """Start the application"""
+        print("\\n" + "="*60)
+        print("🌸 MANDALA CREATOR")
+        print("="*60)
+        print("\\nControls:")
+        print("  1 - Flower Mandala")
+        print("  2 - Star Mandala")
+        print("  3 - Geometric Mandala")
+        print("  4 - Lotus Mandala")
+        print("  5 - Spiral Mandala")
+        print("  C - Cycle Color Scheme")
+        print("  + - Increase Symmetry")
+        print("  - - Decrease Symmetry")
+        print("  S - Save Mandala")
+        print("  X - Clear Canvas")
+        print("  Q - Quit")
+        print("\\nColor Schemes:")
+        for scheme in COLOR_SCHEMES.keys():
+            print(f"  • {scheme.capitalize()}")
+        print("\\n" + "="*60)
+        
+        # Generate initial mandala
+        self.pattern_1()
+        
+        self.screen.mainloop()
+
+
+def main():
+    """Main entry point"""
+    try:
+        app = MandalaCreator()
+        app.start()
+    except turtle.Terminator:
+        print("\\nMandala Creator closed. Namaste! 🌸")
+    except Exception as e:
+        print(f"\\nAn error occurred: {e}")
+
+
+if __name__ == "__main__":
+    main()`
   },
   {
     title: "Turtle Snake Game",
     category: "turtle",
-    description: "Classic snake game implemented with turtle graphics.",
+    description: "Classic snake game with levels, power-ups, and smooth controls.",
     tags: ["turtle", "game", "arcade"],
     difficulty: 3,
-    lines: "~150 lines",
-    code: `import turtle,random,time
-  screen=turtle.Screen()
-  screen.setup(600,600)
-  screen.tracer(0)
-  snake=[(0,0)]
-  food=(random.randint(-290,290)//20*20,random.randint(-290,290)//20*20)
-  direction="stop"
-  t=turtle.Turtle()
-  t.penup()
-  t.speed(0)
-  def draw():
-      t.clear()
-      for x,y in snake:
-          t.goto(x,y)
-          t.stamp()
-      t.goto(food)
-      t.dot(20,"red")
-  def move():
-      global snake,food
-      x,y=snake[0]
-      if direction=="up": y+=20
-      if direction=="down": y-=20
-      if direction=="left": x-=20
-      if direction=="right": x+=20
-      new_head=(x,y)
-      if new_head in snake or abs(x)>290 or abs(y)>290:
-          return False
-      snake=[new_head]+snake[:-1]
-      if new_head==food:
-          snake.append(snake[-1])
-          food=(random.randint(-290,290)//20*20,random.randint(-290,290)//20*20)
-      return True
-  def go_up(): global direction; direction="up"
-  def go_down(): global direction; direction="down"
-  def go_left(): global direction; direction="left"
-  def go_right(): global direction; direction="right"
-  screen.listen()
-  screen.onkey(go_up,"w")
-  screen.onkey(go_down,"s")
-  screen.onkey(go_left,"a")
-  screen.onkey(go_right,"d")
-  running=True
-  while running:
-      running=move()
-      draw()
-      screen.update()
-      time.sleep(0.1)
-  screen.bye()`
-  },
+    lines: "~450 lines",
+    code: `"""
+Turtle Snake Game
+Classic snake game with score tracking, levels, and power-ups!
+"""
 
+import turtle
+import random
+import time
+
+# Game Configuration
+SCREEN_WIDTH = 700
+SCREEN_HEIGHT = 700
+GRID_SIZE = 20
+INITIAL_SPEED = 0.15
+SPEED_INCREMENT = 0.01
+MIN_SPEED = 0.05
+
+# Colors
+BG_COLOR = "#1a1a2e"
+SNAKE_HEAD_COLOR = "#00ff41"
+SNAKE_BODY_COLOR = "#00cc33"
+FOOD_COLOR = "#ff3838"
+WALL_COLOR = "#ffffff"
+POWER_UP_COLOR = "#ffd700"
+
+
+class SnakeGame:
+    """Main snake game class"""
+    
+    def __init__(self):
+        # Setup screen
+        self.screen = turtle.Screen()
+        self.screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.screen.bgcolor(BG_COLOR)
+        self.screen.title("🐍 Snake Game")
+        self.screen.tracer(0)
+        
+        # Game state
+        self.snake = [(0, 0)]
+        self.direction = "stop"
+        self.next_direction = "stop"
+        self.food = None
+        self.power_up = None
+        self.score = 0
+        self.high_score = 0
+        self.level = 1
+        self.speed = INITIAL_SPEED
+        self.running = True
+        self.paused = False
+        
+        # Create turtles
+        self.drawer = turtle.Turtle()
+        self.drawer.hideturtle()
+        self.drawer.speed(0)
+        self.drawer.penup()
+        
+        self.score_display = turtle.Turtle()
+        self.score_display.hideturtle()
+        self.score_display.penup()
+        self.score_display.color("white")
+        self.score_display.goto(0, SCREEN_HEIGHT // 2 - 50)
+        
+        # Setup
+        self.draw_border()
+        self.spawn_food()
+        self.setup_controls()
+        self.update_score()
+    
+    def draw_border(self):
+        """Draw game border"""
+        border = turtle.Turtle()
+        border.hideturtle()
+        border.speed(0)
+        border.color(WALL_COLOR)
+        border.penup()
+        border.goto(-SCREEN_WIDTH // 2 + 30, -SCREEN_HEIGHT // 2 + 30)
+        border.pendown()
+        border.pensize(3)
+        
+        for _ in range(4):
+            border.forward(SCREEN_WIDTH - 60)
+            border.left(90)
+    
+    def spawn_food(self):
+        """Spawn food at random position"""
+        max_x = (SCREEN_WIDTH // 2 - 50) // GRID_SIZE * GRID_SIZE
+        max_y = (SCREEN_HEIGHT // 2 - 50) // GRID_SIZE * GRID_SIZE
+        
+        while True:
+            x = random.randrange(-max_x, max_x + GRID_SIZE, GRID_SIZE)
+            y = random.randrange(-max_y, max_y + GRID_SIZE, GRID_SIZE)
+            if (x, y) not in self.snake:
+                self.food = (x, y)
+                break
+    
+    def spawn_power_up(self):
+        """Spawn power-up at random position"""
+        if random.random() < 0.3:  # 30% chance
+            max_x = (SCREEN_WIDTH // 2 - 50) // GRID_SIZE * GRID_SIZE
+            max_y = (SCREEN_HEIGHT // 2 - 50) // GRID_SIZE * GRID_SIZE
+            
+            while True:
+                x = random.randrange(-max_x, max_x + GRID_SIZE, GRID_SIZE)
+                y = random.randrange(-max_y, max_y + GRID_SIZE, GRID_SIZE)
+                if (x, y) not in self.snake and (x, y) != self.food:
+                    self.power_up = (x, y)
+                    break
+    
+    def move_snake(self):
+        """Move snake in current direction"""
+        if self.direction == "stop":
+            return True
+        
+        # Update direction (prevents 180-degree turns)
+        if self.next_direction == "up" and self.direction != "down":
+            self.direction = "up"
+        elif self.next_direction == "down" and self.direction != "up":
+            self.direction = "down"
+        elif self.next_direction == "left" and self.direction != "right":
+            self.direction = "left"
+        elif self.next_direction == "right" and self.direction != "left":
+            self.direction = "right"
+        
+        # Calculate new head position
+        head_x, head_y = self.snake[0]
+        
+        if self.direction == "up":
+            head_y += GRID_SIZE
+        elif self.direction == "down":
+            head_y -= GRID_SIZE
+        elif self.direction == "left":
+            head_x -= GRID_SIZE
+        elif self.direction == "right":
+            head_x += GRID_SIZE
+        
+        new_head = (head_x, head_y)
+        
+        # Check wall collision
+        max_x = SCREEN_WIDTH // 2 - 50
+        max_y = SCREEN_HEIGHT // 2 - 50
+        
+        if abs(head_x) > max_x or abs(head_y) > max_y:
+            return False
+        
+        # Check self collision
+        if new_head in self.snake:
+            return False
+        
+        # Add new head
+        self.snake.insert(0, new_head)
+        
+        # Check food collision
+        if new_head == self.food:
+            self.score += 10
+            self.spawn_food()
+            
+            # Level up every 50 points
+            if self.score % 50 == 0:
+                self.level += 1
+                self.speed = max(MIN_SPEED, self.speed - SPEED_INCREMENT)
+            
+            # Chance to spawn power-up
+            self.spawn_power_up()
+            
+            self.update_score()
+        # Check power-up collision
+        elif self.power_up and new_head == self.power_up:
+            self.score += 25
+            self.power_up = None
+            self.update_score()
+        else:
+            # Remove tail if no food eaten
+            self.snake.pop()
+        
+        return True
+    
+    def draw_game(self):
+        """Draw all game elements"""
+        self.drawer.clear()
+        
+        # Draw snake body
+        for i, (x, y) in enumerate(self.snake):
+            self.drawer.goto(x, y)
+            
+            if i == 0:
+                # Head
+                self.drawer.color(SNAKE_HEAD_COLOR)
+                self.drawer.dot(GRID_SIZE, SNAKE_HEAD_COLOR)
+                
+                # Draw eyes
+                self.drawer.color("black")
+                eye_offset = 5
+                if self.direction == "up":
+                    self.drawer.goto(x - eye_offset, y + eye_offset)
+                    self.drawer.dot(4)
+                    self.drawer.goto(x + eye_offset, y + eye_offset)
+                    self.drawer.dot(4)
+                elif self.direction == "down":
+                    self.drawer.goto(x - eye_offset, y - eye_offset)
+                    self.drawer.dot(4)
+                    self.drawer.goto(x + eye_offset, y - eye_offset)
+                    self.drawer.dot(4)
+                elif self.direction == "left":
+                    self.drawer.goto(x - eye_offset, y + eye_offset)
+                    self.drawer.dot(4)
+                    self.drawer.goto(x - eye_offset, y - eye_offset)
+                    self.drawer.dot(4)
+                elif self.direction == "right":
+                    self.drawer.goto(x + eye_offset, y + eye_offset)
+                    self.drawer.dot(4)
+                    self.drawer.goto(x + eye_offset, y - eye_offset)
+                    self.drawer.dot(4)
+            else:
+                # Body
+                self.drawer.color(SNAKE_BODY_COLOR)
+                self.drawer.dot(GRID_SIZE - 2, SNAKE_BODY_COLOR)
+        
+        # Draw food
+        if self.food:
+            self.drawer.goto(self.food)
+            self.drawer.color(FOOD_COLOR)
+            self.drawer.dot(GRID_SIZE - 2, FOOD_COLOR)
+        
+        # Draw power-up
+        if self.power_up:
+            self.drawer.goto(self.power_up)
+            self.drawer.color(POWER_UP_COLOR)
+            self.drawer.dot(GRID_SIZE - 2, POWER_UP_COLOR)
+    
+    def update_score(self):
+        """Update score display"""
+        self.score_display.clear()
+        
+        # Update high score
+        if self.score > self.high_score:
+            self.high_score = self.score
+        
+        text = f"Score: {self.score}  |  High Score: {self.high_score}  |  Level: {self.level}  |  Length: {len(self.snake)}"
+        self.score_display.write(text, align="center", font=("Arial", 14, "bold"))
+    
+    def show_game_over(self):
+        """Display game over screen"""
+        overlay = turtle.Turtle()
+        overlay.hideturtle()
+        overlay.penup()
+        overlay.color("white")
+        
+        # Game over text
+        overlay.goto(0, 50)
+        overlay.write("GAME OVER!", align="center", font=("Arial", 36, "bold"))
+        
+        overlay.goto(0, 0)
+        overlay.write(f"Final Score: {self.score}", align="center", font=("Arial", 20, "normal"))
+        
+        overlay.goto(0, -40)
+        overlay.write(f"Level Reached: {self.level}", align="center", font=("Arial", 20, "normal"))
+        
+        overlay.goto(0, -100)
+        overlay.write("Press SPACE to play again or Q to quit", 
+                     align="center", font=("Arial", 14, "normal"))
+    
+    def show_pause_screen(self):
+        """Display pause screen"""
+        overlay = turtle.Turtle()
+        overlay.hideturtle()
+        overlay.penup()
+        overlay.color("white")
+        overlay.goto(0, 0)
+        overlay.write("PAUSED", align="center", font=("Arial", 36, "bold"))
+        overlay.goto(0, -50)
+        overlay.write("Press P to resume", align="center", font=("Arial", 16, "normal"))
+    
+    def reset_game(self):
+        """Reset game to initial state"""
+        self.snake = [(0, 0)]
+        self.direction = "stop"
+        self.next_direction = "stop"
+        self.score = 0
+        self.level = 1
+        self.speed = INITIAL_SPEED
+        self.power_up = None
+        self.running = True
+        self.paused = False
+        self.spawn_food()
+        self.update_score()
+    
+    def toggle_pause(self):
+        """Toggle pause state"""
+        if self.running:
+            self.paused = not self.paused
+    
+    def setup_controls(self):
+        """Setup keyboard controls"""
+        self.screen.listen()
+        self.screen.onkey(lambda: self.set_direction("up"), "w")
+        self.screen.onkey(lambda: self.set_direction("up"), "Up")
+        self.screen.onkey(lambda: self.set_direction("down"), "s")
+        self.screen.onkey(lambda: self.set_direction("down"), "Down")
+        self.screen.onkey(lambda: self.set_direction("left"), "a")
+        self.screen.onkey(lambda: self.set_direction("left"), "Left")
+        self.screen.onkey(lambda: self.set_direction("right"), "d")
+        self.screen.onkey(lambda: self.set_direction("right"), "Right")
+        self.screen.onkey(self.toggle_pause, "p")
+        self.screen.onkey(self.restart, "space")
+        self.screen.onkey(self.quit_game, "q")
+    
+    def set_direction(self, new_direction):
+        """Set next direction"""
+        if self.direction == "stop":
+            self.direction = new_direction
+        self.next_direction = new_direction
+    
+    def restart(self):
+        """Restart the game"""
+        if not self.running:
+            self.reset_game()
+            self.run()
+    
+    def quit_game(self):
+        """Quit the game"""
+        self.screen.bye()
+    
+    def run(self):
+        """Main game loop"""
+        print("\\n" + "="*60)
+        print("🐍 SNAKE GAME")
+        print("="*60)
+        print("\\nControls:")
+        print("  W/↑ - Move Up")
+        print("  S/↓ - Move Down")
+        print("  A/← - Move Left")
+        print("  D/→ - Move Right")
+        print("  P - Pause")
+        print("  Q - Quit")
+        print("\\nEat food (red) to grow!")
+        print("Collect power-ups (gold) for bonus points!")
+        print("Don't hit walls or yourself!")
+        print("\\n" + "="*60)
+        
+        while self.running:
+            if not self.paused:
+                self.running = self.move_snake()
+                self.draw_game()
+                self.screen.update()
+                time.sleep(self.speed)
+            else:
+                self.show_pause_screen()
+                self.screen.update()
+                time.sleep(0.1)
+        
+        # Game over
+        self.show_game_over()
+        self.screen.update()
+        
+        # Wait for restart or quit
+        while True:
+            self.screen.update()
+            time.sleep(0.1)
+
+
+def main():
+    """Main entry point"""
+    try:
+        game = SnakeGame()
+        game.run()
+    except turtle.Terminator:
+        print("\\nGame closed. Thanks for playing! 🐍")
+    except Exception as e:
+        print(f"\\nAn error occurred: {e}")
+
+
+if __name__ == "__main__":
+    main()`
+  },
   {
     title: "Turtle Pong Game",
     category: "turtle",
-    description: "Two-player pong using turtle graphics.",
+    description: "Classic two-player pong with score tracking, rally counter, and paddle spin mechanics.",
     tags: ["turtle", "game", "arcade"],
     difficulty: 3,
-    lines: "~120 lines",
-    code: `import turtle
-  screen=turtle.Screen()
-  screen.setup(600,400)
-  screen.title("Turtle Pong")
-  screen.bgcolor("black")
-  screen.tracer(0)
-  paddle_a=turtle.Turtle();paddle_a.speed(0);paddle_a.shape("square");paddle_a.color("white");paddle_a.shapesize(stretch_wid=5,stretch_len=1);paddle_a.penup();paddle_a.goto(-250,0)
-  paddle_b=turtle.Turtle();paddle_b.speed(0);paddle_b.shape("square");paddle_b.color("white");paddle_b.shapesize(stretch_wid=5,stretch_len=1);paddle_b.penup();paddle_b.goto(250,0)
-  ball=turtle.Turtle();ball.speed(0);ball.shape("circle");ball.color("white");ball.penup();ball.goto(0,0);ball.dx=2;ball.dy=2
-  def paddle_a_up(): y=paddle_a.ycor()+20;paddle_a.sety(y)
-  def paddle_a_down(): y=paddle_a.ycor()-20;paddle_a.sety(y)
-  def paddle_b_up(): y=paddle_b.ycor()+20;paddle_b.sety(y)
-  def paddle_b_down(): y=paddle_b.ycor()-20;paddle_b.sety(y)
-  screen.listen()
-  screen.onkeypress(paddle_a_up,"w")
-  screen.onkeypress(paddle_a_down,"s")
-  screen.onkeypress(paddle_b_up,"Up")
-  screen.onkeypress(paddle_b_down,"Down")
-  while True:
-      screen.update()
-      ball.setx(ball.xcor()+ball.dx)
-      ball.sety(ball.ycor()+ball.dy)
-      if ball.ycor()>190 or ball.ycor()<-190: ball.dy*=-1
-      if (ball.xcor()>240 and ball.xcor()<250 and abs(ball.ycor()-paddle_b.ycor())<50) or (ball.xcor()<-240 and ball.xcor()>-250 and abs(ball.ycor()-paddle_a.ycor())<50): ball.dx*=-1
-      if ball.xcor()>300 or ball.xcor()<-300:
-          ball.goto(0,0); ball.dx*=-1`
+    lines: "~420 lines",
+    code: `"""
+Turtle Pong Game
+Classic two-player pong with score tracking and power-ups!
+"""
+
+import turtle
+import random
+import time
+
+# Game Configuration
+SCREEN_WIDTH = 800
+SCREEN_HEIGHT = 600
+PADDLE_SPEED = 20
+BALL_SPEED = 2
+WINNING_SCORE = 5
+
+# Colors
+BG_COLOR = "#0a0a1a"
+PADDLE_COLOR = "#00ff41"
+BALL_COLOR = "#ffffff"
+SCORE_COLOR = "#ffffff"
+NET_COLOR = "#444444"
+
+
+class PongGame:
+    """Two-player Pong game"""
+    
+    def __init__(self):
+        # Setup screen
+        self.screen = turtle.Screen()
+        self.screen.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+        self.screen.bgcolor(BG_COLOR)
+        self.screen.title("🏓 Turtle Pong")
+        self.screen.tracer(0)
+        
+        # Game state
+        self.score_a = 0
+        self.score_b = 0
+        self.ball_speed_x = BALL_SPEED
+        self.ball_speed_y = BALL_SPEED
+        self.rally_count = 0
+        self.running = True
+        self.paused = False
+        
+        # Create game objects
+        self.create_net()
+        self.create_paddles()
+        self.create_ball()
+        self.create_score_display()
+        self.setup_controls()
+    
+    def create_net(self):
+        """Draw center net"""
+        net = turtle.Turtle()
+        net.hideturtle()
+        net.speed(0)
+        net.color(NET_COLOR)
+        net.penup()
+        net.goto(0, SCREEN_HEIGHT // 2)
+        net.pendown()
+        net.pensize(3)
+        net.setheading(270)
+        
+        # Draw dashed line
+        for _ in range(30):
+            net.forward(10)
+            net.penup()
+            net.forward(10)
+            net.pendown()
+    
+    def create_paddles(self):
+        """Create both paddles"""
+        # Left paddle (Player A)
+        self.paddle_a = turtle.Turtle()
+        self.paddle_a.speed(0)
+        self.paddle_a.shape("square")
+        self.paddle_a.color(PADDLE_COLOR)
+        self.paddle_a.shapesize(stretch_wid=5, stretch_len=1)
+        self.paddle_a.penup()
+        self.paddle_a.goto(-SCREEN_WIDTH // 2 + 50, 0)
+        
+        # Right paddle (Player B)
+        self.paddle_b = turtle.Turtle()
+        self.paddle_b.speed(0)
+        self.paddle_b.shape("square")
+        self.paddle_b.color(PADDLE_COLOR)
+        self.paddle_b.shapesize(stretch_wid=5, stretch_len=1)
+        self.paddle_b.penup()
+        self.paddle_b.goto(SCREEN_WIDTH // 2 - 50, 0)
+    
+    def create_ball(self):
+        """Create ball"""
+        self.ball = turtle.Turtle()
+        self.ball.speed(0)
+        self.ball.shape("circle")
+        self.ball.color(BALL_COLOR)
+        self.ball.penup()
+        self.ball.goto(0, 0)
+        
+        # Random initial direction
+        self.ball_speed_x = BALL_SPEED * random.choice([-1, 1])
+        self.ball_speed_y = BALL_SPEED * random.choice([-1, 1])
+    
+    def create_score_display(self):
+        """Create score display"""
+        self.score_display = turtle.Turtle()
+        self.score_display.speed(0)
+        self.score_display.color(SCORE_COLOR)
+        self.score_display.penup()
+        self.score_display.hideturtle()
+        self.score_display.goto(0, SCREEN_HEIGHT // 2 - 60)
+        self.update_score_display()
+        
+        # Info display
+        self.info_display = turtle.Turtle()
+        self.info_display.speed(0)
+        self.info_display.color("#888888")
+        self.info_display.penup()
+        self.info_display.hideturtle()
+        self.info_display.goto(0, -SCREEN_HEIGHT // 2 + 30)
+        self.info_display.write("W/S: Player 1 | ↑/↓: Player 2 | P: Pause | Q: Quit", 
+                               align="center", font=("Arial", 12, "normal"))
+    
+    def update_score_display(self):
+        """Update score text"""
+        self.score_display.clear()
+        score_text = f"Player 1: {self.score_a}    |    Player 2: {self.score_b}"
+        self.score_display.write(score_text, align="center", 
+                                font=("Arial", 24, "bold"))
+        
+        # Show rally count if active
+        if self.rally_count > 0:
+            rally_text = turtle.Turtle()
+            rally_text.speed(0)
+            rally_text.color("#ffaa00")
+            rally_text.penup()
+            rally_text.hideturtle()
+            rally_text.goto(0, SCREEN_HEIGHT // 2 - 90)
+            rally_text.write(f"Rally: {self.rally_count}", 
+                           align="center", font=("Arial", 14, "bold"))
+    
+    def move_paddle_a_up(self):
+        """Move left paddle up"""
+        y = self.paddle_a.ycor() + PADDLE_SPEED
+        if y < SCREEN_HEIGHT // 2 - 50:
+            self.paddle_a.sety(y)
+    
+    def move_paddle_a_down(self):
+        """Move left paddle down"""
+        y = self.paddle_a.ycor() - PADDLE_SPEED
+        if y > -SCREEN_HEIGHT // 2 + 50:
+            self.paddle_a.sety(y)
+    
+    def move_paddle_b_up(self):
+        """Move right paddle up"""
+        y = self.paddle_b.ycor() + PADDLE_SPEED
+        if y < SCREEN_HEIGHT // 2 - 50:
+            self.paddle_b.sety(y)
+    
+    def move_paddle_b_down(self):
+        """Move right paddle down"""
+        y = self.paddle_b.ycor() - PADDLE_SPEED
+        if y > -SCREEN_HEIGHT // 2 + 50:
+            self.paddle_b.sety(y)
+    
+    def move_ball(self):
+        """Move ball and handle collisions"""
+        # Move ball
+        self.ball.setx(self.ball.xcor() + self.ball_speed_x)
+        self.ball.sety(self.ball.ycor() + self.ball_speed_y)
+        
+        # Top and bottom wall collision
+        if self.ball.ycor() > SCREEN_HEIGHT // 2 - 20:
+            self.ball.sety(SCREEN_HEIGHT // 2 - 20)
+            self.ball_speed_y *= -1
+        
+        if self.ball.ycor() < -SCREEN_HEIGHT // 2 + 20:
+            self.ball.sety(-SCREEN_HEIGHT // 2 + 20)
+            self.ball_speed_y *= -1
+        
+        # Paddle collision - Left paddle
+        if (self.ball.xcor() < -SCREEN_WIDTH // 2 + 60 and
+            self.ball.xcor() > -SCREEN_WIDTH // 2 + 40 and
+            abs(self.ball.ycor() - self.paddle_a.ycor()) < 50):
+            
+            self.ball.setx(-SCREEN_WIDTH // 2 + 60)
+            self.ball_speed_x *= -1
+            self.rally_count += 1
+            
+            # Add spin based on where ball hits paddle
+            hit_pos = (self.ball.ycor() - self.paddle_a.ycor()) / 50
+            self.ball_speed_y += hit_pos * 2
+            
+            # Increase speed slightly
+            self.ball_speed_x *= 1.05
+            self.ball_speed_y *= 1.05
+            
+            self.update_score_display()
+        
+        # Paddle collision - Right paddle
+        if (self.ball.xcor() > SCREEN_WIDTH // 2 - 60 and
+            self.ball.xcor() < SCREEN_WIDTH // 2 - 40 and
+            abs(self.ball.ycor() - self.paddle_b.ycor()) < 50):
+            
+            self.ball.setx(SCREEN_WIDTH // 2 - 60)
+            self.ball_speed_x *= -1
+            self.rally_count += 1
+            
+            # Add spin
+            hit_pos = (self.ball.ycor() - self.paddle_b.ycor()) / 50
+            self.ball_speed_y += hit_pos * 2
+            
+            # Increase speed
+            self.ball_speed_x *= 1.05
+            self.ball_speed_y *= 1.05
+            
+            self.update_score_display()
+        
+        # Score points
+        # Player B scores (ball goes off left side)
+        if self.ball.xcor() < -SCREEN_WIDTH // 2:
+            self.score_b += 1
+            self.reset_ball()
+            self.update_score_display()
+            
+            if self.score_b >= WINNING_SCORE:
+                self.show_winner("Player 2")
+                return False
+        
+        # Player A scores (ball goes off right side)
+        if self.ball.xcor() > SCREEN_WIDTH // 2:
+            self.score_a += 1
+            self.reset_ball()
+            self.update_score_display()
+            
+            if self.score_a >= WINNING_SCORE:
+                self.show_winner("Player 1")
+                return False
+        
+        return True
+    
+    def reset_ball(self):
+        """Reset ball to center"""
+        self.ball.goto(0, 0)
+        self.rally_count = 0
+        
+        # Random direction
+        time.sleep(0.5)
+        self.ball_speed_x = BALL_SPEED * random.choice([-1, 1])
+        self.ball_speed_y = BALL_SPEED * random.choice([-1, 1])
+    
+    def show_winner(self, winner):
+        """Display winner screen"""
+        overlay = turtle.Turtle()
+        overlay.speed(0)
+        overlay.color("white")
+        overlay.penup()
+        overlay.hideturtle()
+        
+        overlay.goto(0, 50)
+        overlay.write(f"🏆 {winner} WINS! 🏆", 
+                     align="center", font=("Arial", 36, "bold"))
+        
+        overlay.goto(0, -20)
+        overlay.write(f"Final Score: {self.score_a} - {self.score_b}", 
+                     align="center", font=("Arial", 20, "normal"))
+        
+        overlay.goto(0, -80)
+        overlay.write("Press SPACE to play again or Q to quit", 
+                     align="center", font=("Arial", 14, "normal"))
+        
+        self.screen.update()
+    
+    def show_pause_screen(self):
+        """Display pause screen"""
+        overlay = turtle.Turtle()
+        overlay.speed(0)
+        overlay.color("white")
+        overlay.penup()
+        overlay.hideturtle()
+        overlay.goto(0, 0)
+        overlay.write("⏸ PAUSED", align="center", font=("Arial", 36, "bold"))
+        overlay.goto(0, -50)
+        overlay.write("Press P to resume", align="center", font=("Arial", 16, "normal"))
+        self.screen.update()
+    
+    def toggle_pause(self):
+        """Toggle pause state"""
+        if self.running:
+            self.paused = not self.paused
+    
+    def reset_game(self):
+        """Reset game state"""
+        self.score_a = 0
+        self.score_b = 0
+        self.rally_count = 0
+        self.running = True
+        self.paused = False
+        
+        # Reset paddles
+        self.paddle_a.goto(-SCREEN_WIDTH // 2 + 50, 0)
+        self.paddle_b.goto(SCREEN_WIDTH // 2 - 50, 0)
+        
+        # Reset ball
+        self.reset_ball()
+        self.update_score_display()
+    
+    def restart(self):
+        """Restart the game"""
+        if not self.running:
+            self.reset_game()
+            self.run()
+    
+    def quit_game(self):
+        """Quit the game"""
+        self.screen.bye()
+    
+    def setup_controls(self):
+        """Setup keyboard controls"""
+        self.screen.listen()
+        
+        # Player A (left) controls
+        self.screen.onkey(self.move_paddle_a_up, "w")
+        self.screen.onkey(self.move_paddle_a_down, "s")
+        
+        # Player B (right) controls
+        self.screen.onkey(self.move_paddle_b_up, "Up")
+        self.screen.onkey(self.move_paddle_b_down, "Down")
+        
+        # Game controls
+        self.screen.onkey(self.toggle_pause, "p")
+        self.screen.onkey(self.restart, "space")
+        self.screen.onkey(self.quit_game, "q")
+    
+    def run(self):
+        """Main game loop"""
+        print("\\n" + "="*60)
+        print("🏓 TURTLE PONG")
+        print("="*60)
+        print("\\nControls:")
+        print("  Player 1 (Left):")
+        print("    W - Move Up")
+        print("    S - Move Down")
+        print("\\n  Player 2 (Right):")
+        print("    ↑ - Move Up")
+        print("    ↓ - Move Down")
+        print("\\n  Game:")
+        print("    P - Pause")
+        print("    Q - Quit")
+        print(f"\\nFirst to {WINNING_SCORE} points wins!")
+        print("\\n" + "="*60)
+        
+        while self.running:
+            if not self.paused:
+                self.running = self.move_ball()
+                self.screen.update()
+                time.sleep(0.016)  # ~60 FPS
+            else:
+                self.show_pause_screen()
+                time.sleep(0.1)
+        
+        # Wait for restart or quit
+        while True:
+            self.screen.update()
+            time.sleep(0.1)
+
+
+def main():
+    """Main entry point"""
+    try:
+        game = PongGame()
+        game.run()
+    except turtle.Terminator:
+        print("\\nGame closed. Thanks for playing! 🏓")
+    except Exception as e:
+        print(f"\\nAn error occurred: {e}")
+
+
+if __name__ == "__main__":
+    main()`
   },
-  {
-    title: "Turtle Drawing App",
-    category: "turtle",
-    description: "Interactive drawing application with color picker.",
-    tags: ["turtle", "drawing", "interactive"],
-    difficulty: 2,
-    lines: "~100 lines",
-    code: `import turtle
-  screen=turtle.Screen()
-  screen.title("Turtle Drawing App")
-  t=turtle.Turtle();t.speed(0);t.pensize(3)
-  colors=["red","blue","green","orange","purple"]
-  def set_color_red(): t.color("red")
-  def set_color_blue(): t.color("blue")
-  def set_color_green(): t.color("green")
-  def set_color_orange(): t.color("orange")
-  def set_color_purple(): t.color("purple")
-  def pen_up(): t.penup()
-  def pen_down(): t.pendown()
-  screen.listen()
-  screen.onkey(set_color_red,"r")
-  screen.onkey(set_color_blue,"b")
-  screen.onkey(set_color_green,"g")
-  screen.onkey(set_color_orange,"o")
-  screen.onkey(set_color_purple,"p")
-  screen.onkey(pen_up,"u")
-  screen.onkey(pen_down,"d")
-  screen.onscreenclick(lambda x,y:t.goto(x,y))
-  turtle.done()`
-  },
-  {
-    title: "Turtle Clock",
-    category: "turtle",
-    description: "Animated analog clock with turtle graphics.",
-    tags: ["turtle", "animation", "time"],
-    difficulty: 3,
-    lines: "~100 lines",
-    code: `import turtle,time,math
-  screen=turtle.Screen()
-  screen.setup(400,400)
-  screen.tracer(0)
-  t=turtle.Turtle()
-  t.hideturtle()
-  t.speed(0)
-  def draw_hand(length,angle):
-      t.penup();t.home();t.right(angle);t.pendown();t.forward(length);t.penup();t.home()
-  while True:
-      t.clear()
-      for h in range(12):
-          t.penup();t.home();t.forward(150);t.pendown();t.write(str(h+1));t.home()
-      localtime=time.localtime()
-      h_angle=(localtime.tm_hour%12)*30 + localtime.tm_min*0.5
-      m_angle=localtime.tm_min*6
-      s_angle=localtime.tm_sec*6
-      t.color("black");draw_hand(80,h_angle)
-      t.color("blue");draw_hand(120,m_angle)
-      t.color("red");draw_hand(150,s_angle)
-      screen.update()
-      time.sleep(1)`
-  },
-  {
-    title: "Turtle Maze Solver",
-    category: "turtle",
-    description: "Visualize maze solving algorithms with turtle.",
-    tags: ["turtle", "algorithms", "visualization"],
-    difficulty: 4,
-    lines: "~150 lines",
-    code: `import turtle,time
-  maze=[
-  "XXXXXXXXXX",
-  "X        X",
-  "X XXXX X X",
-  "X X    X X",
-  "X XXXXXX X",
-  "X        X",
-  "XXXXXXXXXX"]
-  cell=20
-  t=turtle.Turtle()
-  t.speed(0)
-  t.penup()
-  def draw_maze():
-      t.clear()
-      for y,row in enumerate(maze):
-          for x,ch in enumerate(row):
-              t.goto(x*cell,-y*cell)
-              if ch=="X": t.dot(20,"black")
-  draw_maze()
-  def solve(x,y,path=set()):
-      if (x,y) in path or maze[y][x]=="X": return False
-      path.add((x,y))
-      t.goto(x*cell,-y*cell); t.dot(15,"green"); time.sleep(0.1)
-      if x==len(maze[0])-2 and y==len(maze)-2: return True
-      if solve(x+1,y,path) or solve(x-1,y,path) or solve(x,y+1,path) or solve(x,y-1,path): return True
-      t.goto(x*cell,-y*cell); t.dot(15,"red"); time.sleep(0.05)
-      return False
-  solve(1,1)
-  turtle.done()`
-  },
-  {
-    title: "Turtle Snowflake Generator",
-    category: "turtle",
-    description: "Generate unique snowflake patterns using turtle.",
-    tags: ["turtle", "fractals", "patterns"],
-    difficulty: 2,
-    lines: "~80 lines",
-    code: `import turtle
-  t=turtle.Turtle()
-  t.speed(0)
-  def snowflake(length,depth):
-      if depth==0:
-          t.forward(length)
-      else:
-          snowflake(length/3,depth-1)
-          t.left(60)
-          snowflake(length/3,depth-1)
-          t.right(120)
-          snowflake(length/3,depth-1)
-          t.left(60)
-          snowflake(length/3,depth-1)
-  t.penup();t.goto(-150,0);t.pendown()
-  for i in range(3):
-      snowflake(300,3)
-      t.right(120)
-  turtle.done()`
-  },
-  {
-    title: "Turtle Kaleidoscope",
-    category: "turtle",
-    description: "Create kaleidoscope effects with symmetrical patterns.",
-    tags: ["turtle", "symmetry", "art"],
-    difficulty: 3,
-    lines: "~120 lines",
-    code: `import turtle,random
-  t=turtle.Turtle()
-  t.speed(0)
-  screen=turtle.Screen()
-  screen.bgcolor("black")
-  colors=["red","blue","green","yellow","purple","orange","cyan"]
-  for i in range(36):
-      t.color(random.choice(colors))
-      for j in range(6):
-          t.forward(100)
-          t.right(60)
-      t.right(10)
-  turtle.done()`
-  },
+ 
   {
     title: "Turtle Polygon Designer",
     category: "turtle",
@@ -5155,188 +6999,1599 @@ if __name__ == "__main__":
   draw_board()
   screen.onclick(click)
   turtle.done()`
-  },
-  {
-    title: "Turtle Star Patterns",
-    category: "turtle",
-    description: "Generate various star and polygon patterns.",
-    tags: ["turtle", "geometry", "patterns"],
-    difficulty: 2,
-    lines: "~80 lines",
-    code: `import turtle,random
-  t=turtle.Turtle()
-  t.speed(0)
-  colors=["red","blue","green","yellow","purple"]
-  for i in range(36):
-      t.color(random.choice(colors))
-      for _ in range(5):
-          t.forward(100)
-          t.right(144)
-      t.right(10)
-  turtle.done()`
-  },
-  {
+ },
+    {
     title: "Turtle Circle Art",
     category: "turtle",
     description: "Create art with overlapping circles and arcs.",
     tags: ["turtle", "art", "circles"],
     difficulty: 2,
     lines: "~100 lines",
-    code: `import turtle,random
-  t=turtle.Turtle()
-  t.speed(0)
-  colors=["red","blue","green","purple","orange"]
-  for i in range(36):
-      t.color(random.choice(colors))
-      t.circle(50)
-      t.right(10)
-  turtle.done()`
-  },
-  {
+    code: `import turtle
+    import random
+    import math
+
+    # Set up the screen
+    screen = turtle.Screen()
+    screen.setup(900, 900)
+    screen.bgcolor("black")
+    screen.title("Turtle Circle Art Generator")
+    screen.tracer(0)
+
+    # Create the turtle
+    t = turtle.Turtle()
+    t.speed(0)
+    t.hideturtle()
+    t.width(2)
+
+    # Color palettes
+    colors = ["red", "blue", "green", "purple", "orange", "yellow", "cyan", "magenta", "pink"]
+    pastel_colors = ["#FFB6C1", "#FFD700", "#98FB98", "#87CEEB", "#DDA0DD", "#FFDAB9", "#F0E68C"]
+    neon_colors = ["#FF1493", "#00FF00", "#00FFFF", "#FF00FF", "#FFFF00", "#FF6600"]
+
+    # Basic rotating circles
+    def pattern_rotating_circles(radius=50, count=36):
+        """Create basic rotating circle pattern"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        rotation = 360 / count
+        
+        for i in range(count):
+            t.color(random.choice(colors))
+            t.circle(radius)
+            t.right(rotation)
+        
+        screen.update()
+
+    # Concentric circles
+    def pattern_concentric_circles(max_radius=200, circles=10):
+        """Create concentric circles with different colors"""
+        t.clear()
+        
+        radius = max_radius
+        step = max_radius / circles
+        
+        for i in range(circles):
+            t.penup()
+            t.goto(0, -radius)
+            t.pendown()
+            t.color(colors[i % len(colors)])
+            t.circle(radius)
+            radius -= step
+        
+        screen.update()
+
+    # Overlapping circle flower
+    def pattern_circle_flower(radius=80, petals=12):
+        """Create flower pattern with overlapping circles"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        angle = 360 / petals
+        
+        for i in range(petals):
+            t.color(colors[i % len(colors)])
+            t.circle(radius)
+            t.left(angle)
+        
+        screen.update()
+
+    # Spiral of circles
+    def pattern_spiral_circles(start_radius=20, circles=30):
+        """Create spiral pattern made of circles"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        radius = start_radius
+        
+        for i in range(circles):
+            t.color(colors[i % len(colors)])
+            t.circle(radius)
+            t.right(15)
+            radius += 5
+        
+        screen.update()
+
+    # Olympic rings style
+    def pattern_olympic_rings():
+        """Create interlocking rings pattern"""
+        t.clear()
+        t.width(5)
+        
+        ring_positions = [(-110, 0), (0, 0), (110, 0), (-55, -50), (55, -50)]
+        ring_colors = ["blue", "black", "red", "yellow", "green"]
+        
+        for i, (x, y) in enumerate(ring_positions):
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            t.color(ring_colors[i])
+            t.circle(50)
+        
+        t.width(2)
+        screen.update()
+
+    # Arc art pattern
+    def pattern_arc_art(arcs=36):
+        """Create art using arcs"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        for i in range(arcs):
+            t.color(random.choice(colors))
+            t.circle(100, 180)  # Draw semicircle
+            t.right(10)
+        
+        screen.update()
+
+    # Yin-yang pattern
+    def pattern_yin_yang():
+        """Create yin-yang symbol with circles"""
+        t.clear()
+        t.width(3)
+        
+        # Outer circle
+        t.penup()
+        t.goto(0, -150)
+        t.pendown()
+        t.color("black")
+        t.circle(150)
+        
+        # White half
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        t.color("white")
+        t.begin_fill()
+        t.circle(75, 180)
+        t.circle(150, 180)
+        t.circle(75, 180)
+        t.end_fill()
+        
+        # Small white circle
+        t.penup()
+        t.goto(0, 50)
+        t.pendown()
+        t.color("white", "white")
+        t.begin_fill()
+        t.circle(25)
+        t.end_fill()
+        
+        # Small black circle
+        t.penup()
+        t.goto(0, -100)
+        t.pendown()
+        t.color("black", "black")
+        t.begin_fill()
+        t.circle(25)
+        t.end_fill()
+        
+        t.width(2)
+        screen.update()
+
+    # Random circles constellation
+    def pattern_random_circles(count=30):
+        """Create random circles like bubbles"""
+        t.clear()
+        
+        for i in range(count):
+            x = random.randint(-400, 400)
+            y = random.randint(-400, 400)
+            radius = random.randint(10, 60)
+            color = random.choice(colors)
+            
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            t.color(color)
+            t.circle(radius)
+        
+        screen.update()
+
+    # Mandala circles
+    def pattern_mandala(layers=5, circles_per_layer=8):
+        """Create mandala pattern with circles"""
+        t.clear()
+        
+        base_distance = 50
+        
+        for layer in range(1, layers + 1):
+            angle = 360 / circles_per_layer
+            distance = base_distance * layer
+            
+            for i in range(circles_per_layer):
+                # Calculate position
+                rad = math.radians(i * angle)
+                x = distance * math.cos(rad)
+                y = distance * math.sin(rad)
+                
+                t.penup()
+                t.goto(x, y - 20)
+                t.pendown()
+                t.color(colors[(layer + i) % len(colors)])
+                t.circle(20)
+        
+        screen.update()
+
+    # Target circles
+    def pattern_target(rings=8):
+        """Create target/bullseye pattern"""
+        t.clear()
+        
+        max_radius = 200
+        step = max_radius / rings
+        
+        for i in range(rings, 0, -1):
+            radius = i * step
+            t.penup()
+            t.goto(0, -radius)
+            t.pendown()
+            
+            if i % 2 == 0:
+                t.color("red")
+                t.begin_fill()
+                t.circle(radius)
+                t.end_fill()
+            else:
+                t.color("white")
+                t.begin_fill()
+                t.circle(radius)
+                t.end_fill()
+        
+        screen.update()
+
+    # Venn diagram
+    def pattern_venn_diagram():
+        """Create overlapping circles (Venn diagram style)"""
+        t.clear()
+        t.width(3)
+        
+        positions = [(-60, 0), (60, 0), (0, 80)]
+        circle_colors = ["red", "blue", "green"]
+        
+        for i, (x, y) in enumerate(positions):
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            t.color(circle_colors[i])
+            t.circle(100)
+        
+        t.width(2)
+        screen.update()
+
+    # Chain of circles
+    def pattern_circle_chain(circles=20):
+        """Create chain of interconnected circles"""
+        t.clear()
+        
+        x = -300
+        y = 0
+        
+        for i in range(circles):
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            t.color(colors[i % len(colors)])
+            t.circle(30)
+            x += 35
+        
+        screen.update()
+
+    # Interactive controls
+    def main():
+        print("=== TURTLE CIRCLE ART GENERATOR ===")
+        print("\nKeyboard Controls:")
+        print("1 - Rotating Circles")
+        print("2 - Concentric Circles")
+        print("3 - Circle Flower")
+        print("4 - Spiral Circles")
+        print("5 - Olympic Rings")
+        print("6 - Arc Art")
+        print("7 - Yin-Yang")
+        print("8 - Random Circles")
+        print("9 - Mandala")
+        print("0 - Target/Bullseye")
+        print("V - Venn Diagram")
+        print("C - Circle Chain")
+        print("Space - Clear Screen")
+        
+        # Draw initial pattern
+        pattern_rotating_circles()
+        
+        # Set up keyboard bindings
+        screen.listen()
+        screen.onkey(lambda: pattern_rotating_circles(), "1")
+        screen.onkey(lambda: pattern_concentric_circles(), "2")
+        screen.onkey(lambda: pattern_circle_flower(), "3")
+        screen.onkey(lambda: pattern_spiral_circles(), "4")
+        screen.onkey(lambda: pattern_olympic_rings(), "5")
+        screen.onkey(lambda: pattern_arc_art(), "6")
+        screen.onkey(lambda: pattern_yin_yang(), "7")
+        screen.onkey(lambda: pattern_random_circles(), "8")
+        screen.onkey(lambda: pattern_mandala(), "9")
+        screen.onkey(lambda: pattern_target(), "0")
+        screen.onkey(lambda: pattern_venn_diagram(), "v")
+        screen.onkey(lambda: pattern_circle_chain(), "c")
+        screen.onkey(lambda: (t.clear(), screen.update()), "space")
+        
+        screen.update()
+
+    # Run the program
+    if __name__ == '__main__':
+        main()
+        turtle.done()`
+    },
+    {
     title: "Turtle Bouncing Ball",
     category: "turtle",
     description: "Simulate physics with bouncing ball animation.",
     tags: ["turtle", "physics", "animation"],
     difficulty: 2,
     lines: "~80 lines",
-    code: `import turtle,time
-  screen=turtle.Screen()
-  screen.setup(400,400)
-  screen.tracer(0)
-  ball=turtle.Turtle()
-  ball.shape("circle")
-  ball.color("red")
-  ball.penup()
-  x,y=0,0
-  dx,dy=5,3
-  while True:
-      x+=dx
-      y+=dy
-      if x>190 or x<-190: dx*=-1
-      if y>190 or y<-190: dy*=-1
-      ball.goto(x,y)
-      screen.update()
-      time.sleep(0.03)`
-  },
+    code: `import turtle
+    import time
+    import random
+    import math
 
-    {
-      title: "Turtle Rainbow Spiral",
-      category: "turtle",
-      description: "Draw colorful spiral patterns with gradient colors.",
-      tags: ["turtle", "colors", "spirals"],
-      difficulty: 2,
-      lines: "~90 lines",
-      code: `# Turtle Rainbow Spiral
-  import turtle
+    # Set up the screen
+    screen = turtle.Screen()
+    screen.setup(600, 600)
+    screen.bgcolor("black")
+    screen.title("Bouncing Ball Physics Simulation")
+    screen.tracer(0)
 
-  def draw_spiral():
-      # Setup
-      screen = turtle.Screen()
-      screen.bgcolor("black")
-      screen.title("Rainbow Spiral")
-      
-      pen = turtle.Turtle()
-      pen.speed(0)
-      pen.width(2)
-      
-      colors = ["red", "orange", "yellow", "green", "blue", "purple", "pink"]
-      
-      # Draw spiral
-      for i in range(360):
-          pen.pencolor(colors[i % len(colors)])
-          pen.forward(i * 2)
-          pen.left(59)
-      
-      pen.hideturtle()
-      screen.exitonclick()
+    # Create the ball
+    ball = turtle.Turtle()
+    ball.shape("circle")
+    ball.color("red")
+    ball.penup()
+    ball.shapesize(1.5, 1.5)
 
-  if __name__ == '__main__':
-      draw_spiral()`
+    # Create trail turtle
+    trail = turtle.Turtle()
+    trail.hideturtle()
+    trail.penup()
+    trail.speed(0)
+
+    # Create info display
+    info = turtle.Turtle()
+    info.hideturtle()
+    info.penup()
+    info.goto(0, 260)
+    info.color("white")
+
+    # Ball physics properties
+    x, y = 0, 0
+    dx, dy = 5, 3
+    gravity = 0.3
+    bounce_damping = 0.9
+    speed_limit = 15
+
+    # Simulation mode
+    gravity_enabled = True
+    trail_enabled = False
+    ball_color_mode = "single"
+
+    # Draw boundaries
+    def draw_boundaries():
+        """Draw the boundary box"""
+        boundary = turtle.Turtle()
+        boundary.hideturtle()
+        boundary.speed(0)
+        boundary.color("white")
+        boundary.penup()
+        boundary.goto(-290, -290)
+        boundary.pendown()
+        boundary.pensize(3)
+        
+        for _ in range(4):
+            boundary.forward(580)
+            boundary.left(90)
+        
+        boundary.penup()
+
+    # Update info display
+    def update_info():
+        """Display current simulation info"""
+        info.clear()
+        speed = math.sqrt(dx**2 + dy**2)
+        info.write(f"Speed: {speed:.1f} | Gravity: {'ON' if gravity_enabled else 'OFF'} | Trail: {'ON' if trail_enabled else 'OFF'}", 
+                align="center", font=("Courier", 12, "bold"))
+
+    # Change ball color based on speed
+    def update_ball_color():
+        """Change ball color based on speed"""
+        if ball_color_mode == "speed":
+            speed = math.sqrt(dx**2 + dy**2)
+            if speed < 5:
+                ball.color("blue")
+            elif speed < 10:
+                ball.color("green")
+            elif speed < 15:
+                ball.color("yellow")
+            else:
+                ball.color("red")
+        elif ball_color_mode == "rainbow":
+            colors = ["red", "orange", "yellow", "green", "cyan", "blue", "purple", "magenta"]
+            ball.color(random.choice(colors))
+
+    # Toggle gravity
+    def toggle_gravity():
+        """Toggle gravity on/off"""
+        global gravity_enabled
+        gravity_enabled = not gravity_enabled
+        print(f"Gravity: {'ON' if gravity_enabled else 'OFF'}")
+
+    # Toggle trail
+    def toggle_trail():
+        """Toggle ball trail on/off"""
+        global trail_enabled
+        trail_enabled = not trail_enabled
+        if not trail_enabled:
+            trail.clear()
+        print(f"Trail: {'ON' if trail_enabled else 'OFF'}")
+
+    # Change color mode
+    def cycle_color_mode():
+        """Cycle through color modes"""
+        global ball_color_mode
+        modes = ["single", "speed", "rainbow"]
+        current_index = modes.index(ball_color_mode)
+        ball_color_mode = modes[(current_index + 1) % len(modes)]
+        print(f"Color mode: {ball_color_mode}")
+        if ball_color_mode == "single":
+            ball.color("red")
+
+    # Reset simulation
+    def reset_simulation():
+        """Reset ball to center"""
+        global x, y, dx, dy
+        x, y = 0, 0
+        dx = random.uniform(-8, 8)
+        dy = random.uniform(-8, 8)
+        trail.clear()
+        ball.goto(x, y)
+        print("Simulation reset!")
+
+    # Add random ball
+    balls = []
+
+    def create_multi_ball():
+        """Create multiple balls"""
+        global balls
+        if len(balls) < 10:
+            new_ball = turtle.Turtle()
+            new_ball.shape("circle")
+            new_ball.color(random.choice(["red", "blue", "green", "yellow", "purple", "orange"]))
+            new_ball.penup()
+            new_ball.shapesize(1, 1)
+            new_ball.goto(random.randint(-200, 200), random.randint(-200, 200))
+            
+            # Random velocity
+            new_ball.dx = random.uniform(-6, 6)
+            new_ball.dy = random.uniform(-6, 6)
+            
+            balls.append(new_ball)
+            print(f"Balls: {len(balls)}")
+
+    def clear_all_balls():
+        """Clear all extra balls"""
+        global balls
+        for b in balls:
+            b.hideturtle()
+        balls = []
+        print("All extra balls cleared!")
+
+    # Increase speed
+    def speed_up():
+        """Increase ball speed"""
+        global dx, dy
+        dx *= 1.2
+        dy *= 1.2
+        print("Speed increased!")
+
+    # Decrease speed
+    def slow_down():
+        """Decrease ball speed"""
+        global dx, dy
+        dx *= 0.8
+        dy *= 0.8
+        print("Speed decreased!")
+
+    # Main animation loop
+    def animate():
+        """Main animation loop"""
+        global x, y, dx, dy
+        
+        # Apply gravity
+        if gravity_enabled:
+            dy -= gravity
+        
+        # Update position
+        x += dx
+        y += dy
+        
+        # Bounce off walls
+        if x > 280 or x < -280:
+            dx *= -1
+            x = 280 if x > 280 else -280
+            if gravity_enabled:
+                dx *= bounce_damping
+        
+        if y > 280 or y < -280:
+            dy *= -1
+            y = 280 if y > 280 else -280
+            if gravity_enabled:
+                dy *= bounce_damping
+        
+        # Limit speed
+        speed = math.sqrt(dx**2 + dy**2)
+        if speed > speed_limit:
+            scale = speed_limit / speed
+            dx *= scale
+            dy *= scale
+        
+        # Update ball position
+        ball.goto(x, y)
+        
+        # Draw trail
+        if trail_enabled:
+            trail.goto(x, y)
+            trail.dot(5, ball.pencolor())
+        
+        # Update color
+        update_ball_color()
+        
+        # Update extra balls
+        for b in balls:
+            b.dx += 0 if not gravity_enabled else -gravity
+            b.setx(b.xcor() + b.dx)
+            b.sety(b.ycor() + b.dy)
+            
+            # Bounce
+            if b.xcor() > 280 or b.xcor() < -280:
+                b.dx *= -1
+                b.setx(280 if b.xcor() > 280 else -280)
+            
+            if b.ycor() > 280 or b.ycor() < -280:
+                b.dy *= -1
+                b.sety(280 if b.ycor() > 280 else -280)
+        
+        # Update info
+        update_info()
+        
+        # Update screen
+        screen.update()
+        
+        # Continue animation
+        screen.ontimer(animate, 30)
+
+    # Set up keyboard controls
+    def setup_controls():
+        """Set up keyboard bindings"""
+        screen.listen()
+        screen.onkey(toggle_gravity, "g")
+        screen.onkey(toggle_trail, "t")
+        screen.onkey(cycle_color_mode, "c")
+        screen.onkey(reset_simulation, "r")
+        screen.onkey(create_multi_ball, "m")
+        screen.onkey(clear_all_balls, "x")
+        screen.onkey(speed_up, "Up")
+        screen.onkey(slow_down, "Down")
+
+    # Initialize simulation
+    def main():
+        """Initialize and start the simulation"""
+        print("=== BOUNCING BALL PHYSICS ===")
+        print("\nKeyboard Controls:")
+        print("G - Toggle Gravity")
+        print("T - Toggle Trail")
+        print("C - Change Color Mode")
+        print("R - Reset Ball")
+        print("M - Add Ball")
+        print("X - Clear Extra Balls")
+        print("Up/Down - Speed Up/Slow Down")
+        print("\nPress any key to start!")
+        
+        draw_boundaries()
+        update_info()
+        setup_controls()
+        
+        # Start animation
+        animate()
+        
+        screen.update()
+
+    # Run the simulation
+    if __name__ == '__main__':
+        main()
+        turtle.done()`
     },
-  {
+    {
     title: "Turtle Colorful Spirals",
     category: "turtle",
     description: "Draw colorful spiral patterns with turtle graphics.",
     tags: ["turtle", "colors", "spirals"],
     difficulty: 2,
     lines: "~60 lines",
-    code: `import turtle,random
-  t=turtle.Turtle()
-  t.speed(0)
-  screen=turtle.Screen()
-  screen.bgcolor("black")
-  colors=["red","blue","green","yellow","purple","orange","cyan"]
-  for i in range(72):
-      t.color(random.choice(colors))
-      t.forward(i*5)
-      t.right(45)
-  turtle.done()`
-  },
-  {
+    code: `import turtle
+    import random
+    import colorsys
+    import math
+
+    # Set up the screen
+    screen = turtle.Screen()
+    screen.setup(900, 900)
+    screen.bgcolor("black")
+    screen.title("Colorful Spiral Art Generator")
+    screen.tracer(0)
+
+    # Create the turtle
+    t = turtle.Turtle()
+    t.speed(0)
+    t.hideturtle()
+    t.width(2)
+
+    # Color palettes
+    colors = ["red", "blue", "green", "yellow", "purple", "orange", "cyan", "magenta", "pink"]
+    neon_colors = ["#FF1493", "#00FF00", "#00FFFF", "#FF00FF", "#FFFF00", "#FF6600", "#8B00FF"]
+    pastel_colors = ["#FFB6C1", "#FFD700", "#98FB98", "#87CEEB", "#DDA0DD", "#FFDAB9", "#F0E68C"]
+
+    # Basic colorful spiral
+    def spiral_basic(iterations=72, step_multiplier=5, angle=45):
+        """Draw basic colorful spiral"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        for i in range(iterations):
+            t.color(random.choice(colors))
+            t.forward(i * step_multiplier)
+            t.right(angle)
+        
+        screen.update()
+
+    # Square spiral
+    def spiral_square(iterations=100, step_increment=5):
+        """Draw square spiral with colors"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        distance = 0
+        for i in range(iterations):
+            t.color(colors[i % len(colors)])
+            t.forward(distance)
+            t.right(90)
+            distance += step_increment
+        
+        screen.update()
+
+    # HSV rainbow spiral
+    def spiral_rainbow(iterations=200, step_multiplier=2, angle=61):
+        """Draw spiral with smooth rainbow gradient"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        for i in range(iterations):
+            # Smooth color transition using HSV
+            hue = i / iterations
+            rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+            t.color(rgb)
+            t.forward(i * step_multiplier)
+            t.right(angle)
+        
+        screen.update()
+
+    # Double helix spiral
+    def spiral_double_helix(iterations=150):
+        """Draw double helix spiral pattern"""
+        t.clear()
+        
+        # First spiral
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        for i in range(iterations):
+            hue = i / iterations
+            rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+            t.color(rgb)
+            t.forward(i * 2)
+            t.right(59)
+        
+        # Second spiral (mirrored)
+        t.penup()
+        t.goto(0, 0)
+        t.setheading(180)
+        t.pendown()
+        
+        for i in range(iterations):
+            hue = (i / iterations + 0.5) % 1.0
+            rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+            t.color(rgb)
+            t.forward(i * 2)
+            t.right(59)
+        
+        screen.update()
+
+    # Flower spiral
+    def spiral_flower(petals=12, iterations=36):
+        """Create flower-like spiral pattern"""
+        t.clear()
+        
+        angle_step = 360 / petals
+        
+        for petal in range(petals):
+            t.penup()
+            t.goto(0, 0)
+            t.setheading(petal * angle_step)
+            t.pendown()
+            
+            color = colors[petal % len(colors)]
+            
+            for i in range(iterations):
+                t.color(color)
+                t.forward(i * 3)
+                t.right(10)
+        
+        screen.update()
+
+    # Star spiral
+    def spiral_star(points=5, iterations=72):
+        """Create star-shaped spiral"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        angle = 180 - (180 / points)
+        
+        for i in range(iterations):
+            hue = i / iterations
+            rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+            t.color(rgb)
+            t.forward(i * 3)
+            t.right(angle)
+        
+        screen.update()
+
+    # Circular spiral
+    def spiral_circles(circles=50):
+        """Draw spiral made of circles"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        radius = 5
+        for i in range(circles):
+            hue = i / circles
+            rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+            t.color(rgb)
+            t.circle(radius)
+            t.right(15)
+            radius += 4
+        
+        screen.update()
+
+    # Triangular spiral
+    def spiral_triangular(iterations=120):
+        """Draw triangular spiral pattern"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        distance = 5
+        for i in range(iterations):
+            t.color(colors[i % len(colors)])
+            t.forward(distance)
+            t.right(120)
+            distance += 3
+        
+        screen.update()
+
+    # Fibonacci spiral approximation
+    def spiral_fibonacci(iterations=15):
+        """Draw Fibonacci-inspired spiral"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        # Fibonacci sequence
+        fib = [1, 1]
+        for i in range(2, iterations):
+            fib.append(fib[-1] + fib[-2])
+        
+        for i in range(iterations):
+            hue = i / iterations
+            rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+            t.color(rgb)
+            
+            # Draw quarter circle
+            t.circle(fib[i] * 5, 90)
+        
+        screen.update()
+
+    # Hexagonal spiral
+    def spiral_hexagonal(iterations=60):
+        """Draw hexagonal spiral pattern"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        distance = 5
+        for i in range(iterations):
+            hue = i / iterations
+            rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+            t.color(rgb)
+            t.forward(distance)
+            t.right(60)
+            distance += 4
+        
+        screen.update()
+
+    # Pulsing spiral
+    def spiral_pulsing(iterations=100):
+        """Draw spiral with pulsing size"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        
+        for i in range(iterations):
+            hue = i / iterations
+            rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+            t.color(rgb)
+            
+            # Pulsing effect using sine wave
+            pulse = abs(math.sin(i / 10)) * 3 + 1
+            t.forward(i * pulse)
+            t.right(61)
+        
+        screen.update()
+
+    # Dotted spiral
+    def spiral_dotted(iterations=200):
+        """Draw spiral with dots instead of lines"""
+        t.clear()
+        t.penup()
+        t.goto(0, 0)
+        
+        for i in range(iterations):
+            hue = i / iterations
+            rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+            t.color(rgb)
+            t.forward(i * 2)
+            t.dot(10)
+            t.right(61)
+        
+        screen.update()
+
+    # Interactive controls
+    def main():
+        """Initialize and start the program"""
+        print("=== COLORFUL SPIRAL ART ===")
+        print("\nKeyboard Controls:")
+        print("1 - Basic Colorful Spiral")
+        print("2 - Square Spiral")
+        print("3 - Rainbow Gradient Spiral")
+        print("4 - Double Helix Spiral")
+        print("5 - Flower Spiral")
+        print("6 - Star Spiral")
+        print("7 - Circular Spiral")
+        print("8 - Triangular Spiral")
+        print("9 - Fibonacci Spiral")
+        print("0 - Hexagonal Spiral")
+        print("P - Pulsing Spiral")
+        print("D - Dotted Spiral")
+        print("Space - Clear Screen")
+        
+        # Draw initial pattern
+        spiral_basic()
+        
+        # Set up keyboard bindings
+        screen.listen()
+        screen.onkey(lambda: spiral_basic(), "1")
+        screen.onkey(lambda: spiral_square(), "2")
+        screen.onkey(lambda: spiral_rainbow(), "3")
+        screen.onkey(lambda: spiral_double_helix(), "4")
+        screen.onkey(lambda: spiral_flower(), "5")
+        screen.onkey(lambda: spiral_star(), "6")
+        screen.onkey(lambda: spiral_circles(), "7")
+        screen.onkey(lambda: spiral_triangular(), "8")
+        screen.onkey(lambda: spiral_fibonacci(), "9")
+        screen.onkey(lambda: spiral_hexagonal(), "0")
+        screen.onkey(lambda: spiral_pulsing(), "p")
+        screen.onkey(lambda: spiral_dotted(), "d")
+        screen.onkey(lambda: (t.clear(), screen.update()), "space")
+        
+        screen.update()
+
+    # Run the program
+    if __name__ == '__main__':
+        main()
+        turtle.done()`
+    },
+    {
     title: "Turtle Brick Breaker",
     category: "turtle",
     description: "Classic brick breaker game with turtle graphics.",
     tags: ["turtle", "game", "arcade"],
     difficulty: 4,
     lines: "~200 lines",
-    code: `import turtle,time,random
-  screen=turtle.Screen()
-  screen.setup(600,600)
-  screen.title("Brick Breaker")
-  screen.tracer(0)
-  paddle=turtle.Turtle();paddle.shape("square");paddle.shapesize(stretch_wid=1,stretch_len=5);paddle.color("blue");paddle.penup();paddle.goto(0,-250)
-  ball=turtle.Turtle();ball.shape("circle");ball.color("red");ball.penup();ball.goto(0,-200);ball.dx=4;ball.dy=4
-  bricks=[]
-  for y in range(5):
-      for x in range(-250,251,50):
-          b=turtle.Turtle();b.shape("square");b.shapesize(stretch_wid=1,stretch_len=2);b.color(random.choice(["red","green","yellow","purple","orange"]));b.penup();b.goto(x,200-y*30);bricks.append(b)
-  def paddle_left(): x=paddle.xcor()-20; paddle.setx(max(-250,x))
-  def paddle_right(): x=paddle.xcor()+20; paddle.setx(min(250,x))
-  screen.listen()
-  screen.onkeypress(paddle_left,"a")
-  screen.onkeypress(paddle_right,"d")
-  running=True
-  while running:
-      screen.update()
-      ball.setx(ball.xcor()+ball.dx)
-      ball.sety(ball.ycor()+ball.dy)
-      if ball.xcor()>290 or ball.xcor()<-290: ball.dx*=-1
-      if ball.ycor()>290: ball.dy*=-1
-      if ball.ycor()<-290: running=False
-      if abs(ball.ycor()-paddle.ycor())<10 and abs(ball.xcor()-paddle.xcor())<50: ball.dy*=-1
-      for b in bricks:
-          if abs(ball.xcor()-b.xcor())<25 and abs(ball.ycor()-b.ycor())<10:
-              ball.dy*=-1; b.goto(1000,1000); bricks.remove(b)
-      time.sleep(0.02)
-  screen.bye()`
-  },
+    code: `import turtle
+    import time
+    import random
 
-  {
+    # Set up the screen
+    screen = turtle.Screen()
+    screen.setup(700, 700)
+    screen.title("Brick Breaker - Turtle Edition")
+    screen.bgcolor("black")
+    screen.tracer(0)
+
+    # Game state
+    score = 0
+    lives = 3
+    level = 1
+    game_running = True
+    game_started = False
+
+    # Create paddle
+    paddle = turtle.Turtle()
+    paddle.shape("square")
+    paddle.shapesize(stretch_wid=1, stretch_len=6)
+    paddle.color("cyan")
+    paddle.penup()
+    paddle.goto(0, -280)
+
+    # Create ball
+    ball = turtle.Turtle()
+    ball.shape("circle")
+    ball.color("white")
+    ball.shapesize(0.8, 0.8)
+    ball.penup()
+    ball.goto(0, -250)
+    ball.dx = 0
+    ball.dy = 0
+    ball.speed_multiplier = 1
+
+    # Create score display
+    score_display = turtle.Turtle()
+    score_display.hideturtle()
+    score_display.penup()
+    score_display.color("white")
+    score_display.goto(0, 310)
+
+    # Create message display
+    message_display = turtle.Turtle()
+    message_display.hideturtle()
+    message_display.penup()
+    message_display.color("yellow")
+    message_display.goto(0, 0)
+
+    # Brick list
+    bricks = []
+
+    # Draw boundaries
+    def draw_boundaries():
+        """Draw game boundaries"""
+        boundary = turtle.Turtle()
+        boundary.hideturtle()
+        boundary.speed(0)
+        boundary.color("white")
+        boundary.penup()
+        boundary.goto(-330, -330)
+        boundary.pendown()
+        boundary.pensize(3)
+        
+        for _ in range(4):
+            boundary.forward(660)
+            boundary.left(90)
+        
+        boundary.penup()
+
+    # Create bricks
+    def create_bricks(rows=5, cols=11):
+        """Create the brick layout"""
+        global bricks
+        
+        # Clear existing bricks
+        for brick in bricks:
+            brick.hideturtle()
+        bricks.clear()
+        
+        brick_colors = ["red", "orange", "yellow", "green", "cyan", "blue", "purple"]
+        brick_width = 50
+        brick_height = 20
+        
+        start_x = -280
+        start_y = 250
+        
+        for row in range(rows):
+            for col in range(cols):
+                brick = turtle.Turtle()
+                brick.shape("square")
+                brick.shapesize(stretch_wid=1, stretch_len=2.5)
+                brick.color(brick_colors[row % len(brick_colors)])
+                brick.penup()
+                
+                x = start_x + col * (brick_width + 5)
+                y = start_y - row * (brick_height + 5)
+                brick.goto(x, y)
+                
+                # Assign points based on row
+                brick.points = (rows - row) * 10
+                
+                bricks.append(brick)
+
+    # Update score display
+    def update_score():
+        """Update the score display"""
+        score_display.clear()
+        score_display.write(f"Score: {score}  Lives: {lives}  Level: {level}", 
+                        align="center", font=("Courier", 16, "bold"))
+
+    # Show message
+    def show_message(text, duration=0):
+        """Display a message on screen"""
+        message_display.clear()
+        message_display.write(text, align="center", font=("Arial", 20, "bold"))
+        if duration > 0:
+            screen.ontimer(lambda: message_display.clear(), duration)
+
+    # Paddle movement
+    def paddle_left():
+        """Move paddle left"""
+        x = paddle.xcor() - 30
+        if x > -280:
+            paddle.setx(x)
+
+    def paddle_right():
+        """Move paddle right"""
+        x = paddle.xcor() + 30
+        if x < 280:
+            paddle.setx(x)
+
+    # Mouse movement
+    def move_paddle_mouse(x, y):
+        """Move paddle with mouse"""
+        if -280 < x < 280:
+            paddle.setx(x)
+
+    # Start game
+    def start_game():
+        """Start the ball moving"""
+        global game_started
+        if not game_started and game_running:
+            game_started = True
+            ball.dx = random.choice([-4, 4])
+            ball.dy = 4
+            message_display.clear()
+
+    # Reset ball
+    def reset_ball():
+        """Reset ball to starting position"""
+        global game_started
+        ball.goto(0, -250)
+        ball.dx = 0
+        ball.dy = 0
+        game_started = False
+        show_message("Press SPACE to launch ball", 2000)
+
+    # Next level
+    def next_level():
+        """Advance to next level"""
+        global level, score
+        level += 1
+        score += 100  # Bonus for completing level
+        ball.speed_multiplier += 0.2
+        create_bricks(rows=min(5 + level, 8), cols=11)
+        reset_ball()
+        show_message(f"Level {level}! Bonus: 100 points", 2000)
+
+    # Game over
+    def game_over():
+        """End the game"""
+        global game_running
+        game_running = False
+        show_message(f"GAME OVER! Final Score: {score}")
+
+    # Win game
+    def win_game():
+        """Player wins"""
+        global game_running
+        game_running = False
+        show_message(f"YOU WIN! Final Score: {score}")
+
+    # Restart game
+    def restart_game():
+        """Restart the game"""
+        global score, lives, level, game_running, game_started
+        score = 0
+        lives = 3
+        level = 1
+        game_running = True
+        game_started = False
+        ball.speed_multiplier = 1
+        
+        create_bricks()
+        reset_ball()
+        update_score()
+        message_display.clear()
+
+    # Check collisions
+    def check_collisions():
+        """Check for all collisions"""
+        global score, lives, game_running
+        
+        # Wall collisions
+        if ball.xcor() > 320 or ball.xcor() < -320:
+            ball.dx *= -1
+        
+        if ball.ycor() > 320:
+            ball.dy *= -1
+        
+        # Bottom wall (lose life)
+        if ball.ycor() < -320:
+            lives -= 1
+            update_score()
+            
+            if lives <= 0:
+                game_over()
+            else:
+                reset_ball()
+                show_message(f"Life lost! {lives} remaining", 2000)
+            return
+        
+        # Paddle collision
+        if (ball.ycor() < paddle.ycor() + 10 and 
+            ball.ycor() > paddle.ycor() - 10 and
+            abs(ball.xcor() - paddle.xcor()) < 60):
+            
+            ball.dy = abs(ball.dy)  # Always bounce up
+            
+            # Add spin based on where ball hits paddle
+            hit_pos = (ball.xcor() - paddle.xcor()) / 60
+            ball.dx += hit_pos * 2
+            
+            # Limit ball speed
+            if abs(ball.dx) > 8:
+                ball.dx = 8 if ball.dx > 0 else -8
+        
+        # Brick collisions
+        for brick in bricks[:]:  # Use slice to avoid modification during iteration
+            if (abs(ball.xcor() - brick.xcor()) < 30 and 
+                abs(ball.ycor() - brick.ycor()) < 15):
+                
+                # Determine bounce direction
+                if abs(ball.xcor() - brick.xcor()) > abs(ball.ycor() - brick.ycor()):
+                    ball.dx *= -1
+                else:
+                    ball.dy *= -1
+                
+                # Remove brick and update score
+                score += brick.points
+                brick.hideturtle()
+                bricks.remove(brick)
+                update_score()
+                
+                # Check if level complete
+                if len(bricks) == 0:
+                    next_level()
+                
+                break
+
+    # Main game loop
+    def game_loop():
+        """Main game loop"""
+        if game_running and game_started:
+            # Update ball position
+            ball.setx(ball.xcor() + ball.dx * ball.speed_multiplier)
+            ball.sety(ball.ycor() + ball.dy * ball.speed_multiplier)
+            
+            # Check collisions
+            check_collisions()
+        
+        # Update screen
+        screen.update()
+        
+        # Continue loop
+        screen.ontimer(game_loop, 20)
+
+    # Set up keyboard controls
+    def setup_controls():
+        """Set up game controls"""
+        screen.listen()
+        screen.onkey(paddle_left, "Left")
+        screen.onkey(paddle_right, "Right")
+        screen.onkey(paddle_left, "a")
+        screen.onkey(paddle_right, "d")
+        screen.onkey(start_game, "space")
+        screen.onkey(restart_game, "r")
+        screen.onscreenclick(lambda x, y: move_paddle_mouse(x, y))
+
+    # Initialize game
+    def main():
+        """Initialize and start the game"""
+        print("=== BRICK BREAKER ===")
+        print("\nControls:")
+        print("Arrow Keys / A,D - Move paddle")
+        print("Mouse - Move paddle")
+        print("SPACE - Launch ball")
+        print("R - Restart game")
+        print("\nGood luck!")
+        
+        draw_boundaries()
+        create_bricks()
+        update_score()
+        show_message("Press SPACE to start!")
+        
+        setup_controls()
+        game_loop()
+
+    # Run the game
+    if __name__ == '__main__':
+        main()
+        turtle.done()`
+    },
+    {
     title: "Turtle Fireworks",
     category: "turtle",
     description: "Animated fireworks display with particle effects.",
     tags: ["turtle", "animation", "particles"],
     difficulty: 3,
     lines: "~150 lines",
-    code: `import turtle,random,time
-  t=turtle.Turtle()
-  t.speed(0)
-  screen=turtle.Screen()
-  screen.bgcolor("black")
-  colors=["red","blue","green","yellow","purple","orange","cyan"]
-  def firework(x,y):
-      for _ in range(36):
-          t.penup();t.goto(x,y);t.pendown()
-          t.color(random.choice(colors))
-          t.forward(50)
-          t.backward(50)
-  for i in range(10):
-      firework(random.randint(-200,200),random.randint(-200,200))
-      screen.update()
-      time.sleep(0.5)
-  turtle.done()`
-  },
-  {
+    code: `import turtle
+    import random
+    import time
+    import math
+
+    # Set up the screen
+    screen = turtle.Screen()
+    screen.setup(900, 700)
+    screen.bgcolor("black")
+    screen.title("Fireworks Display - Press SPACE for fireworks!")
+    screen.tracer(0)
+
+    # Create turtles for drawing
+    firework_turtle = turtle.Turtle()
+    firework_turtle.speed(0)
+    firework_turtle.hideturtle()
+
+    # Particle system
+    class Particle:
+        def __init__(self, x, y, color, angle, speed):
+            self.x = x
+            self.y = y
+            self.color = color
+            self.angle = angle
+            self.speed = speed
+            self.gravity = 0.15
+            self.lifetime = 60
+            self.age = 0
+            
+        def update(self):
+            """Update particle position"""
+            self.age += 1
+            rad = math.radians(self.angle)
+            self.x += math.cos(rad) * self.speed
+            self.y += math.sin(rad) * self.speed
+            self.speed -= self.gravity
+            
+        def is_dead(self):
+            """Check if particle should be removed"""
+            return self.age >= self.lifetime or self.y < -350
+
+    # Active particles
+    particles = []
+
+    # Color palettes
+    color_palettes = {
+        "rainbow": ["red", "orange", "yellow", "green", "cyan", "blue", "purple", "magenta"],
+        "fire": ["red", "orange", "yellow", "gold"],
+        "ice": ["cyan", "lightblue", "blue", "white"],
+        "galaxy": ["purple", "magenta", "pink", "blue", "cyan"],
+        "neon": ["#FF1493", "#00FF00", "#00FFFF", "#FF00FF", "#FFFF00"],
+    }
+
+    current_palette = "rainbow"
+    colors = color_palettes[current_palette]
+
+    # Simple burst firework
+    def simple_firework(x, y, size=50):
+        """Draw a simple burst firework"""
+        color = random.choice(colors)
+        rays = 36
+        
+        for i in range(rays):
+            angle = i * (360 / rays)
+            firework_turtle.penup()
+            firework_turtle.goto(x, y)
+            firework_turtle.setheading(angle)
+            firework_turtle.pendown()
+            firework_turtle.color(color)
+            firework_turtle.forward(size)
+        
+        screen.update()
+
+    # Animated burst firework
+    def animated_burst(x, y, particles_count=30):
+        """Create animated particle burst"""
+        for _ in range(particles_count):
+            angle = random.randint(0, 360)
+            speed = random.uniform(3, 8)
+            color = random.choice(colors)
+            particle = Particle(x, y, color, angle, speed)
+            particles.append(particle)
+
+    # Circle burst firework
+    def circle_burst(x, y, rings=3):
+        """Create concentric circle burst"""
+        color = random.choice(colors)
+        
+        for ring in range(1, rings + 1):
+            radius = ring * 30
+            firework_turtle.penup()
+            firework_turtle.goto(x, y - radius)
+            firework_turtle.pendown()
+            firework_turtle.color(color)
+            firework_turtle.circle(radius)
+        
+        screen.update()
+
+    # Star burst firework
+    def star_burst(x, y, points=5):
+        """Create star-shaped burst"""
+        color = random.choice(colors)
+        size = 80
+        angle = 180 - (180 / points)
+        
+        firework_turtle.penup()
+        firework_turtle.goto(x, y)
+        firework_turtle.pendown()
+        firework_turtle.color(color)
+        
+        for _ in range(points):
+            firework_turtle.forward(size)
+            firework_turtle.right(angle)
+        
+        screen.update()
+
+    # Heart-shaped firework
+    def heart_burst(x, y):
+        """Create heart-shaped burst"""
+        color = random.choice(["red", "pink", "magenta"])
+        
+        firework_turtle.penup()
+        firework_turtle.goto(x, y)
+        firework_turtle.pendown()
+        firework_turtle.color(color)
+        firework_turtle.begin_fill()
+        
+        # Draw heart shape
+        firework_turtle.left(140)
+        firework_turtle.forward(50)
+        firework_turtle.circle(-25, 200)
+        firework_turtle.left(120)
+        firework_turtle.circle(-25, 200)
+        firework_turtle.forward(50)
+        
+        firework_turtle.end_fill()
+        firework_turtle.setheading(0)
+        screen.update()
+
+    # Spiral firework
+    def spiral_burst(x, y):
+        """Create spiral burst effect"""
+        color = random.choice(colors)
+        firework_turtle.penup()
+        firework_turtle.goto(x, y)
+        firework_turtle.pendown()
+        firework_turtle.color(color)
+        
+        size = 1
+        for _ in range(60):
+            firework_turtle.forward(size)
+            firework_turtle.right(30)
+            size += 1
+        
+        screen.update()
+
+    # Multi-colored burst
+    def rainbow_burst(x, y):
+        """Create rainbow-colored burst"""
+        rays = 24
+        
+        for i in range(rays):
+            angle = i * (360 / rays)
+            color = colors[i % len(colors)]
+            
+            firework_turtle.penup()
+            firework_turtle.goto(x, y)
+            firework_turtle.setheading(angle)
+            firework_turtle.pendown()
+            firework_turtle.color(color)
+            firework_turtle.forward(70)
+
+    # Willow effect
+    def willow_burst(x, y):
+        """Create willow tree effect"""
+        for _ in range(40):
+            angle = random.randint(60, 120)
+            speed = random.uniform(4, 7)
+            color = random.choice(["yellow", "gold", "orange"])
+            particle = Particle(x, y, color, angle, speed)
+            particle.gravity = 0.08
+            particle.lifetime = 100
+            particles.append(particle)
+
+    # Fountain effect
+    def fountain_burst(x, y):
+        """Create fountain effect"""
+        for _ in range(50):
+            angle = random.randint(70, 110)
+            speed = random.uniform(5, 10)
+            color = random.choice(colors)
+            particle = Particle(x, y, color, angle, speed)
+            particle.gravity = 0.2
+            particles.append(particle)
+
+    # Update particles
+    def update_particles():
+        """Update all active particles"""
+        firework_turtle.clear()
+        
+        # Update each particle
+        for particle in particles[:]:
+            particle.update()
+            
+            if particle.is_dead():
+                particles.remove(particle)
+            else:
+                # Draw particle
+                firework_turtle.penup()
+                firework_turtle.goto(particle.x, particle.y)
+                firework_turtle.dot(4, particle.color)
+
+    # Random firework
+    def random_firework():
+        """Launch a random firework"""
+        x = random.randint(-350, 350)
+        y = random.randint(-200, 250)
+        
+        firework_type = random.choice([
+            animated_burst,
+            circle_burst,
+            star_burst,
+            spiral_burst,
+            rainbow_burst,
+            willow_burst,
+            fountain_burst
+        ])
+        
+        firework_type(x, y)
+
+    # Automatic show
+    auto_show_active = False
+
+    def toggle_auto_show():
+        """Toggle automatic fireworks show"""
+        global auto_show_active
+        auto_show_active = not auto_show_active
+        print(f"Auto show: {'ON' if auto_show_active else 'OFF'}")
+
+    # Change color palette
+    def cycle_palette():
+        """Cycle through color palettes"""
+        global current_palette, colors
+        palettes = list(color_palettes.keys())
+        current_index = palettes.index(current_palette)
+        current_palette = palettes[(current_index + 1) % len(palettes)]
+        colors = color_palettes[current_palette]
+        print(f"Color palette: {current_palette}")
+
+    # Clear screen
+    def clear_display():
+        """Clear all fireworks"""
+        firework_turtle.clear()
+        particles.clear()
+        screen.update()
+
+    # Main animation loop
+    def animate():
+        """Main animation loop"""
+        # Auto show
+        if auto_show_active and random.random() < 0.05:
+            random_firework()
+        
+        # Update particles
+        update_particles()
+        
+        # Update screen
+        screen.update()
+        
+        # Continue loop
+        screen.ontimer(animate, 30)
+
+    # Set up controls
+    def setup_controls():
+        """Set up keyboard controls"""
+        screen.listen()
+        screen.onkey(random_firework, "space")
+        screen.onkey(lambda: animated_burst(0, 0), "1")
+        screen.onkey(lambda: circle_burst(0, 0), "2")
+        screen.onkey(lambda: star_burst(0, 0), "3")
+        screen.onkey(lambda: heart_burst(0, 0), "4")
+        screen.onkey(lambda: spiral_burst(0, 0), "5")
+        screen.onkey(lambda: rainbow_burst(0, 0), "6")
+        screen.onkey(lambda: willow_burst(0, 0), "7")
+        screen.onkey(lambda: fountain_burst(0, 0), "8")
+        screen.onkey(toggle_auto_show, "a")
+        screen.onkey(cycle_palette, "c")
+        screen.onkey(clear_display, "x")
+        
+        # Mouse click for fireworks
+        screen.onclick(lambda x, y: animated_burst(x, y))
+
+    # Draw instructions
+    def draw_instructions():
+        """Draw control instructions"""
+        instructions = turtle.Turtle()
+        instructions.hideturtle()
+        instructions.penup()
+        instructions.color("white")
+        instructions.goto(0, -330)
+        text = "SPACE/Click: Random | 1-8: Types | A: Auto | C: Colors | X: Clear"
+        instructions.write(text, align="center", font=("Courier", 10, "normal"))
+
+    # Initialize
+    def main():
+        """Initialize and start the fireworks display"""
+        print("=== FIREWORKS DISPLAY ===")
+        print("\nControls:")
+        print("SPACE - Random firework")
+        print("Click - Firework at mouse position")
+        print("1 - Animated Burst")
+        print("2 - Circle Burst")
+        print("3 - Star Burst")
+        print("4 - Heart Burst")
+        print("5 - Spiral Burst")
+        print("6 - Rainbow Burst")
+        print("7 - Willow Effect")
+        print("8 - Fountain Effect")
+        print("A - Toggle auto show")
+        print("C - Change color palette")
+        print("X - Clear screen")
+        print("\nPress SPACE or click to launch fireworks!")
+        
+        draw_instructions()
+        setup_controls()
+        animate()
+
+    # Run the program
+    if __name__ == '__main__':
+        main()
+        turtle.done()`
+    },
+    {
     title: "Turtle Sierpinski Triangle",
     category: "turtle",
     description: "Draw the famous Sierpinski triangle fractal.",
@@ -5344,20 +8599,278 @@ if __name__ == "__main__":
     difficulty: 3,
     lines: "~80 lines",
     code: `import turtle
-  t=turtle.Turtle()
-  t.speed(0)
-  def sierpinski(points,depth):
-      if depth==0:
-          t.penup();t.goto(points[0]);t.pendown();t.goto(points[1]);t.goto(points[2]);t.goto(points[0])
-      else:
-          mid=lambda a,b: ((a[0]+b[0])/2,(a[1]+b[1])/2)
-          sierpinski([points[0],mid(points[0],points[1]),mid(points[0],points[2])],depth-1)
-          sierpinski([points[1],mid(points[0],points[1]),mid(points[1],points[2])],depth-1)
-          sierpinski([points[2],mid(points[2],points[1]),mid(points[0],points[2])],depth-1)
-  sierpinski([(-200,-150),(0,200),(200,-150)],4)
-  turtle.done()`
-  },
-  {
+    import random
+    import math
+
+    # Set up the screen
+    screen = turtle.Screen()
+    screen.setup(900, 900)
+    screen.bgcolor("black")
+    screen.title("Sierpinski Triangle Fractal")
+    screen.tracer(0)
+
+    # Create the turtle
+    t = turtle.Turtle()
+    t.speed(0)
+    t.hideturtle()
+    t.color("cyan")
+    t.width(1)
+
+    # Current depth
+    current_depth = 4
+    use_colors = False
+
+    # Midpoint calculation
+    def midpoint(p1, p2):
+        """Calculate midpoint between two points"""
+        return ((p1[0] + p2[0]) / 2, (p1[1] + p2[1]) / 2)
+
+    # Draw triangle
+    def draw_triangle(points, color="cyan"):
+        """Draw a single triangle"""
+        t.penup()
+        t.goto(points[0])
+        t.pendown()
+        t.color(color)
+        t.goto(points[1])
+        t.goto(points[2])
+        t.goto(points[0])
+
+    # Sierpinski triangle recursive function
+    def sierpinski(points, depth):
+        """Draw Sierpinski triangle using recursion"""
+        colors = ["cyan", "magenta", "yellow", "lime", "red", "orange", "purple"]
+        
+        if depth == 0:
+            if use_colors:
+                color = colors[depth % len(colors)]
+                draw_triangle(points, color)
+            else:
+                draw_triangle(points)
+        else:
+            # Calculate midpoints
+            mid1 = midpoint(points[0], points[1])
+            mid2 = midpoint(points[1], points[2])
+            mid3 = midpoint(points[2], points[0])
+            
+            # Recursively draw three smaller triangles
+            sierpinski([points[0], mid1, mid3], depth - 1)
+            sierpinski([points[1], mid1, mid2], depth - 1)
+            sierpinski([points[2], mid2, mid3], depth - 1)
+
+    # Draw filled Sierpinski
+    def sierpinski_filled(points, depth):
+        """Draw filled Sierpinski triangle"""
+        colors = ["#FF0000", "#FF7F00", "#FFFF00", "#00FF00", "#0000FF", "#4B0082", "#9400D3"]
+        
+        if depth == 0:
+            t.penup()
+            t.goto(points[0])
+            t.pendown()
+            t.color(colors[depth % len(colors)])
+            t.begin_fill()
+            t.goto(points[1])
+            t.goto(points[2])
+            t.goto(points[0])
+            t.end_fill()
+        else:
+            mid1 = midpoint(points[0], points[1])
+            mid2 = midpoint(points[1], points[2])
+            mid3 = midpoint(points[2], points[0])
+            
+            sierpinski_filled([points[0], mid1, mid3], depth - 1)
+            sierpinski_filled([points[1], mid1, mid2], depth - 1)
+            sierpinski_filled([points[2], mid2, mid3], depth - 1)
+
+    # Chaos game method
+    def sierpinski_chaos_game(iterations=10000):
+        """Draw Sierpinski using chaos game method"""
+        t.clear()
+        
+        # Define triangle vertices
+        vertices = [(-300, -250), (0, 300), (300, -250)]
+        
+        # Start at random point
+        x, y = random.choice(vertices)
+        
+        t.penup()
+        
+        for _ in range(iterations):
+            # Choose random vertex
+            target = random.choice(vertices)
+            
+            # Move halfway to that vertex
+            x = (x + target[0]) / 2
+            y = (y + target[1]) / 2
+            
+            # Draw point
+            t.goto(x, y)
+            t.dot(2, "cyan")
+        
+        screen.update()
+
+    # Draw multiple Sierpinski triangles
+    def sierpinski_pattern():
+        """Draw pattern of multiple Sierpinski triangles"""
+        t.clear()
+        
+        positions = [
+            (0, 200, 150),
+            (-200, -100, 100),
+            (200, -100, 100)
+        ]
+        
+        colors = ["cyan", "magenta", "yellow"]
+        
+        for i, (cx, cy, size) in enumerate(positions):
+            h = size * math.sqrt(3) / 2
+            points = [
+                (cx, cy + h * 2/3),
+                (cx - size/2, cy - h/3),
+                (cx + size/2, cy - h/3)
+            ]
+            
+            t.color(colors[i])
+            sierpinski(points, 3)
+        
+        screen.update()
+
+    # Draw inverted Sierpinski
+    def sierpinski_inverted(points, depth):
+        """Draw inverted Sierpinski (Sierpinski carpet style)"""
+        if depth == 0:
+            t.penup()
+            t.goto(points[0])
+            t.pendown()
+            t.color("white")
+            t.begin_fill()
+            t.goto(points[1])
+            t.goto(points[2])
+            t.goto(points[0])
+            t.end_fill()
+        else:
+            mid1 = midpoint(points[0], points[1])
+            mid2 = midpoint(points[1], points[2])
+            mid3 = midpoint(points[2], points[0])
+            
+            # Draw center triangle (inverted)
+            t.penup()
+            t.goto(mid1)
+            t.pendown()
+            t.color("black")
+            t.begin_fill()
+            t.goto(mid2)
+            t.goto(mid3)
+            t.goto(mid1)
+            t.end_fill()
+            
+            # Recurse on corner triangles
+            sierpinski_inverted([points[0], mid1, mid3], depth - 1)
+            sierpinski_inverted([points[1], mid1, mid2], depth - 1)
+            sierpinski_inverted([points[2], mid2, mid3], depth - 1)
+
+    # Draw standard Sierpinski
+    def draw_sierpinski(depth=4):
+        """Draw standard Sierpinski triangle"""
+        global current_depth
+        current_depth = depth
+        t.clear()
+        
+        # Define main triangle points
+        points = [(-300, -250), (0, 300), (300, -250)]
+        
+        sierpinski(points, depth)
+        screen.update()
+
+    # Increase depth
+    def increase_depth():
+        """Increase fractal depth"""
+        global current_depth
+        if current_depth < 7:
+            current_depth += 1
+            draw_sierpinski(current_depth)
+            print(f"Depth: {current_depth}")
+
+    # Decrease depth
+    def decrease_depth():
+        """Decrease fractal depth"""
+        global current_depth
+        if current_depth > 0:
+            current_depth -= 1
+            draw_sierpinski(current_depth)
+            print(f"Depth: {current_depth}")
+
+    # Toggle colors
+    def toggle_colors():
+        """Toggle colorful mode"""
+        global use_colors
+        use_colors = not use_colors
+        draw_sierpinski(current_depth)
+        print(f"Colors: {'ON' if use_colors else 'OFF'}")
+
+    # Set up controls
+    def setup_controls():
+        """Set up keyboard controls"""
+        screen.listen()
+        screen.onkey(increase_depth, "Up")
+        screen.onkey(decrease_depth, "Down")
+        screen.onkey(lambda: draw_sierpinski(current_depth), "1")
+        screen.onkey(lambda: (t.clear(), sierpinski_filled([(-300, -250), (0, 300), (300, -250)], current_depth), screen.update()), "2")
+        screen.onkey(sierpinski_chaos_game, "3")
+        screen.onkey(sierpinski_pattern, "4")
+        screen.onkey(lambda: (screen.bgcolor("white"), t.clear(), sierpinski_inverted([(-300, -250), (0, 300), (300, -250)], current_depth), screen.update()), "5")
+        screen.onkey(toggle_colors, "c")
+        screen.onkey(lambda: (t.clear(), screen.update()), "x")
+        screen.onkey(lambda: screen.bgcolor("black" if screen.bgcolor() == "white" else "white"), "b")
+
+    # Draw instructions
+    def draw_instructions():
+        """Draw control instructions"""
+        instructions = turtle.Turtle()
+        instructions.hideturtle()
+        instructions.penup()
+        instructions.color("white")
+        instructions.goto(0, -360)
+        text = "Up/Down: Depth | 1-5: Styles | C: Colors | B: Background | X: Clear"
+        instructions.write(text, align="center", font=("Courier", 11, "normal"))
+
+    # Draw info
+    def draw_info():
+        """Display current info"""
+        info = turtle.Turtle()
+        info.hideturtle()
+        info.penup()
+        info.color("yellow")
+        info.goto(0, 360)
+        info.write(f"Sierpinski Triangle - Depth: {current_depth}", align="center", font=("Arial", 16, "bold"))
+
+    # Initialize
+    def main():
+        """Initialize and start the program"""
+        print("=== SIERPINSKI TRIANGLE FRACTAL ===")
+        print("\nControls:")
+        print("Up/Down Arrows - Increase/Decrease depth")
+        print("1 - Standard Sierpinski")
+        print("2 - Filled Sierpinski")
+        print("3 - Chaos Game method")
+        print("4 - Pattern")
+        print("5 - Inverted")
+        print("C - Toggle colors")
+        print("B - Toggle background")
+        print("X - Clear screen")
+        print("\nFractal depth: 0-7")
+        
+        draw_instructions()
+        draw_info()
+        draw_sierpinski(current_depth)
+        setup_controls()
+
+    # Run the program
+    if __name__ == '__main__':
+        main()
+        turtle.done()`
+    },
+    {
     title: "Turtle Olympic Rings",
     category: "turtle",
     description: "Draw the Olympic rings with precise positioning.",
@@ -5365,15 +8878,308 @@ if __name__ == "__main__":
     difficulty: 2,
     lines: "~60 lines",
     code: `import turtle
-  t=turtle.Turtle()
-  t.pensize(5)
-  colors=["blue","black","red","yellow","green"]
-  positions=[(-120,0),(0,0),(120,0),(-60,-50),(60,-50)]
-  for i in range(5):
-      t.penup();t.goto(positions[i]);t.pendown();t.color(colors[i]);t.circle(50)
-  turtle.done()`
-  },
-  {
+    import time
+
+    # Set up the screen
+    screen = turtle.Screen()
+    screen.setup(800, 600)
+    screen.bgcolor("white")
+    screen.title("Olympic Rings - Tokyo 2020")
+    screen.tracer(0)
+
+    # Create the turtle
+    t = turtle.Turtle()
+    t.speed(0)
+    t.hideturtle()
+
+    # Olympic ring colors (official order)
+    colors = ["blue", "black", "red", "yellow", "green"]
+
+    # Ring positions (x, y)
+    positions = [
+        (-120, 0),    # Blue (top left)
+        (0, 0),       # Black (top center)
+        (120, 0),     # Red (top right)
+        (-60, -50),   # Yellow (bottom left)
+        (60, -50)     # Green (bottom right)
+    ]
+
+    # Draw a single ring
+    def draw_ring(x, y, color, radius=50, thickness=5):
+        """Draw a single Olympic ring"""
+        t.penup()
+        t.goto(x, y)
+        t.pendown()
+        t.pensize(thickness)
+        t.color(color)
+        t.circle(radius)
+
+    # Draw all Olympic rings (simple version)
+    def draw_olympic_rings_simple():
+        """Draw the basic Olympic rings"""
+        t.clear()
+        
+        for i in range(5):
+            x, y = positions[i]
+            draw_ring(x, y, colors[i])
+        
+        screen.update()
+
+    # Draw Olympic rings with proper interlocking
+    def draw_olympic_rings_interlocked():
+        """Draw Olympic rings with proper overlapping effect"""
+        t.clear()
+        radius = 50
+        thickness = 8
+        
+        # Draw in specific order to create interlocking effect
+        # Blue ring
+        draw_ring(-120, 0, "blue", radius, thickness)
+        
+        # Yellow ring (overlaps blue)
+        t.penup()
+        t.goto(-60, -50)
+        t.pendown()
+        t.pensize(thickness)
+        t.color("yellow")
+        
+        # Draw yellow with sections
+        t.circle(radius, 180)  # Bottom half
+        t.penup()
+        t.circle(radius, 180)  # Skip top half
+        t.pendown()
+        
+        # Black ring (overlaps blue and red)
+        draw_ring(0, 0, "black", radius, thickness)
+        
+        # Green ring (overlaps black)
+        t.penup()
+        t.goto(60, -50)
+        t.pendown()
+        t.pensize(thickness)
+        t.color("green")
+        t.circle(radius, 180)
+        t.penup()
+        t.circle(radius, 180)
+        t.pendown()
+        
+        # Red ring (overlaps black)
+        draw_ring(120, 0, "red", radius, thickness)
+        
+        # Complete yellow and green rings
+        t.penup()
+        t.goto(-60, -50)
+        t.pendown()
+        t.color("yellow")
+        t.circle(radius, -180)
+        
+        t.penup()
+        t.goto(60, -50)
+        t.pendown()
+        t.color("green")
+        t.circle(radius, -180)
+        
+        screen.update()
+
+    # Draw animated Olympic rings
+    def draw_olympic_rings_animated():
+        """Draw rings with animation"""
+        t.clear()
+        
+        for i in range(5):
+            x, y = positions[i]
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            t.pensize(8)
+            t.color(colors[i])
+            
+            # Draw ring in segments for animation
+            segments = 36
+            angle = 360 / segments
+            
+            for _ in range(segments):
+                t.circle(50, angle)
+                screen.update()
+                time.sleep(0.01)
+        
+        screen.update()
+
+    # Draw filled Olympic rings
+    def draw_olympic_rings_filled():
+        """Draw filled Olympic rings"""
+        t.clear()
+        
+        for i in range(5):
+            x, y = positions[i]
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            t.pensize(2)
+            t.color(colors[i])
+            t.fillcolor(colors[i])
+            t.begin_fill()
+            t.circle(50)
+            t.end_fill()
+        
+        screen.update()
+
+    # Draw 3D-style Olympic rings
+    def draw_olympic_rings_3d():
+        """Draw rings with 3D effect"""
+        t.clear()
+        
+        for i in range(5):
+            x, y = positions[i]
+            
+            # Draw shadow
+            t.penup()
+            t.goto(x + 5, y - 5)
+            t.pendown()
+            t.pensize(8)
+            t.color("gray")
+            t.circle(50)
+            
+            # Draw main ring
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            t.pensize(8)
+            t.color(colors[i])
+            t.circle(50)
+        
+        screen.update()
+
+    # Draw Olympic rings with gradient effect
+    def draw_olympic_rings_gradient():
+        """Draw rings with gradient-like effect"""
+        t.clear()
+        
+        for i in range(5):
+            x, y = positions[i]
+            
+            # Draw multiple circles with decreasing thickness
+            for thickness in range(12, 2, -1):
+                t.penup()
+                t.goto(x, y)
+                t.pendown()
+                t.pensize(thickness)
+                t.color(colors[i])
+                t.circle(50)
+        
+        screen.update()
+
+    # Draw Olympic rings with title
+    def draw_complete_olympic_logo():
+        """Draw complete Olympic logo with text"""
+        t.clear()
+        
+        # Draw rings
+        for i in range(5):
+            x, y = positions[i]
+            draw_ring(x, y, colors[i], 50, 8)
+        
+        # Draw title
+        t.penup()
+        t.goto(0, 100)
+        t.color("black")
+        t.write("OLYMPIC GAMES", align="center", font=("Arial", 24, "bold"))
+        
+        # Draw subtitle
+        t.goto(0, -150)
+        t.write("Unity in Diversity", align="center", font=("Arial", 14, "italic"))
+        
+        screen.update()
+
+    # Draw pattern with Olympic rings
+    def draw_olympic_pattern():
+        """Draw a pattern using Olympic rings"""
+        t.clear()
+        
+        scale = 0.5
+        radius = int(50 * scale)
+        
+        for row in range(3):
+            for col in range(4):
+                x = -150 + col * 100
+                y = 150 - row * 100
+                color = colors[(row + col) % 5]
+                
+                t.penup()
+                t.goto(x, y)
+                t.pendown()
+                t.pensize(4)
+                t.color(color)
+                t.circle(radius)
+        
+        screen.update()
+
+    # Draw colorful variations
+    def draw_olympic_rainbow():
+        """Draw Olympic rings with rainbow colors"""
+        t.clear()
+        
+        rainbow_colors = ["red", "orange", "yellow", "green", "blue"]
+        
+        for i in range(5):
+            x, y = positions[i]
+            draw_ring(x, y, rainbow_colors[i], 50, 8)
+        
+        screen.update()
+
+    # Set up keyboard controls
+    def setup_controls():
+        """Set up keyboard controls"""
+        screen.listen()
+        screen.onkey(draw_olympic_rings_simple, "1")
+        screen.onkey(draw_olympic_rings_interlocked, "2")
+        screen.onkey(draw_olympic_rings_animated, "3")
+        screen.onkey(draw_olympic_rings_filled, "4")
+        screen.onkey(draw_olympic_rings_3d, "5")
+        screen.onkey(draw_olympic_rings_gradient, "6")
+        screen.onkey(draw_complete_olympic_logo, "7")
+        screen.onkey(draw_olympic_pattern, "8")
+        screen.onkey(draw_olympic_rainbow, "9")
+        screen.onkey(lambda: (t.clear(), screen.update()), "x")
+
+    # Draw instructions
+    def draw_instructions():
+        """Draw control instructions"""
+        instructions = turtle.Turtle()
+        instructions.hideturtle()
+        instructions.penup()
+        instructions.color("gray")
+        instructions.goto(0, -220)
+        text = "1: Simple | 2: Interlocked | 3: Animated | 4: Filled | 5: 3D | 6: Gradient | 7: Logo | 8: Pattern | 9: Rainbow | X: Clear"
+        instructions.write(text, align="center", font=("Courier", 8, "normal"))
+
+    # Initialize
+    def main():
+        """Initialize and start the program"""
+        print("=== OLYMPIC RINGS ===")
+        print("\nKeyboard Controls:")
+        print("1 - Simple Olympic Rings")
+        print("2 - Interlocked Rings")
+        print("3 - Animated Drawing")
+        print("4 - Filled Rings")
+        print("5 - 3D Effect")
+        print("6 - Gradient Effect")
+        print("7 - Complete Logo")
+        print("8 - Ring Pattern")
+        print("9 - Rainbow Colors")
+        print("X - Clear Screen")
+        print("\nPress a number key to see different styles!")
+        
+        draw_instructions()
+        draw_olympic_rings_simple()
+        setup_controls()
+
+    # Run the program
+    if __name__ == '__main__':
+        main()
+        turtle.done()`
+    },
+    {
     title: "Turtle Chess Board",
     category: "turtle",
     description: "Draw a chess board with alternating colors.",
@@ -5381,1961 +9187,3653 @@ if __name__ == "__main__":
     difficulty: 2,
     lines: "~70 lines",
     code: `import turtle
-  t=turtle.Turtle()
-  t.speed(0)
-  size=50
-  colors=["white","black"]
-  for y in range(8):
-      for x in range(8):
-          t.penup();t.goto(x*size-200,y*size-200);t.pendown();t.fillcolor(colors[(x+y)%2]);t.begin_fill(); 
-          for _ in range(4): t.forward(size); t.right(90)
-          t.end_fill()
-  turtle.done()`
-  },
-  {
+    import random
+
+    # Set up the screen
+    screen = turtle.Screen()
+    screen.setup(800, 850)
+    screen.bgcolor("burlywood")
+    screen.title("Chess Board Designer")
+    screen.tracer(0)
+
+    # Create the turtle
+    t = turtle.Turtle()
+    t.speed(0)
+    t.hideturtle()
+
+    # Board settings
+    square_size = 60
+    board_size = 8
+
+    # Color schemes
+    color_schemes = {
+        "classic": ["white", "black"],
+        "wood": ["#F0D9B5", "#B58863"],
+        "green": ["#EEEED2", "#769656"],
+        "blue": ["#DEE3E6", "#8CA2AD"],
+        "red": ["#FFE4C4", "#CD5C5C"],
+        "purple": ["#E6E6FA", "#9370DB"],
+        "modern": ["#FFFFFF", "#404040"]
+    }
+
+    current_scheme = "classic"
+
+    # Draw a single square
+    def draw_square(x, y, size, color):
+        """Draw a filled square"""
+        t.penup()
+        t.goto(x, y)
+        t.pendown()
+        t.color("black")
+        t.fillcolor(color)
+        t.begin_fill()
+        
+        for _ in range(4):
+            t.forward(size)
+            t.right(90)
+        
+        t.end_fill()
+
+    # Draw basic chess board
+    def draw_chess_board(size=square_size):
+        """Draw standard chess board"""
+        t.clear()
+        colors = color_schemes[current_scheme]
+        
+        # Calculate starting position to center the board
+        start_x = -size * board_size / 2
+        start_y = -size * board_size / 2
+        
+        for row in range(board_size):
+            for col in range(board_size):
+                x = start_x + col * size
+                y = start_y + row * size
+                color = colors[(row + col) % 2]
+                draw_square(x, y, size, color)
+        
+        screen.update()
+
+    # Draw chess board with coordinates
+    def draw_chess_board_with_coords():
+        """Draw chess board with coordinate labels"""
+        t.clear()
+        colors = color_schemes[current_scheme]
+        size = square_size
+        
+        start_x = -size * board_size / 2
+        start_y = -size * board_size / 2
+        
+        # Draw squares
+        for row in range(board_size):
+            for col in range(board_size):
+                x = start_x + col * size
+                y = start_y + row * size
+                color = colors[(row + col) % 2]
+                draw_square(x, y, size, color)
+        
+        # Draw column labels (a-h)
+        t.penup()
+        for col in range(board_size):
+            x = start_x + col * size + size / 2
+            y = start_y - 30
+            t.goto(x, y)
+            t.color("black")
+            t.write(chr(97 + col), align="center", font=("Arial", 14, "bold"))
+        
+        # Draw row labels (1-8)
+        for row in range(board_size):
+            x = start_x - 30
+            y = start_y + row * size + size / 3
+            t.goto(x, y)
+            t.color("black")
+            t.write(str(row + 1), align="center", font=("Arial", 14, "bold"))
+        
+        screen.update()
+
+    # Draw chess board with border
+    def draw_chess_board_with_border():
+        """Draw chess board with decorative border"""
+        t.clear()
+        colors = color_schemes[current_scheme]
+        size = square_size
+        
+        start_x = -size * board_size / 2
+        start_y = -size * board_size / 2
+        
+        # Draw border
+        border_size = size * board_size + 20
+        t.penup()
+        t.goto(start_x - 10, start_y - 10)
+        t.pendown()
+        t.pensize(8)
+        t.color("saddlebrown")
+        
+        for _ in range(4):
+            t.forward(border_size)
+            t.left(90)
+        
+        t.pensize(1)
+        
+        # Draw squares
+        for row in range(board_size):
+            for col in range(board_size):
+                x = start_x + col * size
+                y = start_y + row * size
+                color = colors[(row + col) % 2]
+                draw_square(x, y, size, color)
+        
+        draw_coordinates(start_x, start_y, size)
+        screen.update()
+
+    # Draw coordinates
+    def draw_coordinates(start_x, start_y, size):
+        """Draw coordinate labels"""
+        t.penup()
+        
+        # Column labels
+        for col in range(board_size):
+            x = start_x + col * size + size / 2
+            y = start_y - 30
+            t.goto(x, y)
+            t.color("black")
+            t.write(chr(97 + col), align="center", font=("Arial", 12, "bold"))
+        
+        # Row labels
+        for row in range(board_size):
+            x = start_x - 30
+            y = start_y + row * size + size / 3
+            t.goto(x, y)
+            t.color("black")
+            t.write(str(row + 1), align="center", font=("Arial", 12, "bold"))
+
+    # Draw checkerboard pattern (10x10)
+    def draw_checkerboard():
+        """Draw 10x10 checkerboard"""
+        t.clear()
+        colors = color_schemes[current_scheme]
+        size = 45
+        board = 10
+        
+        start_x = -size * board / 2
+        start_y = -size * board / 2
+        
+        for row in range(board):
+            for col in range(board):
+                x = start_x + col * size
+                y = start_y + row * size
+                color = colors[(row + col) % 2]
+                draw_square(x, y, size, color)
+        
+        screen.update()
+
+    # Draw mini chess boards
+    def draw_mini_boards():
+        """Draw multiple small chess boards"""
+        t.clear()
+        colors = color_schemes[current_scheme]
+        size = 20
+        mini_board_size = 4
+        
+        positions = [(-150, 150), (50, 150), (-150, -50), (50, -50)]
+        
+        for px, py in positions:
+            for row in range(mini_board_size):
+                for col in range(mini_board_size):
+                    x = px + col * size
+                    y = py + row * size
+                    color = colors[(row + col) % 2]
+                    draw_square(x, y, size, color)
+        
+        screen.update()
+
+    # Draw 3D chess board effect
+    def draw_3d_chess_board():
+        """Draw chess board with 3D effect"""
+        t.clear()
+        colors = color_schemes[current_scheme]
+        size = square_size
+        
+        start_x = -size * board_size / 2
+        start_y = -size * board_size / 2
+        
+        # Draw shadows
+        for row in range(board_size):
+            for col in range(board_size):
+                x = start_x + col * size + 3
+                y = start_y + row * size - 3
+                draw_square(x, y, size, "gray")
+        
+        # Draw main board
+        for row in range(board_size):
+            for col in range(board_size):
+                x = start_x + col * size
+                y = start_y + row * size
+                color = colors[(row + col) % 2]
+                draw_square(x, y, size, color)
+        
+        screen.update()
+
+    # Draw highlighted squares
+    def draw_board_with_highlights():
+        """Draw board with highlighted squares"""
+        t.clear()
+        colors = color_schemes[current_scheme]
+        size = square_size
+        
+        start_x = -size * board_size / 2
+        start_y = -size * board_size / 2
+        
+        # Squares to highlight (chess notation style)
+        highlights = [(4, 4), (3, 3), (4, 3), (3, 4)]  # Center squares
+        
+        for row in range(board_size):
+            for col in range(board_size):
+                x = start_x + col * size
+                y = start_y + row * size
+                
+                if (row, col) in highlights:
+                    color = "yellow"
+                else:
+                    color = colors[(row + col) % 2]
+                
+                draw_square(x, y, size, color)
+        
+        screen.update()
+
+    # Draw gradient board
+    def draw_gradient_board():
+        """Draw board with gradient-like effect"""
+        t.clear()
+        size = square_size
+        
+        start_x = -size * board_size / 2
+        start_y = -size * board_size / 2
+        
+        for row in range(board_size):
+            for col in range(board_size):
+                x = start_x + col * size
+                y = start_y + row * size
+                
+                # Create gradient effect
+                if (row + col) % 2 == 0:
+                    gray_level = int(255 - (row * 30))
+                    color = f"#{gray_level:02x}{gray_level:02x}{gray_level:02x}"
+                else:
+                    gray_level = int(50 + (row * 20))
+                    color = f"#{gray_level:02x}{gray_level:02x}{gray_level:02x}"
+                
+                draw_square(x, y, size, color)
+        
+        screen.update()
+
+    # Change color scheme
+    def cycle_color_scheme():
+        """Cycle through color schemes"""
+        global current_scheme
+        schemes = list(color_schemes.keys())
+        current_index = schemes.index(current_scheme)
+        current_scheme = schemes[(current_index + 1) % len(schemes)]
+        print(f"Color scheme: {current_scheme}")
+        draw_chess_board_with_coords()
+
+    # Set up keyboard controls
+    def setup_controls():
+        """Set up keyboard controls"""
+        screen.listen()
+        screen.onkey(lambda: draw_chess_board(), "1")
+        screen.onkey(draw_chess_board_with_coords, "2")
+        screen.onkey(draw_chess_board_with_border, "3")
+        screen.onkey(draw_checkerboard, "4")
+        screen.onkey(draw_mini_boards, "5")
+        screen.onkey(draw_3d_chess_board, "6")
+        screen.onkey(draw_board_with_highlights, "7")
+        screen.onkey(draw_gradient_board, "8")
+        screen.onkey(cycle_color_scheme, "c")
+        screen.onkey(lambda: (t.clear(), screen.update()), "x")
+
+    # Draw instructions
+    def draw_instructions():
+        """Draw control instructions"""
+        instructions = turtle.Turtle()
+        instructions.hideturtle()
+        instructions.penup()
+        instructions.color("black")
+        instructions.goto(0, -380)
+        text = "1: Basic | 2: Coords | 3: Border | 4: 10x10 | 5: Mini | 6: 3D | 7: Highlight | 8: Gradient | C: Colors | X: Clear"
+        instructions.write(text, align="center", font=("Courier", 9, "normal"))
+
+    # Initialize
+    def main():
+        """Initialize and start the program"""
+        print("=== CHESS BOARD DESIGNER ===")
+        print("\nKeyboard Controls:")
+        print("1 - Basic Chess Board")
+        print("2 - Board with Coordinates")
+        print("3 - Board with Border")
+        print("4 - 10x10 Checkerboard")
+        print("5 - Mini Boards")
+        print("6 - 3D Effect Board")
+        print("7 - Highlighted Squares")
+        print("8 - Gradient Board")
+        print("C - Change Color Scheme")
+        print("X - Clear Screen")
+        
+        draw_instructions()
+        draw_chess_board_with_coords()
+        setup_controls()
+
+    # Run the program
+    if __name__ == '__main__':
+        main()
+        turtle.done()`
+    },
+    {
     title: "Turtle Random Walk",
     category: "turtle",
     description: "Visualize random walk algorithms with turtle.",
     tags: ["turtle", "random", "simulation"],
     difficulty: 2,
     lines: "~70 lines",
-    code: `import turtle,random
-  t=turtle.Turtle()
-  t.speed(0)
-  t.penup();t.goto(0,0);t.pendown()
-  directions=[0,90,180,270]
-  for _ in range(200):
-      t.setheading(random.choice(directions))
-      t.forward(20)
-  turtle.done()`
-  },
+    code: `import turtle
+    import random
+    import math
+    import time
 
-  {
+    # Set up the screen
+    screen = turtle.Screen()
+    screen.setup(900, 700)
+    screen.bgcolor("black")
+    screen.title("Random Walk Visualizer")
+    screen.tracer(0)
+
+    # Create the walker turtle
+    walker = turtle.Turtle()
+    walker.speed(0)
+    walker.shape("circle")
+    walker.color("cyan")
+    walker.penup()
+    walker.goto(0, 0)
+    walker.pendown()
+    walker.pensize(2)
+
+    # Create info display
+    info = turtle.Turtle()
+    info.hideturtle()
+    info.penup()
+    info.goto(0, 320)
+    info.color("white")
+
+    # Walk statistics
+    total_steps = 0
+    distance_from_origin = 0
+    max_distance = 0
+
+    # Walking parameters
+    step_size = 15
+    use_colors = False
+    leave_trail = True
+    bounded = False
+
+    # Cardinal directions
+    cardinal_directions = [0, 90, 180, 270]  # East, North, West, South
+
+    # Update info display
+    def update_info():
+        """Display walk statistics"""
+        info.clear()
+        distance = math.sqrt(walker.xcor()**2 + walker.ycor()**2)
+        info.write(f"Steps: {total_steps} | Distance from origin: {distance:.1f} | Max: {max_distance:.1f}", 
+                align="center", font=("Courier", 11, "bold"))
+
+    # Reset walker
+    def reset_walker():
+        """Reset walker to origin"""
+        global total_steps, max_distance
+        walker.clear()
+        walker.penup()
+        walker.goto(0, 0)
+        walker.pendown()
+        total_steps = 0
+        max_distance = 0
+        update_info()
+        screen.update()
+
+    # Simple random walk (4 directions)
+    def random_walk_simple(steps=200):
+        """Basic random walk in 4 cardinal directions"""
+        global total_steps, max_distance
+        reset_walker()
+        
+        for _ in range(steps):
+            direction = random.choice(cardinal_directions)
+            walker.setheading(direction)
+            
+            if use_colors:
+                walker.color(random.choice(["red", "blue", "green", "yellow", "cyan", "magenta", "orange"]))
+            
+            walker.forward(step_size)
+            total_steps += 1
+            
+            # Update max distance
+            distance = math.sqrt(walker.xcor()**2 + walker.ycor()**2)
+            max_distance = max(max_distance, distance)
+            
+            # Boundary check
+            if bounded and (abs(walker.xcor()) > 400 or abs(walker.ycor()) > 300):
+                walker.backward(step_size)
+            
+            if total_steps % 10 == 0:
+                update_info()
+                screen.update()
+        
+        update_info()
+        screen.update()
+
+    # Continuous random walk (any angle)
+    def random_walk_continuous(steps=200):
+        """Random walk in any direction"""
+        global total_steps, max_distance
+        reset_walker()
+        
+        for _ in range(steps):
+            angle = random.randint(0, 359)
+            walker.setheading(angle)
+            
+            if use_colors:
+                walker.color(random.choice(["red", "blue", "green", "yellow", "cyan", "magenta", "orange"]))
+            
+            walker.forward(step_size)
+            total_steps += 1
+            
+            distance = math.sqrt(walker.xcor()**2 + walker.ycor()**2)
+            max_distance = max(max_distance, distance)
+            
+            if bounded and (abs(walker.xcor()) > 400 or abs(walker.ycor()) > 300):
+                walker.backward(step_size)
+            
+            if total_steps % 10 == 0:
+                update_info()
+                screen.update()
+        
+        update_info()
+        screen.update()
+
+    # Biased random walk (tends upward)
+    def random_walk_biased(steps=200):
+        """Random walk with upward bias"""
+        global total_steps, max_distance
+        reset_walker()
+        
+        for _ in range(steps):
+            # 40% chance up, 20% each for other directions
+            rand = random.random()
+            if rand < 0.4:
+                direction = 90  # North
+            elif rand < 0.6:
+                direction = 0   # East
+            elif rand < 0.8:
+                direction = 180 # West
+            else:
+                direction = 270 # South
+            
+            walker.setheading(direction)
+            
+            if use_colors:
+                walker.color(random.choice(["lime", "green", "cyan", "yellow"]))
+            
+            walker.forward(step_size)
+            total_steps += 1
+            
+            distance = math.sqrt(walker.xcor()**2 + walker.ycor()**2)
+            max_distance = max(max_distance, distance)
+            
+            if total_steps % 10 == 0:
+                update_info()
+                screen.update()
+        
+        update_info()
+        screen.update()
+
+    # Levy flight (varying step sizes)
+    def random_walk_levy(steps=150):
+        """Random walk with varying step sizes (Levy flight)"""
+        global total_steps, max_distance
+        reset_walker()
+        
+        for _ in range(steps):
+            angle = random.randint(0, 359)
+            walker.setheading(angle)
+            
+            # Levy distribution approximation: mostly small steps, occasional large jumps
+            if random.random() < 0.9:
+                distance = step_size
+            else:
+                distance = step_size * random.randint(3, 8)
+            
+            if use_colors:
+                walker.color("red" if distance > step_size else "cyan")
+            
+            walker.forward(distance)
+            total_steps += 1
+            
+            dist = math.sqrt(walker.xcor()**2 + walker.ycor()**2)
+            max_distance = max(max_distance, dist)
+            
+            if bounded and (abs(walker.xcor()) > 400 or abs(walker.ycor()) > 300):
+                walker.backward(distance)
+            
+            if total_steps % 5 == 0:
+                update_info()
+                screen.update()
+        
+        update_info()
+        screen.update()
+
+    # Self-avoiding walk
+    def random_walk_self_avoiding(steps=100):
+        """Random walk that tries to avoid crossing its own path"""
+        global total_steps, max_distance
+        reset_walker()
+        
+        visited = set()
+        visited.add((0, 0))
+        
+        for _ in range(steps):
+            # Try each direction
+            possible_directions = []
+            
+            for direction in cardinal_directions:
+                walker.setheading(direction)
+                test_x = walker.xcor() + step_size * math.cos(math.radians(direction))
+                test_y = walker.ycor() + step_size * math.sin(math.radians(direction))
+                
+                # Round to grid position
+                grid_pos = (round(test_x / step_size), round(test_y / step_size))
+                
+                if grid_pos not in visited:
+                    possible_directions.append(direction)
+            
+            if not possible_directions:
+                break
+            
+            direction = random.choice(possible_directions)
+            walker.setheading(direction)
+            
+            if use_colors:
+                walker.color(random.choice(["yellow", "orange", "red", "magenta"]))
+            
+            walker.forward(step_size)
+            grid_pos = (round(walker.xcor() / step_size), round(walker.ycor() / step_size))
+            visited.add(grid_pos)
+            
+            total_steps += 1
+            
+            distance = math.sqrt(walker.xcor()**2 + walker.ycor()**2)
+            max_distance = max(max_distance, distance)
+            
+            if total_steps % 5 == 0:
+                update_info()
+                screen.update()
+        
+        update_info()
+        screen.update()
+
+    # Multiple walkers
+    def random_walk_multiple():
+        """Multiple random walkers"""
+        global total_steps
+        walker.clear()
+        
+        walkers = []
+        colors = ["red", "blue", "green", "yellow", "cyan", "magenta", "orange", "white"]
+        
+        for i in range(6):
+            w = turtle.Turtle()
+            w.speed(0)
+            w.shape("circle")
+            w.shapesize(0.5, 0.5)
+            w.color(colors[i])
+            w.penup()
+            w.goto(0, 0)
+            w.pendown()
+            w.pensize(1)
+            walkers.append(w)
+        
+        for step in range(100):
+            for w in walkers:
+                direction = random.choice(cardinal_directions)
+                w.setheading(direction)
+                w.forward(10)
+            
+            if step % 5 == 0:
+                screen.update()
+        
+        screen.update()
+
+    # Brownian motion
+    def random_walk_brownian(steps=500):
+        """Simulate Brownian motion with small random steps"""
+        global total_steps, max_distance
+        reset_walker()
+        walker.pensize(1)
+        
+        for _ in range(steps):
+            # Small random angle change
+            current_heading = walker.heading()
+            angle_change = random.uniform(-45, 45)
+            walker.setheading(current_heading + angle_change)
+            
+            if use_colors:
+                walker.color(random.choice(["cyan", "lightblue", "blue", "purple"]))
+            
+            walker.forward(5)
+            total_steps += 1
+            
+            distance = math.sqrt(walker.xcor()**2 + walker.ycor()**2)
+            max_distance = max(max_distance, distance)
+            
+            if bounded and (abs(walker.xcor()) > 400 or abs(walker.ycor()) > 300):
+                walker.backward(5)
+                walker.setheading(walker.heading() + 180)
+            
+            if total_steps % 20 == 0:
+                update_info()
+                screen.update()
+        
+        walker.pensize(2)
+        update_info()
+        screen.update()
+
+    # Toggle features
+    def toggle_colors():
+        """Toggle colorful mode"""
+        global use_colors
+        use_colors = not use_colors
+        print(f"Colors: {'ON' if use_colors else 'OFF'}")
+
+    def toggle_boundary():
+        """Toggle bounded walk"""
+        global bounded
+        bounded = not bounded
+        print(f"Boundary: {'ON' if bounded else 'OFF'}")
+
+    # Set up keyboard controls
+    def setup_controls():
+        """Set up keyboard controls"""
+        screen.listen()
+        screen.onkey(lambda: random_walk_simple(), "1")
+        screen.onkey(lambda: random_walk_continuous(), "2")
+        screen.onkey(lambda: random_walk_biased(), "3")
+        screen.onkey(lambda: random_walk_levy(), "4")
+        screen.onkey(lambda: random_walk_self_avoiding(), "5")
+        screen.onkey(random_walk_multiple, "6")
+        screen.onkey(lambda: random_walk_brownian(), "7")
+        screen.onkey(reset_walker, "r")
+        screen.onkey(toggle_colors, "c")
+        screen.onkey(toggle_boundary, "b")
+
+    # Draw instructions
+    def draw_instructions():
+        """Draw control instructions"""
+        instructions = turtle.Turtle()
+        instructions.hideturtle()
+        instructions.penup()
+        instructions.color("white")
+        instructions.goto(0, -330)
+        text = "1: Cardinal | 2: Continuous | 3: Biased | 4: Levy | 5: Self-avoid | 6: Multiple | 7: Brownian | R: Reset | C: Colors | B: Boundary"
+        instructions.write(text, align="center", font=("Courier", 8, "normal"))
+
+    # Initialize
+    def main():
+        """Initialize and start the program"""
+        print("=== RANDOM WALK VISUALIZER ===")
+        print("\nKeyboard Controls:")
+        print("1 - Cardinal Directions Walk")
+        print("2 - Continuous (Any Angle) Walk")
+        print("3 - Biased Walk (Upward)")
+        print("4 - Levy Flight")
+        print("5 - Self-Avoiding Walk")
+        print("6 - Multiple Walkers")
+        print("7 - Brownian Motion")
+        print("R - Reset")
+        print("C - Toggle Colors")
+        print("B - Toggle Boundary")
+        print("\nPress a number to start a random walk!")
+        
+        draw_instructions()
+        update_info()
+        setup_controls()
+        screen.update()
+
+    # Run the program
+    if __name__ == '__main__':
+        main()
+        turtle.done()`
+    },
+    {
     title: "Turtle Heart Shape",
     category: "turtle",
     description: "Draw a heart using mathematical curves.",
     tags: ["turtle", "shapes", "mathematics"],
     difficulty: 2,
     lines: "~10 lines",
-    code: `import turtle,math
-  t=turtle.Turtle()
-  t.speed(0)
-  t.penup();t.goto(0,-100);t.pendown()
-  for i in range(360):
-      angle=math.radians(i)
-      x=16*math.sin(angle)**3
-      y=13*math.cos(angle)-5*math.cos(2*angle)-2*math.cos(3*angle)-math.cos(4*angle)
-      t.goto(x*10,y*10)
-  turtle.done()`
-  },
-  {
-    title: "Turtle Grid Pattern",
-    category: "turtle",
-    description: "Create various grid-based patterns and designs.",
-    tags: ["turtle", "patterns", "grid"],
-    difficulty: 2,
-    lines: "~20 lines",
     code: `import turtle
-  t=turtle.Turtle()
-  t.speed(0)
-  size=20
-  for y in range(-100,101,size):
-      for x in range(-100,101,size):
-          t.penup();t.goto(x,y);t.pendown();t.dot(5)
-  # extra loops for pattern variations
-  for y in range(-100,101,size):
-      for x in range(-100,101,size):
-          t.penup();t.goto(x+5,y+5);t.pendown();t.dot(3)
-  for y in range(-100,101,size):
-      for x in range(-100,101,size):
-          t.penup();t.goto(x-5,y-5);t.pendown();t.dot(3)
-  turtle.done()`
-  },
+    import math
+    import random
 
+    # Set up the screen
+    screen = turtle.Screen()
+    screen.setup(800, 800)
+    screen.bgcolor("black")
+    screen.title("Heart Shape Art")
+    screen.tracer(0)
 
-    // GUI/Pygame Games Category
-  {
-    title: "Pygame Snake Game",
-    category: "pygame",
-    description: "Classic snake game using Pygame with keyboard controls.",
-    tags: ["pygame", "game", "arcade"],
-    difficulty: 3,
-    lines: "~30 lines",
-    code: `import pygame,random
-  pygame.init()
-  w,h=400,400
-  screen=pygame.display.set_mode((w,h))
-  clock=pygame.time.Clock()
-  snake=[(200,200)]
-  dx,dy=20,0
-  food=(random.randrange(0,w,20),random.randrange(0,h,20))
-  running=True
-  while running:
-      for e in pygame.event.get():
-          if e.type==pygame.QUIT: running=False
-          if e.type==pygame.KEYDOWN:
-              if e.key==pygame.K_LEFT: dx,dy=-20,0
-              if e.key==pygame.K_RIGHT: dx,dy=20,0
-              if e.key==pygame.K_UP: dx,dy=0,-20
-              if e.key==pygame.K_DOWN: dx,dy=0,20
-      head=(snake[0][0]+dx,snake[0][1]+dy)
-      if head in snake or head[0]<0 or head[1]<0 or head[0]>=w or head[1]>=h: running=False
-      snake.insert(0,head)
-      if head==food: food=(random.randrange(0,w,20),random.randrange(0,h,20))
-      else: snake.pop()
-      screen.fill((0,0,0))
-      for x,y in snake: pygame.draw.rect(screen,(0,255,0),(x,y,20,20))
-      pygame.draw.rect(screen,(255,0,0),(food[0],food[1],20,20))
-      pygame.display.flip()
-      clock.tick(10)
-  pygame.quit()`
-  },
+    # Create the turtle
+    t = turtle.Turtle()
+    t.speed(0)
+    t.hideturtle()
+    t.color("red")
+    t.pensize(2)
 
-  {
-    title: "Tetris Clone",
-    category: "games",
-    description: "Full-featured Tetris game with piece rotation, line clearing, and scoring system.",
-    tags: ["pygame", "matrix-manipulation", "game-logic"],
-    difficulty: 4,
-    lines: "~120 lines",
-    code: `import pygame,random
-  pygame.init()
-  w,h=300,600
-  screen=pygame.display.set_mode((w,h))
-  clock=pygame.time.Clock()
-  grid=[[0]*10 for _ in range(20)]
-  pieces=[[[1,1,1,1]],[[1,1],[1,1]],[[0,1,1],[1,1,0]],[[1,1,0],[0,1,1]],[[1,0,0],[1,1,1]],[[0,0,1],[1,1,1]],[[0,1,0],[1,1,1]]]
-  colors=[(0,255,255),(255,255,0),(255,0,0),(0,255,0),(0,0,255),(255,165,0),(128,0,128)]
-  import copy,sys
-  def collide(shape,offset):x,y=offset;return any(y+j>=20 or x+i<0 or x+i>=10 or grid[y+j][x+i] for j,row in enumerate(shape) for i,val in enumerate(row) if val)
-  def place(shape,offset):x,y=offset; 
-  for j,row in enumerate(shape):
-    for i,val in enumerate(row):
-    if val:grid[y+j][x+i]=shape[j][i]
-  def clear_lines():
-  global grid
-  new_grid=[row for row in grid if any(v==0 for v in row)]
-  for _ in range(20-len(new_grid)): new_grid.insert(0,[0]*10)
-  grid=new_grid
-  def draw_grid():
-  for y,row in enumerate(grid):
-    for x,val in enumerate(row):
-    if val: pygame.draw.rect(screen,colors[val-1],(x*30,y*30,30,30))
-  current=copy.deepcopy(random.choice(pieces))
-  cx,cy=3,0
-  fall_time=0
-  while True:
-  for e in pygame.event.get():
-    if e.type==pygame.QUIT: sys.exit()
-  keys=pygame.key.get_pressed()
-  if keys[pygame.K_LEFT] and not collide(current,(cx-1,cy)): cx-=1
-  if keys[pygame.K_RIGHT] and not collide(current,(cx+1,cy)): cx+=1
-  if keys[pygame.K_DOWN] and not collide(current,(cx,cy+1)): cy+=1
-  if keys[pygame.K_UP]: current=[list(r) for r in zip(*current[::-1])]
-  fall_time+=1
-  if fall_time>10:
-    fall_time=0
-    if not collide(current,(cx,cy+1)): cy+=1
-    else:
-    place(current,(cx,cy))
-    clear_lines()
-    current=copy.deepcopy(random.choice(pieces)); cx,cy=3,0
-  screen.fill((0,0,0))
-  draw_grid()
-  for j,row in enumerate(current):
-    for i,val in enumerate(row):
-    if val: pygame.draw.rect(screen,colors[val-1],((cx+i)*30,(cy+j)*30,30,30))
-  pygame.display.flip()
-  clock.tick(30)`
-  },
-  {
-    title: "Pong Game",
-    category: "games",
-    description: "Two-player Pong game with paddle controls and ball physics.",
-    tags: ["pygame", "collision-detection", "physics"],
-    difficulty: 2,
-    lines: "~40 lines",
-    code: `import pygame
-  pygame.init()
-  w,h=400,300
-  screen=pygame.display.set_mode((w,h))
-  clock=pygame.time.Clock()
-  p1,p2=[50,150],[350,150]
-  ball=[200,150];dx,dy=4,3
-  while True:
-  for e in pygame.event.get():
-    if e.type==pygame.QUIT: exit()
-  keys=pygame.key.get_pressed()
-  if keys[pygame.K_w]:p1[1]-=5
-  if keys[pygame.K_s]:p1[1]+=5
-  if keys[pygame.K_UP]:p2[1]-=5
-  if keys[pygame.K_DOWN]:p2[1]+=5
-  ball[0]+=dx; ball[1]+=dy
-  if ball[1]<0 or ball[1]>h: dy*=-1
-  if p1[0]<ball[0]<p1[0]+10 and p1[1]<ball[1]<p1[1]+50: dx*=-1
-  if p2[0]<ball[0]<p2[0]+10 and p2[1]<ball[1]<p2[1]+50: dx*=-1
-  screen.fill((0,0,0))
-  pygame.draw.rect(screen,(255,0,0),(*p1,10,50))
-  pygame.draw.rect(screen,(0,0,255),(*p2,10,50))
-  pygame.draw.circle(screen,(255,255,255),ball,8)
-  pygame.display.flip()
-  clock.tick(60)`
-  },
-
-{
-  title: "Space Invaders",
-  category: "games",
-  description: "Retro space shooter with enemy waves, power-ups, and increasing difficulty.",
-  tags: ["pygame", "sprites", "collision-detection"],
-  difficulty: 4,
-  lines: "~30 lines",
-  code: `import pygame,random
-pygame.init()
-w,h=600,600
-screen=pygame.display.set_mode((w,h))
-clock=pygame.time.Clock()
-player=[w//2,h-50]
-bullets=[]
-enemies=[[x,50] for x in range(50,550,60)]
-dx_enemy=3
-while True:
- for e in pygame.event.get():
-  if e.type==pygame.QUIT: exit()
- keys=pygame.key.get_pressed()
- if keys[pygame.K_LEFT]: player[0]-=5
- if keys[pygame.K_RIGHT]: player[0]+=5
- if keys[pygame.K_SPACE]: bullets.append([player[0]+15,player[1]])
- for b in bullets: b[1]-=10
- bullets=[b for b in bullets if b[1]>0]
- for i,e_pos in enumerate(enemies):
-  e_pos[0]+=dx_enemy
-  if e_pos[0]<0 or e_pos[0]>w-40: dx_enemy*=-1; e_pos[1]+=20
-  for b in bullets:
-   if e_pos[0]<b[0]<e_pos[0]+40 and e_pos[1]<b[1]<e_pos[1]+40:
-     bullets.remove(b); enemies.pop(i); break
- screen.fill((0,0,0))
- pygame.draw.rect(screen,(0,255,0),(*player,30,30))
- for b in bullets: pygame.draw.rect(screen,(255,255,0),(*b,5,10))
- for e_pos in enemies: pygame.draw.rect(screen,(255,0,0),(*e_pos,40,40))
- pygame.display.flip()
- clock.tick(60)`
-},
-{
-  title: "Flappy Bird Clone",
-  category: "games",
-  description: "Side-scrolling game where you navigate a bird through pipes.",
-  tags: ["pygame", "gravity", "endless-runner"],
-  difficulty: 3,
-  lines: "~20 lines",
-  code: `import pygame,random
-pygame.init()
-w,h=400,600
-screen=pygame.display.set_mode((w,h))
-clock=pygame.time.Clock()
-bird=[50,h//2];vy=0
-pipes=[[300,random.randint(150,450)] for _ in range(3)]
-while True:
- for e in pygame.event.get():
-  if e.type==pygame.QUIT: exit()
- keys=pygame.key.get_pressed()
- if keys[pygame.K_SPACE]: vy=-8
- vy+=0.5
- bird[1]+=vy
- for p in pipes:
-  p[0]-=3
-  if p[0]<-50: p[0]=400; p[1]=random.randint(150,450)
- screen.fill((135,206,235))
- pygame.draw.rect(screen,(255,0,0),(*bird,30,30))
- for p in pipes:
-  pygame.draw.rect(screen,(0,255,0),(p[0],0,50,p[1]))
-  pygame.draw.rect(screen,(0,255,0),(p[0],p[1]+150,50,h))
- pygame.display.flip()
- clock.tick(60)`
-},
-{
-  title: "Pac-Man Game",
-  category: "games",
-  description: "Classic maze game with ghosts, pellets, and power-ups.",
-  tags: ["pygame", "pathfinding", "game-ai"],
-  difficulty: 5,
-  lines: "~40 lines",
-  code: `import pygame,random
-pygame.init()
-w,h=400,400
-screen=pygame.display.set_mode((w,h))
-clock=pygame.time.Clock()
-player=[200,200]
-pellets=[[x,y] for x in range(50,351,50) for y in range(50,351,50)]
-ghosts=[[100,100],[300,100]]
-dx,dy=0,0
-while True:
- for e in pygame.event.get():
-  if e.type==pygame.QUIT: exit()
- keys=pygame.key.get_pressed()
- dx,dy=0,0
- if keys[pygame.K_LEFT]:dx=-5
- if keys[pygame.K_RIGHT]:dx=5
- if keys[pygame.K_UP]:dy=-5
- if keys[pygame.K_DOWN]:dy=5
- player[0]+=dx; player[1]+=dy
- for g in ghosts:
-  if g[0]<player[0]:g[0]+=2
-  if g[0]>player[0]:g[0]-=2
-  if g[1]<player[1]:g[1]+=2
-  if g[1]>player[1]:g[1]-=2
- pellets=[p for p in pellets if abs(p[0]-player[0])>10 or abs(p[1]-player[1])>10]
- screen.fill((0,0,0))
- pygame.draw.rect(screen,(255,255,0),(*player,20,20))
- for p in pellets: pygame.draw.circle(screen,(0,255,0),p,5)
- for g in ghosts: pygame.draw.rect(screen,(255,0,0),(*g,20,20))
- pygame.display.flip()
- clock.tick(30)`
-},
-{
-  title: "2048 Game",
-  category: "games",
-  description: "Number puzzle game where you combine tiles to reach 2048.",
-  tags: ["tkinter", "matrix-operations", "game-logic"],
-  difficulty: 3,
-  lines: "~25 lines",
-  code: `import tkinter as tk,random
-grid=[[0]*4 for _ in range(4)]
-def add_tile(): i,j=random.randint(0,3),random.randint(0,3); grid[i][j]=2 if grid[i][j]==0 else 0
-root=tk.Tk()
-canvas=tk.Canvas(root,width=200,height=200);canvas.pack()
-def draw():
-    canvas.delete("all")
-    for i in range(4):
-        for j in range(4):
-            canvas.create_rectangle(j*50,i*50,(j+1)*50,(i+1)*50,fill="white")
-            if grid[i][j]!=0: canvas.create_text(j*50+25,i*50+25,text=str(grid[i][j]))
-def move(): add_tile(); draw(); root.after(500,move)
-root.after(500,move)
-root.mainloop()`
-},
-{
-  title: "Breakout Game",
-  category: "games",
-  description: "Brick-breaking game with paddle, ball, and destructible blocks.",
-  tags: ["pygame", "physics", "collision-detection"],
-  difficulty: 3,
-  lines: "~35 lines",
-  code: `import pygame
-pygame.init()
-w,h=400,300
-screen=pygame.display.set_mode((w,h))
-clock=pygame.time.Clock()
-paddle=[180,280]
-ball=[200,150];dx,dy=3,3
-bricks=[[x,y] for x in range(0,400,40) for y in range(50,150,20)]
-while True:
- for e in pygame.event.get():
-  if e.type==pygame.QUIT: exit()
- keys=pygame.key.get_pressed()
- if keys[pygame.K_LEFT]: paddle[0]-=5
- if keys[pygame.K_RIGHT]: paddle[0]+=5
- ball[0]+=dx; ball[1]+=dy
- if ball[0]<0 or ball[0]>w: dx*=-1
- if ball[1]<0: dy*=-1
- if paddle[0]<ball[0]<paddle[0]+40 and paddle[1]<ball[1]<paddle[1]+10: dy*=-1
- bricks=[b for b in bricks if not (b[0]<ball[0]<b[0]+40 and b[1]<ball[1]<b[1]+20)]
- screen.fill((0,0,0))
- pygame.draw.rect(screen,(255,255,255),(*paddle,40,10))
- pygame.draw.circle(screen,(255,0,0),ball,5)
- for b in bricks: pygame.draw.rect(screen,(0,255,0),(*b,40,20))
- pygame.display.flip()
- clock.tick(60)`
-},
-
-{
-  title: "Chess Game",
-  category: "games",
-  description: "Simplified chess game with piece movement validation (no full AI).",
-  tags: ["pygame", "game-logic", "algorithms"],
-  difficulty: 5,
-  lines: "~60 lines",
-  code: `import pygame
-pygame.init()
-w,h=400,400
-screen=pygame.display.set_mode((w,h))
-clock=pygame.time.Clock()
-board=[[None]*8 for _ in range(8)]
-# Place pawns only for demo
-for i in range(8): board[1][i]="bp"; board[6][i]="wp"
-selected=None
-while True:
- for e in pygame.event.get():
-  if e.type==pygame.QUIT: exit()
-  if e.type==pygame.MOUSEBUTTONDOWN:
-   x,y=e.pos; cx,cy=x//50,y//50
-   if selected: board[cy][cx]=board[selected[1]][selected[0]]; board[selected[1]][selected[0]]=None; selected=None
-   elif board[cy][cx]: selected=(cx,cy)
- screen.fill((255,255,255))
- for y,row in enumerate(board):
-  for x,val in enumerate(row):
-   color=(200,200,200) if (x+y)%2 else (100,100,100)
-   pygame.draw.rect(screen,color,(x*50,y*50,50,50))
-   if val: pygame.draw.circle(screen,(0,0,0),(x*50+25,y*50+25),20)
- pygame.display.flip()
- clock.tick(30)`
-},
-{
-  title: "Tic Tac Toe AI",
-  category: "games",
-  description: "Tic Tac Toe with a simple AI opponent using minimax logic.",
-  tags: ["tkinter", "minimax", "ai"],
-  difficulty: 3,
-  lines: "~25 lines",
-  code: `import tkinter as tk
-root=tk.Tk();root.title("Tic Tac Toe")
-buttons=[[None]*3 for _ in range(3)]
-board=[[""]*3 for _ in range(3)]
-def click(r,c):
- if board[r][c]=="": board[r][c]="X"; buttons[r][c].config(text="X")
- for i in range(3):
-  for j in range(3):
-   if board[i][j]=="": board[i][j]="O"; buttons[i][j].config(text="O"); return
-for i in range(3):
- for j in range(3):
-  b=tk.Button(root,text="",width=5,height=2,command=lambda r=i,c=j:click(r,c))
-  b.grid(row=i,column=j); buttons[i][j]=b
-root.mainloop()`
-},
-{
-  title: "Maze Generator",
-  category: "games",
-  description: "Random maze generator and solver visualization.",
-  tags: ["pygame", "algorithms", "pathfinding"],
-  difficulty: 4,
-  lines: "~35 lines",
-  code: `import pygame,random
-pygame.init()
-w,h=400,400
-screen=pygame.display.set_mode((w,h))
-clock=pygame.time.Clock()
-grid=[[1]*20 for _ in range(20)]
-stack=[(0,0)]
-visited=set()
-while stack:
- x,y=stack.pop()
- if (x,y) in visited: continue
- visited.add((x,y))
- neighbors=[(x+dx,y+dy) for dx,dy in[(0,1),(1,0),(0,-1),(-1,0)] if 0<=x+dx<20 and 0<=y+dy<20 and (x+dx,y+dy) not in visited]
- random.shuffle(neighbors)
- stack.extend(neighbors)
- screen.fill((0,0,0))
- for i,row in enumerate(grid):
-  for j,val in enumerate(row):
-   color=(255,255,255) if (j,i) in visited else (0,0,0)
-   pygame.draw.rect(screen,color,(j*20,i*20,20,20))
- pygame.display.flip()
- clock.tick(30)`
-},
-{
-  title: "Tower Defense",
-  category: "games",
-  description: "Simplified tower defense: place towers, shoot moving enemies.",
-  tags: ["pygame", "pathfinding", "strategy"],
-  difficulty: 5,
-  lines: "~50 lines",
-  code: `import pygame,random
-pygame.init()
-w,h=400,400
-screen=pygame.display.set_mode((w,h))
-clock=pygame.time.Clock()
-towers=[]
-enemies=[[0,random.randint(0,380)] for _ in range(5)]
-while True:
- for e in pygame.event.get():
-  if e.type==pygame.QUIT: exit()
- keys=pygame.key.get_pressed()
- if keys[pygame.K_SPACE]: towers.append([200,200])
- for en in enemies: en[0]+=2
- for t in towers:
-  for en in enemies:
-   if abs(t[0]-en[0])<20 and abs(t[1]-en[1])<20: enemies.remove(en)
- screen.fill((0,0,0))
- for t in towers: pygame.draw.circle(screen,(0,255,0),t,10)
- for en in enemies: pygame.draw.rect(screen,(255,0,0),(*en,20,20))
- pygame.display.flip()
- clock.tick(30)`
-},
-{
-  title: "Sudoku Solver",
-  category: "games",
-  description: "Interactive Sudoku with simple backtracking solver.",
-  tags: ["tkinter", "backtracking", "puzzle"],
-  difficulty: 4,
-  lines: "~25 lines",
-  code: `import tkinter as tk
-root=tk.Tk()
-grid=[[0]*9 for _ in range(9)]
-def draw():
- canvas.delete("all")
- for i in range(9):
-  for j in range(9):
-   canvas.create_rectangle(j*40,i*40,(j+1)*40,(i+1)*40,fill="white")
-   if grid[i][j]!=0: canvas.create_text(j*40+20,i*40+20,text=str(grid[i][j]))
-canvas=tk.Canvas(root,width=360,height=360)
-canvas.pack()
-draw()
-root.mainloop()`
-},
-{
-  title: "Memory Card Game",
-  category: "games",
-  description: "Match pairs of cards in a simple memory game.",
-  tags: ["pygame", "memory", "card-game"],
-  difficulty: 2,
-  lines: "~25 lines",
-  code: `import pygame,random
-pygame.init()
-w,h=400,400
-screen=pygame.display.set_mode((w,h))
-clock=pygame.time.Clock()
-cards=[i//2 for i in range(16)]
-random.shuffle(cards)
-flipped=[]
-while True:
- for e in pygame.event.get():
-  if e.type==pygame.QUIT: exit()
- screen.fill((0,0,0))
- for i,c in enumerate(cards):
-  x=i%4*100;y=i//4*100
-  color=(255,0,0) if i in flipped else (0,255,0)
-  pygame.draw.rect(screen,color,(x,y,90,90))
- pygame.display.flip()
- clock.tick(30)`
-},
-{
-  title: "Rock Paper Scissors",
-  category: "games",
-  description: "GUI game to play against the computer.",
-  tags: ["tkinter", "random", "gui"],
-  difficulty: 1,
-  lines: "~20 lines",
-  code: `import tkinter as tk,random
-root=tk.Tk()
-choices=["Rock","Paper","Scissors"]
-def play(c):
- comp=random.choice(choices)
- result="Win" if (c=="Rock" and comp=="Scissors") or (c=="Paper" and comp=="Rock") or (c=="Scissors" and comp=="Paper") else "Lose" if c!=comp else "Tie"
- label.config(text=f"Computer:{comp} Result:{result}")
-for i in choices:
- tk.Button(root,text=i,command=lambda c=i:play(c)).pack()
-label=tk.Label(root,text="")
-label.pack()
-root.mainloop()`
-},
-
-{
-  title: "Blackjack Game",
-  category: "games",
-  description: "Simplified Blackjack with betting and card draw.",
-  tags: ["pygame", "card-game", "probability"],
-  difficulty: 3,
-  lines: "~25 lines",
-  code: `import random
-player=0;dealer=0;deck=[i for i in range(1,12)]*4
-while True:
- if player==0: player=sum(random.sample(deck,2))
- if dealer==0: dealer=sum(random.sample(deck,2))
- move=input(f"Player:{player} Hit or Stand? ")
- if move.lower()=="hit": player+=random.choice(deck)
- else: break
- while dealer<17: dealer+=random.choice(deck)
- print(f"Player:{player} Dealer:{dealer}")
- print("Win" if player<=21 and (player>dealer or dealer>21) else "Lose")`
-},
-{
-  title: "Minesweeper",
-  category: "games",
-  description: "Simplified Minesweeper playable in terminal.",
-  tags: ["tkinter", "grid-logic", "recursion"],
-  difficulty: 4,
-  lines: "~25 lines",
-  code: `import random
-w,h=5,5
-board=[[0]*w for _ in range(h)]
-for _ in range(5): x,y=random.randint(0,4),random.randint(0,4); board[y][x]=9
-for row in board: print(" ".join("*" if c==9 else str(c) for c in row))`
-},
-{
-  title: "Connect Four",
-  category: "games",
-  description: "Two-player Connect Four in terminal.",
-  tags: ["pygame", "minimax", "strategy"],
-  difficulty: 3,
-  lines: "~20 lines",
-  code: `grid=[[0]*7 for _ in range(6)]
-def print_grid(): [print(row) for row in grid]
-player=1
-while True:
- print_grid()
- col=int(input(f"Player {player} choose column:"))
- for r in range(5,-1,-1):
-  if grid[r][col]==0: grid[r][col]=player; break
- player=3-player`
-},
-{
-  title: "Asteroids Game",
-  category: "games",
-  description: "Simplified Asteroids shooter in terminal.",
-  tags: ["pygame", "vector-math", "physics"],
-  difficulty: 4,
-  lines: "~30 lines",
-  code: `import random
-player=[10,10];asteroids=[[random.randint(0,20),random.randint(0,20)] for _ in range(5)]
-while True:
- print(f"Player:{player}")
- for a in asteroids: a[0]-=1
- move=input("Move (w/a/s/d): ")
- if move=="w": player[1]-=1
- if move=="s": player[1]+=1
- if move=="a": player[0]-=1
- if move=="d": player[0]+=1
- asteroids=[a for a in asteroids if a!=player]`
-},
-
-
-  // Graphics & Art Category
-  {
-    title: "Fractal Generator",
-    category: "graphics",
-    description: "Generate beautiful fractals like Mandelbrot and Julia sets with zoom functionality.",
-    tags: ["matplotlib", "numpy", "complex-numbers"],
-    difficulty: 4,
-    lines: "~200 lines"
-  },
-  {
-    title: "ASCII Art Generator",
-    category: "graphics",
-    description: "Convert images to ASCII art with customizable character sets and density.",
-    tags: ["PIL", "image-processing", "ascii"],
-    difficulty: 3,
-    lines: "~150 lines"
-  },
-  {
-    title: "Pixel Art Editor",
-    category: "graphics",
-    description: "Simple pixel art creation tool with color palette and export functionality.",
-    tags: ["pygame", "graphics", "editor"],
-    difficulty: 3,
-    lines: "~400 lines"
-  },
-  {
-    title: "3D Wireframe Renderer",
-    category: "graphics",
-    description: "Render 3D wireframe objects with rotation and projection.",
-    tags: ["pygame", "3d-math", "linear-algebra"],
-    difficulty: 5,
-    lines: "~300 lines"
-  },
-  {
-    title: "Spirograph Generator",
-    category: "graphics",
-    description: "Create beautiful spirograph patterns with customizable parameters.",
-    tags: ["turtle", "mathematics", "patterns"],
-    difficulty: 2,
-    lines: "~100 lines"
-  },
-  {
-    title: "Color Palette Extractor",
-    category: "graphics",
-    description: "Extract dominant colors from images using K-means clustering.",
-    tags: ["PIL", "sklearn", "color-analysis"],
-    difficulty: 3,
-    lines: "~120 lines"
-  },
-  {
-    title: "Image Filter Effects",
-    category: "graphics",
-    description: "Apply various filters like blur, sharpen, edge detection to images.",
-    tags: ["PIL", "numpy", "image-processing"],
-    difficulty: 3,
-    lines: "~250 lines"
-  },
-  {
-    title: "Mandala Generator",
-    category: "graphics",
-    description: "Create intricate mandala patterns with symmetrical designs.",
-    tags: ["turtle", "geometry", "patterns"],
-    difficulty: 3,
-    lines: "~180 lines"
-  },
-  {
-    title: "QR Code Generator",
-    category: "graphics",
-    description: "Generate QR codes with custom data and styling options.",
-    tags: ["qrcode", "PIL", "encoding"],
-    difficulty: 2,
-    lines: "~80 lines",
-    code: `# QR Code Generator
-# Install required: pip install qrcode[pil]
-import qrcode
-
-def generate_qr(data, filename="qrcode.png", fill_color="black", back_color="white"):
-    """Generate QR code from data"""
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=4,
-    )
-    
-    qr.add_data(data)
-    qr.make(fit=True)
-    
-    img = qr.make_image(fill_color=fill_color, back_color=back_color)
-    img.save(filename)
-    
-    print(f"QR Code saved as {filename}")
-    return img
-
-def main():
-    print("=== QR Code Generator ===\\n")
-    
-    data = input("Enter text or URL to encode: ")
-    filename = input("Output filename (default: qrcode.png): ") or "qrcode.png"
-    
-    # Optional: Custom colors
-    custom = input("Use custom colors? (y/N): ").lower() == 'y'
-    
-    if custom:
-        fill = input("Fill color (default: black): ") or "black"
-        back = input("Background color (default: white): ") or "white"
-        generate_qr(data, filename, fill, back)
-    else:
-        generate_qr(data, filename)
-    
-    print("\\nDone! QR code generated successfully.")
-
-if __name__ == '__main__':
-    main()`
-  },
-  {
-    title: "Barcode Generator",
-    category: "graphics",
-    description: "Create various types of barcodes (Code128, EAN, UPC).",
-    tags: ["python-barcode", "PIL", "encoding"],
-    difficulty: 2,
-    lines: "~100 lines"
-  },
-  {
-    title: "Image Mosaic Creator",
-    category: "graphics",
-    description: "Create photo mosaics using a collection of smaller images.",
-    tags: ["PIL", "image-processing", "algorithms"],
-    difficulty: 4,
-    lines: "~300 lines"
-  },
-  {
-    title: "Geometric Pattern Generator",
-    category: "graphics",
-    description: "Generate various geometric patterns and tessellations.",
-    tags: ["turtle", "matplotlib", "geometry"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Digital Clock Display",
-    category: "graphics",
-    description: "Stylish digital clock with customizable fonts and colors.",
-    tags: ["tkinter", "datetime", "gui"],
-    difficulty: 2,
-    lines: "~120 lines"
-  },
-  {
-    title: "Logo Generator",
-    category: "graphics",
-    description: "Simple logo creation tool with text and shape combinations.",
-    tags: ["PIL", "graphics", "design"],
-    difficulty: 3,
-    lines: "~250 lines"
-  },
-  {
-    title: "Particle System",
-    category: "graphics",
-    description: "Simulate particle effects like fire, smoke, and explosions.",
-    tags: ["pygame", "physics", "simulation"],
-    difficulty: 4,
-    lines: "~350 lines"
-  },
-  {
-    title: "L-System Tree Generator",
-    category: "graphics",
-    description: "Generate fractal trees and plants using L-system rules.",
-    tags: ["turtle", "fractals", "algorithms"],
-    difficulty: 4,
-    lines: "~200 lines"
-  },
-  {
-    title: "Image Watermark Tool",
-    category: "graphics",
-    description: "Add text or image watermarks to photos with transparency control.",
-    tags: ["PIL", "image-processing", "watermark"],
-    difficulty: 2,
-    lines: "~150 lines"
-  },
-  {
-    title: "Collage Maker",
-    category: "graphics",
-    description: "Automatically arrange multiple images into an attractive collage.",
-    tags: ["PIL", "layout-algorithms", "image-processing"],
-    difficulty: 3,
-    lines: "~280 lines"
-  },
-  {
-    title: "Color Blindness Simulator",
-    category: "graphics",
-    description: "Simulate how images appear to people with different types of color blindness.",
-    tags: ["PIL", "color-theory", "accessibility"],
-    difficulty: 3,
-    lines: "~180 lines"
-  },
-  {
-    title: "Animated GIF Creator",
-    category: "graphics",
-    description: "Create animated GIFs from image sequences or video frames.",
-    tags: ["PIL", "imageio", "animation"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-
-  // AI & Machine Learning Category
-  {
-    title: "Chatbot with NLTK",
-    category: "ai",
-    description: "Simple rule-based chatbot using natural language processing.",
-    tags: ["nltk", "nlp", "chatbot"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Image Classifier",
-    category: "ai",
-    description: "Train a CNN to classify images using TensorFlow/Keras.",
-    tags: ["tensorflow", "keras", "cnn"],
-    difficulty: 4,
-    lines: "~300 lines"
-  },
-  {
-    title: "Sentiment Analysis",
-    category: "ai",
-    description: "Analyze sentiment of text using machine learning models.",
-    tags: ["sklearn", "nltk", "text-analysis"],
-    difficulty: 3,
-    lines: "~180 lines"
-  },
-  {
-    title: "Face Detection",
-    category: "ai",
-    description: "Detect faces in images and videos using OpenCV.",
-    tags: ["opencv", "computer-vision", "detection"],
-    difficulty: 3,
-    lines: "~150 lines"
-  },
-  {
-    title: "Handwriting Recognition",
-    category: "ai",
-    description: "Recognize handwritten digits using neural networks.",
-    tags: ["tensorflow", "mnist", "neural-networks"],
-    difficulty: 4,
-    lines: "~250 lines"
-  },
-  {
-    title: "Stock Price Predictor",
-    category: "ai",
-    description: "Predict stock prices using LSTM neural networks.",
-    tags: ["tensorflow", "lstm", "time-series"],
-    difficulty: 5,
-    lines: "~400 lines"
-  },
-  {
-    title: "Recommendation System",
-    category: "ai",
-    description: "Build a movie/book recommendation system using collaborative filtering.",
-    tags: ["pandas", "sklearn", "recommendation"],
-    difficulty: 4,
-    lines: "~300 lines"
-  },
-  {
-    title: "Text Generator",
-    category: "ai",
-    description: "Generate text using Markov chains or RNN models.",
-    tags: ["tensorflow", "nlp", "text-generation"],
-    difficulty: 4,
-    lines: "~350 lines"
-  },
-  {
-    title: "Object Detection",
-    category: "ai",
-    description: "Detect and classify objects in images using YOLO or SSD.",
-    tags: ["opencv", "yolo", "object-detection"],
-    difficulty: 5,
-    lines: "~400 lines"
-  },
-  {
-    title: "Voice Assistant",
-    category: "ai",
-    description: "Create a voice-controlled assistant with speech recognition.",
-    tags: ["speech-recognition", "pyttsx3", "voice"],
-    difficulty: 4,
-    lines: "~300 lines"
-  },
-  {
-    title: "Spam Email Classifier",
-    category: "ai",
-    description: "Classify emails as spam or not spam using machine learning.",
-    tags: ["sklearn", "nlp", "classification"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Gesture Recognition",
-    category: "ai",
-    description: "Recognize hand gestures using computer vision techniques.",
-    tags: ["opencv", "mediapipe", "gesture-recognition"],
-    difficulty: 4,
-    lines: "~250 lines"
-  },
-  {
-    title: "Music Genre Classifier",
-    category: "ai",
-    description: "Classify music genres using audio feature extraction.",
-    tags: ["librosa", "sklearn", "audio-processing"],
-    difficulty: 4,
-    lines: "~350 lines"
-  },
-  {
-    title: "Neural Style Transfer",
-    category: "ai",
-    description: "Apply artistic styles to images using deep learning.",
-    tags: ["tensorflow", "style-transfer", "cnn"],
-    difficulty: 5,
-    lines: "~400 lines"
-  },
-  {
-    title: "Anomaly Detection",
-    category: "ai",
-    description: "Detect anomalies in data using unsupervised learning.",
-    tags: ["sklearn", "anomaly-detection", "clustering"],
-    difficulty: 4,
-    lines: "~280 lines"
-  },
-  {
-    title: "Language Translator",
-    category: "ai",
-    description: "Translate text between languages using pre-trained models.",
-    tags: ["transformers", "nlp", "translation"],
-    difficulty: 3,
-    lines: "~150 lines"
-  },
-  {
-    title: "Pose Estimation",
-    category: "ai",
-    description: "Estimate human pose from images or video streams.",
-    tags: ["opencv", "mediapipe", "pose-estimation"],
-    difficulty: 4,
-    lines: "~200 lines"
-  },
-  {
-    title: "Fake News Detector",
-    category: "ai",
-    description: "Detect fake news articles using NLP and machine learning.",
-    tags: ["sklearn", "nltk", "text-classification"],
-    difficulty: 4,
-    lines: "~300 lines"
-  },
-  {
-    title: "Emotion Recognition",
-    category: "ai",
-    description: "Recognize emotions from facial expressions in real-time.",
-    tags: ["opencv", "tensorflow", "emotion-recognition"],
-    difficulty: 4,
-    lines: "~320 lines"
-  },
-  {
-    title: "Q-Learning Game AI",
-    category: "ai",
-    description: "Train an AI to play games using reinforcement learning.",
-    tags: ["numpy", "q-learning", "reinforcement-learning"],
-    difficulty: 5,
-    lines: "~450 lines"
-  },
-
-  // Web Development Category
-  {
-    title: "Personal Portfolio Website",
-    category: "web",
-    description: "Create a responsive portfolio website using Flask and Bootstrap.",
-    tags: ["flask", "html", "css", "bootstrap"],
-    difficulty: 3,
-    lines: "~400 lines"
-  },
-  {
-    title: "Blog Platform",
-    category: "web",
-    description: "Full-featured blog with user authentication and CRUD operations.",
-    tags: ["django", "sqlite", "authentication"],
-    difficulty: 4,
-    lines: "~800 lines"
-  },
-  {
-    title: "URL Shortener",
-    category: "web",
-    description: "Create short URLs with click tracking and analytics.",
-    tags: ["flask", "sqlite", "url-shortening"],
-    difficulty: 3,
-    lines: "~250 lines"
-  },
-  {
-    title: "Weather App",
-    category: "web",
-    description: "Display weather information using external API integration.",
-    tags: ["flask", "api", "requests"],
-    difficulty: 2,
-    lines: "~200 lines"
-  },
-  {
-    title: "Todo List App",
-    category: "web",
-    description: "Task management application with user accounts and categories.",
-    tags: ["django", "postgresql", "crud"],
-    difficulty: 3,
-    lines: "~500 lines"
-  },
-  {
-    title: "Chat Application",
-    category: "web",
-    description: "Real-time chat app using WebSockets and Flask-SocketIO.",
-    tags: ["flask-socketio", "websockets", "real-time"],
-    difficulty: 4,
-    lines: "~400 lines"
-  },
-  {
-    title: "E-commerce Store",
-    category: "web",
-    description: "Online store with shopping cart, payment integration, and admin panel.",
-    tags: ["django", "stripe", "e-commerce"],
-    difficulty: 5,
-    lines: "~1200 lines"
-  },
-  {
-    title: "Social Media Dashboard",
-    category: "web",
-    description: "Aggregate and display social media metrics from multiple platforms.",
-    tags: ["flask", "api-integration", "dashboard"],
-    difficulty: 4,
-    lines: "~600 lines"
-  },
-  {
-    title: "File Upload Service",
-    category: "web",
-    description: "Secure file upload and sharing service with access controls.",
-    tags: ["flask", "file-handling", "security"],
-    difficulty: 3,
-    lines: "~300 lines"
-  },
-  {
-    title: "Recipe Sharing Platform",
-    category: "web",
-    description: "Share and discover recipes with ratings and comments.",
-    tags: ["django", "user-generated-content", "ratings"],
-    difficulty: 4,
-    lines: "~700 lines"
-  },
-  {
-    title: "Event Management System",
-    category: "web",
-    description: "Create and manage events with RSVP functionality.",
-    tags: ["flask", "calendar", "event-management"],
-    difficulty: 4,
-    lines: "~550 lines"
-  },
-  {
-    title: "News Aggregator",
-    category: "web",
-    description: "Collect and display news from multiple sources with categorization.",
-    tags: ["django", "web-scraping", "rss"],
-    difficulty: 3,
-    lines: "~400 lines"
-  },
-  {
-    title: "Online Quiz Platform",
-    category: "web",
-    description: "Create and take quizzes with scoring and leaderboards.",
-    tags: ["flask", "quiz-logic", "scoring"],
-    difficulty: 3,
-    lines: "~450 lines"
-  },
-  {
-    title: "Expense Tracker",
-    category: "web",
-    description: "Track personal expenses with categories and budget alerts.",
-    tags: ["django", "charts", "financial"],
-    difficulty: 3,
-    lines: "~500 lines"
-  },
-  {
-    title: "Job Board",
-    category: "web",
-    description: "Post and search for jobs with application tracking.",
-    tags: ["flask", "search", "job-board"],
-    difficulty: 4,
-    lines: "~600 lines"
-  },
-  {
-    title: "Booking System",
-    category: "web",
-    description: "Appointment booking system with calendar integration.",
-    tags: ["django", "calendar", "booking"],
-    difficulty: 4,
-    lines: "~650 lines"
-  },
-  {
-    title: "Forum Platform",
-    category: "web",
-    description: "Discussion forum with threads, replies, and moderation.",
-    tags: ["django", "forum", "moderation"],
-    difficulty: 4,
-    lines: "~800 lines"
-  },
-  {
-    title: "API Rate Limiter",
-    category: "web",
-    description: "Implement rate limiting for APIs with different strategies.",
-    tags: ["flask", "rate-limiting", "middleware"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Content Management System",
-    category: "web",
-    description: "Simple CMS for managing website content and pages.",
-    tags: ["django", "cms", "admin-interface"],
-    difficulty: 5,
-    lines: "~1000 lines"
-  },
-  {
-    title: "Real Estate Listings",
-    category: "web",
-    description: "Property listing website with search and filtering.",
-    tags: ["flask", "geolocation", "search"],
-    difficulty: 4,
-    lines: "~700 lines"
-  },
-
-  // Automation Category
-  {
-    title: "Web Scraper",
-    category: "automation",
-    description: "Scrape data from websites and save to CSV or database.",
-    tags: ["beautifulsoup", "requests", "csv"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Email Automation",
-    category: "automation",
-    description: "Send automated emails with attachments and HTML templates.",
-    tags: ["smtplib", "email", "automation"],
-    difficulty: 2,
-    lines: "~150 lines"
-  },
-  {
-    title: "File Organizer",
-    category: "automation",
-    description: "Automatically organize files by type, date, or custom rules.",
-    tags: ["os", "shutil", "file-management"],
-    difficulty: 2,
-    lines: "~120 lines"
-  },
-  {
-    title: "Social Media Bot",
-    category: "automation",
-    description: "Automate social media posting and engagement.",
-    tags: ["tweepy", "instagram-api", "social-media"],
-    difficulty: 3,
-    lines: "~250 lines"
-  },
-  {
-    title: "Backup Script",
-    category: "automation",
-    description: "Automated backup system with compression and cloud storage.",
-    tags: ["zipfile", "cloud-storage", "scheduling"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "System Monitor",
-    category: "automation",
-    description: "Monitor system resources and send alerts when thresholds are exceeded.",
-    tags: ["psutil", "monitoring", "alerts"],
-    difficulty: 3,
-    lines: "~180 lines"
-  },
-  {
-    title: "Log Analyzer",
-    category: "automation",
-    description: "Parse and analyze log files for patterns and anomalies.",
-    tags: ["regex", "log-analysis", "reporting"],
-    difficulty: 3,
-    lines: "~220 lines"
-  },
-  {
-    title: "Database Backup Tool",
-    category: "automation",
-    description: "Automated database backup with scheduling and rotation.",
-    tags: ["sqlite3", "mysql", "backup"],
-    difficulty: 3,
-    lines: "~180 lines"
-  },
-  {
-    title: "Website Monitor",
-    category: "automation",
-    description: "Monitor website uptime and performance with notifications.",
-    tags: ["requests", "monitoring", "notifications"],
-    difficulty: 2,
-    lines: "~150 lines"
-  },
-  {
-    title: "PDF Report Generator",
-    category: "automation",
-    description: "Generate PDF reports from data with charts and tables.",
-    tags: ["reportlab", "matplotlib", "pdf"],
-    difficulty: 3,
-    lines: "~250 lines"
-  },
-  {
-    title: "Excel Automation",
-    category: "automation",
-    description: "Automate Excel tasks like data processing and report generation.",
-    tags: ["openpyxl", "pandas", "excel"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Image Batch Processor",
-    category: "automation",
-    description: "Batch process images with resizing, format conversion, and filters.",
-    tags: ["PIL", "batch-processing", "image-processing"],
-    difficulty: 2,
-    lines: "~180 lines"
-  },
-  {
-    title: "FTP File Sync",
-    category: "automation",
-    description: "Synchronize files between local and remote FTP servers.",
-    tags: ["ftplib", "file-sync", "networking"],
-    difficulty: 3,
-    lines: "~220 lines"
-  },
-  {
-    title: "Task Scheduler",
-    category: "automation",
-    description: "Schedule and execute tasks at specific times or intervals.",
-    tags: ["schedule", "cron", "task-scheduling"],
-    difficulty: 2,
-    lines: "~150 lines"
-  },
-  {
-    title: "API Data Collector",
-    category: "automation",
-    description: "Collect data from multiple APIs and store in database.",
-    tags: ["requests", "api", "data-collection"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Selenium Web Automation",
-    category: "automation",
-    description: "Automate web browser interactions for testing or data collection.",
-    tags: ["selenium", "web-automation", "testing"],
-    difficulty: 4,
-    lines: "~300 lines"
-  },
-  {
-    title: "Network Scanner",
-    category: "automation",
-    description: "Scan network for active devices and open ports.",
-    tags: ["socket", "networking", "security"],
-    difficulty: 4,
-    lines: "~250 lines"
-  },
-  {
-    title: "Configuration Manager",
-    category: "automation",
-    description: "Manage application configurations across different environments.",
-    tags: ["configparser", "yaml", "configuration"],
-    difficulty: 2,
-    lines: "~120 lines"
-  },
-  {
-    title: "Automated Testing Suite",
-    category: "automation",
-    description: "Comprehensive testing framework with reporting and CI integration.",
-    tags: ["pytest", "unittest", "testing"],
-    difficulty: 4,
-    lines: "~400 lines"
-  },
-  {
-    title: "Cloud Storage Sync",
-    category: "automation",
-    description: "Synchronize files with cloud storage services like Google Drive or Dropbox.",
-    tags: ["google-api", "dropbox-api", "cloud-sync"],
-    difficulty: 4,
-    lines: "~350 lines"
-  },
-
-  // Data Science Category
-  {
-    title: "Sales Data Analyzer",
-    category: "data",
-    description: "Analyze sales data with visualizations and trend analysis.",
-    tags: ["pandas", "matplotlib", "seaborn"],
-    difficulty: 3,
-    lines: "~250 lines"
-  },
-  {
-    title: "Stock Market Dashboard",
-    category: "data",
-    description: "Real-time stock market data visualization and analysis.",
-    tags: ["yfinance", "plotly", "dash"],
-    difficulty: 4,
-    lines: "~400 lines"
-  },
-  {
-    title: "COVID-19 Data Tracker",
-    category: "data",
-    description: "Track and visualize COVID-19 statistics with interactive charts.",
-    tags: ["pandas", "plotly", "api"],
-    difficulty: 3,
-    lines: "~300 lines"
-  },
-  {
-    title: "Weather Data Analysis",
-    category: "data",
-    description: "Analyze historical weather data and create predictive models.",
-    tags: ["pandas", "sklearn", "weather-api"],
-    difficulty: 3,
-    lines: "~280 lines"
-  },
-  {
-    title: "Customer Segmentation",
-    category: "data",
-    description: "Segment customers using clustering algorithms and RFM analysis.",
-    tags: ["sklearn", "kmeans", "customer-analysis"],
-    difficulty: 4,
-    lines: "~350 lines"
-  },
-  {
-    title: "A/B Test Analyzer",
-    category: "data",
-    description: "Analyze A/B test results with statistical significance testing.",
-    tags: ["scipy", "statistics", "hypothesis-testing"],
-    difficulty: 4,
-    lines: "~200 lines"
-  },
-  {
-    title: "Social Media Analytics",
-    category: "data",
-    description: "Analyze social media engagement and sentiment trends.",
-    tags: ["tweepy", "nltk", "sentiment-analysis"],
-    difficulty: 4,
-    lines: "~400 lines"
-  },
-  {
-    title: "Financial Portfolio Analyzer",
-    category: "data",
-    description: "Analyze investment portfolio performance and risk metrics.",
-    tags: ["yfinance", "numpy", "portfolio-analysis"],
-    difficulty: 4,
-    lines: "~350 lines"
-  },
-  {
-    title: "Survey Data Processor",
-    category: "data",
-    description: "Process and analyze survey responses with statistical insights.",
-    tags: ["pandas", "matplotlib", "statistics"],
-    difficulty: 3,
-    lines: "~250 lines"
-  },
-  {
-    title: "Time Series Forecasting",
-    category: "data",
-    description: "Forecast future values using ARIMA and other time series models.",
-    tags: ["statsmodels", "time-series", "forecasting"],
-    difficulty: 5,
-    lines: "~400 lines"
-  },
-  {
-    title: "Web Analytics Dashboard",
-    category: "data",
-    description: "Create interactive dashboard for website analytics data.",
-    tags: ["dash", "plotly", "web-analytics"],
-    difficulty: 4,
-    lines: "~500 lines"
-  },
-  {
-    title: "Market Basket Analysis",
-    category: "data",
-    description: "Find associations between products using market basket analysis.",
-    tags: ["mlxtend", "association-rules", "retail-analytics"],
-    difficulty: 4,
-    lines: "~300 lines"
-  },
-  {
-    title: "Churn Prediction Model",
-    category: "data",
-    description: "Predict customer churn using machine learning techniques.",
-    tags: ["sklearn", "classification", "churn-analysis"],
-    difficulty: 4,
-    lines: "~350 lines"
-  },
-  {
-    title: "Data Quality Checker",
-    category: "data",
-    description: "Assess and report on data quality issues in datasets.",
-    tags: ["pandas", "data-quality", "validation"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Correlation Analysis Tool",
-    category: "data",
-    description: "Find correlations between variables with heatmaps and statistics.",
-    tags: ["pandas", "seaborn", "correlation"],
-    difficulty: 2,
-    lines: "~150 lines"
-  },
-  {
-    title: "Outlier Detection System",
-    category: "data",
-    description: "Detect outliers in datasets using statistical and ML methods.",
-    tags: ["sklearn", "statistics", "outlier-detection"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Data Visualization Suite",
-    category: "data",
-    description: "Create various types of charts and visualizations from data.",
-    tags: ["matplotlib", "seaborn", "plotly"],
-    difficulty: 3,
-    lines: "~300 lines"
-  },
-  {
-    title: "ETL Pipeline",
-    category: "data",
-    description: "Extract, transform, and load data from multiple sources.",
-    tags: ["pandas", "sqlalchemy", "etl"],
-    difficulty: 4,
-    lines: "~400 lines"
-  },
-  {
-    title: "Geospatial Data Analyzer",
-    category: "data",
-    description: "Analyze and visualize geospatial data with maps and statistics.",
-    tags: ["geopandas", "folium", "geospatial"],
-    difficulty: 4,
-    lines: "~350 lines"
-  },
-  {
-    title: "Text Mining Tool",
-    category: "data",
-    description: "Extract insights from text data using NLP techniques.",
-    tags: ["nltk", "wordcloud", "text-mining"],
-    difficulty: 3,
-    lines: "~280 lines"
-  },
-
-  // Tools & Utilities Category
-  {
-    title: "Password Generator",
-    category: "tools",
-    description: "Generate secure passwords with customizable criteria and strength checking.",
-    tags: ["random", "security", "password"],
-    difficulty: 2,
-    lines: "~100 lines",
-    code: `# Secure Password Generator
-import random
-import string
-
-def generate_password(length=16, use_symbols=True, use_numbers=True):
-    """Generate a secure random password"""
-    chars = string.ascii_letters
-    
-    if use_numbers:
-        chars += string.digits
-    if use_symbols:
-        chars += string.punctuation
-    
-    # Ensure at least one of each type
-    password = []
-    password.append(random.choice(string.ascii_lowercase))
-    password.append(random.choice(string.ascii_uppercase))
-    
-    if use_numbers:
-        password.append(random.choice(string.digits))
-    if use_symbols:
-        password.append(random.choice(string.punctuation))
-    
-    # Fill the rest
-    for _ in range(length - len(password)):
-        password.append(random.choice(chars))
-    
-    random.shuffle(password)
-    return ''.join(password)
-
-def check_strength(password):
-    """Check password strength"""
-    strength = 0
-    if len(password) >= 8: strength += 1
-    if len(password) >= 12: strength += 1
-    if any(c.isupper() for c in password): strength += 1
-    if any(c.islower() for c in password): strength += 1
-    if any(c.isdigit() for c in password): strength += 1
-    if any(c in string.punctuation for c in password): strength += 1
-    
-    levels = ["Very Weak", "Weak", "Fair", "Good", "Strong", "Very Strong"]
-    return levels[min(strength, 5)]
-
-def main():
-    print("=== Password Generator ===\\n")
-    length = int(input("Password length (default 16): ") or "16")
-    use_symbols = input("Include symbols? (Y/n): ").lower() != 'n'
-    use_numbers = input("Include numbers? (Y/n): ").lower() != 'n'
-    
-    password = generate_password(length, use_symbols, use_numbers)
-    print(f"\\nGenerated Password: {password}")
-    print(f"Strength: {check_strength(password)}")
-
-if __name__ == '__main__':
-    main()`
-  },
-  {
-    title: "File Encryption Tool",
-    category: "tools",
-    description: "Encrypt and decrypt files using various encryption algorithms.",
-    tags: ["cryptography", "security", "encryption"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "QR Code Scanner",
-    category: "tools",
-    description: "Scan and decode QR codes from images or webcam feed.",
-    tags: ["opencv", "pyzbar", "qr-code"],
-    difficulty: 3,
-    lines: "~150 lines"
-  },
-  {
-    title: "Unit Converter",
-    category: "tools",
-    description: "Convert between different units of measurement (length, weight, temperature).",
-    tags: ["tkinter", "conversion", "gui"],
-    difficulty: 2,
-    lines: "~180 lines"
-  },
-  {
-    title: "Color Picker Tool",
-    category: "tools",
-    description: "Pick colors from screen and get RGB, HEX, and HSV values.",
-    tags: ["tkinter", "PIL", "color"],
-    difficulty: 2,
-    lines: "~120 lines"
-  },
-  {
-    title: "Text Editor",
-    category: "tools",
-    description: "Simple text editor with syntax highlighting and file operations.",
-    tags: ["tkinter", "text-editor", "syntax-highlighting"],
-    difficulty: 4,
-    lines: "~500 lines"
-  },
-  {
-    title: "Calculator App",
-    category: "tools",
-    description: "Scientific calculator with advanced mathematical functions.",
-    tags: ["tkinter", "math", "calculator"],
-    difficulty: 3,
-    lines: "~250 lines",
-    code: `# Scientific Calculator
-import tkinter as tk
-import math
-
-class Calculator:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Scientific Calculator")
-        self.root.geometry("400x600")
-        self.root.resizable(False, False)
+    # Mathematical heart using parametric equations
+    def draw_heart_parametric(scale=10, color="red"):
+        """Draw heart using parametric equations"""
+        t.clear()
+        t.color(color)
+        t.penup()
+        t.goto(0, -100)
+        t.pendown()
         
-        self.expression = ""
-        self.result_var = tk.StringVar()
+        for i in range(361):
+            angle = math.radians(i)
+            x = 16 * math.sin(angle)**3
+            y = 13 * math.cos(angle) - 5 * math.cos(2*angle) - 2 * math.cos(3*angle) - math.cos(4*angle)
+            t.goto(x * scale, y * scale)
         
-        self.create_widgets()
-    
-    def create_widgets(self):
-        # Display
-        display = tk.Entry(self.root, textvariable=self.result_var, 
-                          font=('Arial', 24), bd=10, 
-                          insertwidth=4, width=14, justify='right')
-        display.grid(row=0, column=0, columnspan=4, padx=10, pady=20)
+        screen.update()
+
+    # Filled heart
+    def draw_heart_filled(scale=10, color="red"):
+        """Draw a filled heart"""
+        t.clear()
+        t.color(color)
+        t.fillcolor(color)
+        t.penup()
+        t.goto(0, -100)
+        t.pendown()
+        t.begin_fill()
         
-        # Buttons layout
-        buttons = [
-            ('7', 1, 0), ('8', 1, 1), ('9', 1, 2), ('/', 1, 3),
-            ('4', 2, 0), ('5', 2, 1), ('6', 2, 2), ('*', 2, 3),
-            ('1', 3, 0), ('2', 3, 1), ('3', 3, 2), ('-', 3, 3),
-            ('0', 4, 0), ('.', 4, 1), ('=', 4, 2), ('+', 4, 3),
-            ('C', 5, 0), ('(', 5, 1), (')', 5, 2), ('^', 5, 3),
-            ('sin', 6, 0), ('cos', 6, 1), ('tan', 6, 2), ('√', 6, 3),
-            ('log', 7, 0), ('ln', 7, 1), ('π', 7, 2), ('e', 7, 3),
+        for i in range(361):
+            angle = math.radians(i)
+            x = 16 * math.sin(angle)**3
+            y = 13 * math.cos(angle) - 5 * math.cos(2*angle) - 2 * math.cos(3*angle) - math.cos(4*angle)
+            t.goto(x * scale, y * scale)
+        
+        t.end_fill()
+        screen.update()
+
+    # Simple heart using curves
+    def draw_heart_simple(size=100):
+        """Draw heart using simple curves"""
+        t.clear()
+        t.color("red")
+        t.fillcolor("red")
+        t.penup()
+        t.goto(0, 0)
+        t.pendown()
+        t.begin_fill()
+        
+        # Left side
+        t.left(140)
+        t.forward(size)
+        t.circle(-size/2, 200)
+        
+        # Right side
+        t.left(120)
+        t.circle(-size/2, 200)
+        t.forward(size)
+        
+        t.end_fill()
+        t.setheading(0)
+        screen.update()
+
+    # Multiple hearts
+    def draw_hearts_multiple():
+        """Draw multiple hearts in a pattern"""
+        t.clear()
+        
+        positions = [
+            (0, 0, 8, "red"),
+            (-150, 100, 5, "pink"),
+            (150, 100, 5, "pink"),
+            (-150, -150, 5, "hotpink"),
+            (150, -150, 5, "hotpink")
         ]
         
-        for (text, row, col) in buttons:
-            self.create_button(text, row, col)
-    
-    def create_button(self, text, row, col):
-        btn = tk.Button(self.root, text=text, font=('Arial', 18),
-                       width=5, height=2, command=lambda: self.on_click(text))
-        btn.grid(row=row, column=col, padx=5, pady=5)
-    
-    def on_click(self, char):
-        if char == '=':
-            try:
-                result = str(eval(self.expression))
-                self.result_var.set(result)
-                self.expression = result
-            except:
-                self.result_var.set("Error")
-                self.expression = ""
-        elif char == 'C':
-            self.expression = ""
-            self.result_var.set("")
-        elif char == '√':
-            try:
-                result = str(math.sqrt(float(self.expression)))
-                self.result_var.set(result)
-                self.expression = result
-            except:
-                self.result_var.set("Error")
-        elif char in ['sin', 'cos', 'tan']:
-            try:
-                val = float(self.expression)
-                if char == 'sin':
-                    result = str(math.sin(math.radians(val)))
-                elif char == 'cos':
-                    result = str(math.cos(math.radians(val)))
+        for x, y, scale, color in positions:
+            t.color(color)
+            t.fillcolor(color)
+            t.penup()
+            t.goto(x, y - 100)
+            t.pendown()
+            t.begin_fill()
+            
+            for i in range(361):
+                angle = math.radians(i)
+                px = 16 * math.sin(angle)**3
+                py = 13 * math.cos(angle) - 5 * math.cos(2*angle) - 2 * math.cos(3*angle) - math.cos(4*angle)
+                t.goto(x + px * scale, y + py * scale)
+            
+            t.end_fill()
+        
+        screen.update()
+
+    # Gradient heart effect
+    def draw_heart_gradient():
+        """Draw heart with gradient-like effect"""
+        t.clear()
+        
+        colors = ["#8B0000", "#A52A2A", "#CD5C5C", "#DC143C", "#FF0000", "#FF6347", "#FF69B4", "#FFB6C1"]
+        
+        for i, color in enumerate(colors):
+            scale = 10 - i * 0.8
+            t.color(color)
+            t.fillcolor(color)
+            t.penup()
+            t.goto(0, -100)
+            t.pendown()
+            t.begin_fill()
+            
+            for j in range(361):
+                angle = math.radians(j)
+                x = 16 * math.sin(angle)**3
+                y = 13 * math.cos(angle) - 5 * math.cos(2*angle) - 2 * math.cos(3*angle) - math.cos(4*angle)
+                t.goto(x * scale, y * scale)
+            
+            t.end_fill()
+        
+        screen.update()
+
+    # Rotating hearts animation
+    def draw_hearts_rotating():
+        """Draw rotating hearts animation"""
+        t.clear()
+        
+        for rotation in range(0, 360, 30):
+            t.penup()
+            t.goto(0, 0)
+            t.setheading(rotation)
+            t.forward(150)
+            
+            start_x, start_y = t.xcor(), t.ycor()
+            
+            t.color("red")
+            t.pendown()
+            
+            for i in range(361):
+                angle = math.radians(i)
+                x = 16 * math.sin(angle)**3
+                y = 13 * math.cos(angle) - 5 * math.cos(2*angle) - 2 * math.cos(3*angle) - math.cos(4*angle)
+                t.goto(start_x + x * 3, start_y + y * 3)
+        
+        screen.update()
+
+    # Heart with message
+    def draw_heart_with_message(message="LOVE"):
+        """Draw heart with text inside"""
+        draw_heart_filled(10, "red")
+        
+        t.penup()
+        t.goto(0, 0)
+        t.color("white")
+        t.write(message, align="center", font=("Arial", 36, "bold"))
+        
+        screen.update()
+
+    # Pulsing heart effect
+    def draw_heart_pulsing():
+        """Draw pulsing heart animation"""
+        t.clear()
+        
+        for pulse in range(5):
+            for scale in list(range(8, 13)) + list(range(13, 8, -1)):
+                t.clear()
+                t.color("red")
+                t.fillcolor("red")
+                t.penup()
+                t.goto(0, -100)
+                t.pendown()
+                t.begin_fill()
+                
+                for i in range(361):
+                    angle = math.radians(i)
+                    x = 16 * math.sin(angle)**3
+                    y = 13 * math.cos(angle) - 5 * math.cos(2*angle) - 2 * math.cos(3*angle) - math.cos(4*angle)
+                    t.goto(x * scale, y * scale)
+                
+                t.end_fill()
+                screen.update()
+        
+        screen.update()
+
+    # Heart with sparkles
+    def draw_heart_sparkles():
+        """Draw heart with sparkle effect"""
+        draw_heart_filled(10, "red")
+        
+        # Add sparkles
+        for _ in range(30):
+            x = random.randint(-100, 100)
+            y = random.randint(-100, 150)
+            size = random.randint(3, 8)
+            
+            t.penup()
+            t.goto(x, y)
+            t.color("yellow")
+            
+            # Draw star sparkle
+            for _ in range(5):
+                t.pendown()
+                t.forward(size)
+                t.backward(size)
+                t.right(72)
+            
+            t.penup()
+        
+        screen.update()
+
+    # Rainbow hearts
+    def draw_hearts_rainbow():
+        """Draw rainbow colored hearts"""
+        t.clear()
+        
+        colors = ["red", "orange", "yellow", "green", "cyan", "blue", "purple"]
+        
+        for i, color in enumerate(colors):
+            scale = 10 - i * 1.2
+            t.color(color)
+            t.penup()
+            t.goto(0, -100)
+            t.pendown()
+            
+            for j in range(361):
+                angle = math.radians(j)
+                x = 16 * math.sin(angle)**3
+                y = 13 * math.cos(angle) - 5 * math.cos(2*angle) - 2 * math.cos(3*angle) - math.cos(4*angle)
+                t.goto(x * scale, y * scale)
+        
+        screen.update()
+
+    # Heart pattern
+    def draw_heart_pattern():
+        """Draw pattern of small hearts"""
+        t.clear()
+        
+        for y in range(-200, 201, 100):
+            for x in range(-300, 301, 100):
+                t.color("pink")
+                t.penup()
+                t.goto(x, y - 50)
+                t.pendown()
+                
+                for i in range(361):
+                    angle = math.radians(i)
+                    px = 16 * math.sin(angle)**3
+                    py = 13 * math.cos(angle) - 5 * math.cos(2*angle) - 2 * math.cos(3*angle) - math.cos(4*angle)
+                    t.goto(x + px * 2, y + py * 2)
+        
+        screen.update()
+
+    # Set up keyboard controls
+    def setup_controls():
+        """Set up keyboard controls"""
+        screen.listen()
+        screen.onkey(lambda: draw_heart_parametric(), "1")
+        screen.onkey(lambda: draw_heart_filled(), "2")
+        screen.onkey(lambda: draw_heart_simple(), "3")
+        screen.onkey(draw_hearts_multiple, "4")
+        screen.onkey(draw_heart_gradient, "5")
+        screen.onkey(draw_hearts_rotating, "6")
+        screen.onkey(lambda: draw_heart_with_message("LOVE"), "7")
+        screen.onkey(draw_heart_pulsing, "8")
+        screen.onkey(draw_heart_sparkles, "9")
+        screen.onkey(draw_hearts_rainbow, "0")
+        screen.onkey(draw_heart_pattern, "p")
+        screen.onkey(lambda: (t.clear(), screen.update()), "x")
+
+    # Draw instructions
+    def draw_instructions():
+        """Draw control instructions"""
+        instructions = turtle.Turtle()
+        instructions.hideturtle()
+        instructions.penup()
+        instructions.color("white")
+        instructions.goto(0, -360)
+        text = "1: Outline | 2: Filled | 3: Simple | 4: Multiple | 5: Gradient | 6: Rotating | 7: Message | 8: Pulse | 9: Sparkle | 0: Rainbow | P: Pattern"
+        instructions.write(text, align="center", font=("Courier", 8, "normal"))
+
+    # Initialize
+    def main():
+        """Initialize and start the program"""
+        print("=== HEART SHAPE ART ===")
+        print("\nKeyboard Controls:")
+        print("1 - Parametric Heart Outline")
+        print("2 - Filled Heart")
+        print("3 - Simple Heart")
+        print("4 - Multiple Hearts")
+        print("5 - Gradient Heart")
+        print("6 - Rotating Hearts")
+        print("7 - Heart with Message")
+        print("8 - Pulsing Heart")
+        print("9 - Heart with Sparkles")
+        print("0 - Rainbow Hearts")
+        print("P - Heart Pattern")
+        print("X - Clear Screen")
+        
+        draw_instructions()
+        draw_heart_filled()
+        setup_controls()
+
+    # Run the program
+    if __name__ == '__main__':
+        main()
+        turtle.done()`
+    },
+    {
+    title: "Turtle Grid Pattern",
+    category: "turtle",
+    description: "Create various grid-based patterns and designs with multiple dot layers and color variations.",
+    tags: ["turtle", "patterns", "grid", "dots", "layered"],
+    difficulty: 2,
+    lines: "~35 lines",
+    code: `import turtle
+    import random
+
+    t = turtle.Turtle()
+    t.speed(0)
+    t.hideturtle()
+    screen = turtle.Screen()
+    screen.bgcolor("black")
+
+    size = 20
+    colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 'cyan', 'magenta']
+
+    # Main grid with larger dots
+    for y in range(-200, 201, size):
+        for x in range(-200, 201, size):
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            t.color(random.choice(colors))
+            t.dot(8)
+
+    # Offset pattern layer 1
+    for y in range(-200, 201, size):
+        for x in range(-200, 201, size):
+            t.penup()
+            t.goto(x + 10, y + 10)
+            t.pendown()
+            t.color(random.choice(colors))
+            t.dot(5)
+
+    # Offset pattern layer 2
+    for y in range(-200, 201, size):
+        for x in range(-200, 201, size):
+            t.penup()
+            t.goto(x - 10, y - 10)
+            t.pendown()
+            t.color(random.choice(colors))
+            t.dot(5)
+
+    # Diagonal accent dots
+    for y in range(-200, 201, size * 2):
+        for x in range(-200, 201, size * 2):
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            t.color('white')
+            t.dot(3)
+
+    # Center highlight
+    t.penup()
+    t.goto(0, 0)
+    t.pendown()
+    t.color('white')
+    t.dot(15)
+
+    turtle.done()`
+    },
+    // GUI/Pygame Games Category
+    {
+    title: "Pygame Snake Game",
+    category: "pygame",
+    description: "Enhanced snake game with score tracking, game over screen, color effects, and speed progression.",
+    tags: ["pygame", "game", "arcade", "snake", "classic"],
+    difficulty: 3,
+    lines: "~50 lines",
+    code: `import pygame
+    import random
+
+    pygame.init()
+    w, h = 600, 600
+    screen = pygame.display.set_mode((w, h))
+    pygame.display.set_caption("Snake Game")
+    clock = pygame.time.Clock()
+    font = pygame.font.Font(None, 36)
+    big_font = pygame.font.Font(None, 72)
+
+    snake = [(300, 300), (280, 300), (260, 300)]
+    dx, dy = 20, 0
+    food = (random.randrange(0, w, 20), random.randrange(0, h, 20))
+    score = 0
+    speed = 8
+    running = True
+    game_over = False
+
+    while running:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+            if e.type == pygame.KEYDOWN:
+                if not game_over:
+                    if e.key == pygame.K_LEFT and dx != 20:
+                        dx, dy = -20, 0
+                    if e.key == pygame.K_RIGHT and dx != -20:
+                        dx, dy = 20, 0
+                    if e.key == pygame.K_UP and dy != 20:
+                        dx, dy = 0, -20
+                    if e.key == pygame.K_DOWN and dy != -20:
+                        dx, dy = 0, 20
                 else:
-                    result = str(math.tan(math.radians(val)))
-                self.result_var.set(result)
-                self.expression = result
-            except:
-                self.result_var.set("Error")
-        elif char == 'log':
-            try:
-                result = str(math.log10(float(self.expression)))
-                self.result_var.set(result)
-                self.expression = result
-            except:
-                self.result_var.set("Error")
-        elif char == 'ln':
-            try:
-                result = str(math.log(float(self.expression)))
-                self.result_var.set(result)
-                self.expression = result
-            except:
-                self.result_var.set("Error")
-        elif char == 'π':
-            self.expression += str(math.pi)
-            self.result_var.set(self.expression)
-        elif char == 'e':
-            self.expression += str(math.e)
-            self.result_var.set(self.expression)
-        elif char == '^':
-            self.expression += "**"
-            self.result_var.set(self.expression)
+                    if e.key == pygame.K_SPACE:
+                        snake = [(300, 300), (280, 300), (260, 300)]
+                        dx, dy = 20, 0
+                        score = 0
+                        speed = 8
+                        game_over = False
+                        food = (random.randrange(0, w, 20), random.randrange(0, h, 20))
+        
+        if not game_over:
+            head = (snake[0][0] + dx, snake[0][1] + dy)
+            
+            if head in snake or head[0] < 0 or head[1] < 0 or head[0] >= w or head[1] >= h:
+                game_over = True
+            else:
+                snake.insert(0, head)
+                
+                if head == food:
+                    score += 10
+                    speed = min(20, speed + 0.5)
+                    food = (random.randrange(0, w, 20), random.randrange(0, h, 20))
+                    while food in snake:
+                        food = (random.randrange(0, w, 20), random.randrange(0, h, 20))
+                else:
+                    snake.pop()
+        
+        screen.fill((10, 10, 30))
+        
+        for x in range(0, w, 20):
+            pygame.draw.line(screen, (30, 30, 50), (x, 0), (x, h))
+        for y in range(0, h, 20):
+            pygame.draw.line(screen, (30, 30, 50), (0, y), (w, y))
+        
+        for i, (x, y) in enumerate(snake):
+            color = (0, 255 - i * 3, 0) if i < 85 else (0, 0, 0)
+            pygame.draw.rect(screen, color, (x, y, 20, 20))
+            pygame.draw.rect(screen, (0, 180, 0), (x, y, 20, 20), 2)
+        
+        pulse = abs(pygame.time.get_ticks() % 1000 - 500) / 500
+        food_color = (255, int(100 + 155 * pulse), 0)
+        pygame.draw.circle(screen, food_color, (food[0] + 10, food[1] + 10), 10)
+        
+        score_text = font.render(f'Score: {score}', True, (255, 255, 255))
+        screen.blit(score_text, (10, 10))
+        
+        if game_over:
+            overlay = pygame.Surface((w, h))
+            overlay.set_alpha(200)
+            overlay.fill((0, 0, 0))
+            screen.blit(overlay, (0, 0))
+            
+            game_over_text = big_font.render('GAME OVER', True, (255, 50, 50))
+            final_score = font.render(f'Final Score: {score}', True, (255, 255, 255))
+            restart_text = font.render('Press SPACE to restart', True, (200, 200, 200))
+            
+            screen.blit(game_over_text, (w//2 - game_over_text.get_width()//2, h//2 - 80))
+            screen.blit(final_score, (w//2 - final_score.get_width()//2, h//2))
+            screen.blit(restart_text, (w//2 - restart_text.get_width()//2, h//2 + 60))
+        
+        pygame.display.flip()
+        clock.tick(speed)
+
+    pygame.quit()`
+    },
+    {
+    title: "Tetris Clone",
+    category: "games",
+    description: "Full-featured Tetris game with piece rotation, line clearing, scoring system, level progression, next piece preview, and game over detection.",
+    tags: ["pygame", "matrix-manipulation", "game-logic", "tetris", "arcade"],
+    difficulty: 4,
+    lines: "~120 lines",
+    code: `import pygame
+    import random
+    import copy
+
+    pygame.init()
+    w, h = 450, 600
+    screen = pygame.display.set_mode((w, h))
+    pygame.display.set_caption("Tetris")
+    clock = pygame.time.Clock()
+
+    # Game grid
+    grid = [[0] * 10 for _ in range(20)]
+
+    # Tetromino shapes
+    pieces = [
+        [[1, 1, 1, 1]],  # I
+        [[2, 2], [2, 2]],  # O
+        [[0, 3, 3], [3, 3, 0]],  # S
+        [[4, 4, 0], [0, 4, 4]],  # Z
+        [[5, 0, 0], [5, 5, 5]],  # L
+        [[0, 0, 6], [6, 6, 6]],  # J
+        [[0, 7, 0], [7, 7, 7]]   # T
+    ]
+
+    colors = [
+        (0, 0, 0),  # Empty
+        (0, 255, 255),  # I - Cyan
+        (255, 255, 0),  # O - Yellow
+        (0, 255, 0),    # S - Green
+        (255, 0, 0),    # Z - Red
+        (255, 165, 0),  # L - Orange
+        (0, 0, 255),    # J - Blue
+        (128, 0, 128)   # T - Purple
+    ]
+
+    font = pygame.font.Font(None, 36)
+    small_font = pygame.font.Font(None, 24)
+
+    def collide(shape, offset):
+        x, y = offset
+        for j, row in enumerate(shape):
+            for i, val in enumerate(row):
+                if val:
+                    ny, nx = y + j, x + i
+                    if ny >= 20 or nx < 0 or nx >= 10 or (ny >= 0 and grid[ny][nx]):
+                        return True
+        return False
+
+    def place(shape, offset, color_val):
+        x, y = offset
+        for j, row in enumerate(shape):
+            for i, val in enumerate(row):
+                if val and y + j >= 0:
+                    grid[y + j][x + i] = color_val
+
+    def clear_lines():
+        lines_cleared = 0
+        new_grid = []
+        for row in grid:
+            if 0 in row:
+                new_grid.append(row)
+            else:
+                lines_cleared += 1
+        
+        while len(new_grid) < 20:
+            new_grid.insert(0, [0] * 10)
+        
+        return new_grid, lines_cleared
+
+    def rotate(shape):
+        return [list(row) for row in zip(*shape[::-1])]
+
+    def draw_grid():
+        # Draw blocks
+        for y, row in enumerate(grid):
+            for x, val in enumerate(row):
+                if val:
+                    pygame.draw.rect(screen, colors[val], (x * 30, y * 30, 30, 30))
+                    pygame.draw.rect(screen, (50, 50, 50), (x * 30, y * 30, 30, 30), 1)
+        
+        # Draw grid lines
+        for x in range(11):
+            pygame.draw.line(screen, (50, 50, 50), (x * 30, 0), (x * 30, 600))
+        for y in range(21):
+            pygame.draw.line(screen, (50, 50, 50), (0, y * 30), (300, y * 30))
+
+    def draw_piece(shape, offset, color_val):
+        x, y = offset
+        for j, row in enumerate(shape):
+            for i, val in enumerate(row):
+                if val:
+                    pygame.draw.rect(screen, colors[color_val], ((x + i) * 30, (y + j) * 30, 30, 30))
+                    pygame.draw.rect(screen, (50, 50, 50), ((x + i) * 30, (y + j) * 30, 30, 30), 1)
+
+    def draw_next_piece(shape, color_val):
+        pygame.draw.rect(screen, (30, 30, 30), (320, 50, 120, 120))
+        pygame.draw.rect(screen, (100, 100, 100), (320, 50, 120, 120), 2)
+        
+        next_text = small_font.render('NEXT', True, (255, 255, 255))
+        screen.blit(next_text, (350, 20))
+        
+        offset_x = 335 + (4 - len(shape[0])) * 10
+        offset_y = 75 + (4 - len(shape)) * 10
+        
+        for j, row in enumerate(shape):
+            for i, val in enumerate(row):
+                if val:
+                    pygame.draw.rect(screen, colors[color_val], 
+                                (offset_x + i * 20, offset_y + j * 20, 18, 18))
+
+    def draw_ui(score, level, lines):
+        score_text = font.render(f'Score: {score}', True, (255, 255, 255))
+        level_text = small_font.render(f'Level: {level}', True, (255, 255, 255))
+        lines_text = small_font.render(f'Lines: {lines}', True, (255, 255, 255))
+        
+        screen.blit(score_text, (320, 200))
+        screen.blit(level_text, (320, 250))
+        screen.blit(lines_text, (320, 280))
+
+    # Initialize game variables
+    current = copy.deepcopy(random.choice(pieces))
+    current_color = pieces.index(current) + 1
+    next_piece = copy.deepcopy(random.choice(pieces))
+    next_color = pieces.index(next_piece) + 1
+
+    cx, cy = 3, -2
+    fall_time = 0
+    score = 0
+    lines_cleared_total = 0
+    level = 1
+    fall_speed = 30
+    game_over = False
+
+    move_delay = 0
+    rotate_pressed = False
+
+    running = True
+    while running:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+            if e.type == pygame.KEYDOWN and game_over:
+                if e.key == pygame.K_SPACE:
+                    grid = [[0] * 10 for _ in range(20)]
+                    score = 0
+                    lines_cleared_total = 0
+                    level = 1
+                    fall_speed = 30
+                    game_over = False
+                    current = copy.deepcopy(random.choice(pieces))
+                    current_color = pieces.index(current) + 1
+                    next_piece = copy.deepcopy(random.choice(pieces))
+                    next_color = pieces.index(next_piece) + 1
+                    cx, cy = 3, -2
+        
+        if not game_over:
+            keys = pygame.key.get_pressed()
+            
+            # Horizontal movement
+            if move_delay <= 0:
+                if keys[pygame.K_LEFT] and not collide(current, (cx - 1, cy)):
+                    cx -= 1
+                    move_delay = 5
+                if keys[pygame.K_RIGHT] and not collide(current, (cx + 1, cy)):
+                    cx += 1
+                    move_delay = 5
+            else:
+                move_delay -= 1
+            
+            # Fast drop
+            if keys[pygame.K_DOWN]:
+                if not collide(current, (cx, cy + 1)):
+                    cy += 1
+                    score += 1
+            
+            # Rotation
+            if keys[pygame.K_UP] and not rotate_pressed:
+                rotated = rotate(current)
+                if not collide(rotated, (cx, cy)):
+                    current = rotated
+                rotate_pressed = True
+            elif not keys[pygame.K_UP]:
+                rotate_pressed = False
+            
+            # Falling
+            fall_time += 1
+            if fall_time > fall_speed:
+                fall_time = 0
+                if not collide(current, (cx, cy + 1)):
+                    cy += 1
+                else:
+                    # Lock piece
+                    place(current, (cx, cy), current_color)
+                    grid, lines = clear_lines()
+                    
+                    if lines > 0:
+                        lines_cleared_total += lines
+                        score += [0, 100, 300, 500, 800][lines] * level
+                        level = lines_cleared_total // 10 + 1
+                        fall_speed = max(5, 30 - (level - 1) * 2)
+                    
+                    # Get next piece
+                    current = next_piece
+                    current_color = next_color
+                    next_piece = copy.deepcopy(random.choice(pieces))
+                    next_color = pieces.index(next_piece) + 1
+                    
+                    cx, cy = 3, -2
+                    
+                    # Check game over
+                    if collide(current, (cx, cy)):
+                        game_over = True
+        
+        # Drawing
+        screen.fill((20, 20, 20))
+        
+        # Draw game board
+        draw_grid()
+        
+        if not game_over:
+            draw_piece(current, (cx, cy), current_color)
+        
+        # Draw side panel
+        pygame.draw.rect(screen, (40, 40, 40), (300, 0, 150, 600))
+        draw_next_piece(next_piece, next_color)
+        draw_ui(score, level, lines_cleared_total)
+        
+        # Game over screen
+        if game_over:
+            overlay = pygame.Surface((300, 600))
+            overlay.set_alpha(200)
+            overlay.fill((0, 0, 0))
+            screen.blit(overlay, (0, 0))
+            
+            game_over_text = font.render('GAME OVER', True, (255, 0, 0))
+            restart_text = small_font.render('Press SPACE', True, (255, 255, 255))
+            
+            screen.blit(game_over_text, (150 - game_over_text.get_width() // 2, 250))
+            screen.blit(restart_text, (150 - restart_text.get_width() // 2, 300))
+        
+        pygame.display.flip()
+        clock.tick(60)
+
+    pygame.quit()`
+    },
+    {
+    title: "Pong Game",
+    category: "games",
+    description: "Enhanced two-player Pong game with paddle controls, ball physics, scoring system, speed progression, and visual effects.",
+    tags: ["pygame", "collision-detection", "physics", "pong", "multiplayer"],
+    difficulty: 2,
+    lines: "~80 lines",
+    code: `import pygame
+    import random
+    import math
+
+    pygame.init()
+    w, h = 800, 600
+    screen = pygame.display.set_mode((w, h))
+    pygame.display.set_caption("Pong")
+    clock = pygame.time.Clock()
+    font = pygame.font.Font(None, 74)
+    small_font = pygame.font.Font(None, 36)
+
+    # Paddle positions [x, y]
+    p1 = [30, h // 2 - 50]
+    p2 = [w - 40, h // 2 - 50]
+    paddle_width, paddle_height = 15, 100
+    paddle_speed = 7
+
+    # Ball
+    ball = [w // 2, h // 2]
+    ball_radius = 10
+    ball_speed = 5
+    angle = random.choice([random.uniform(-45, 45), random.uniform(135, 225)])
+    dx = ball_speed * math.cos(math.radians(angle))
+    dy = ball_speed * math.sin(math.radians(angle))
+
+    # Scores
+    score1, score2 = 0, 0
+    max_score = 5
+
+    # Particles for visual effects
+    particles = []
+
+    def reset_ball(direction):
+        global dx, dy, ball_speed
+        ball[0] = w // 2
+        ball[1] = h // 2
+        ball_speed = 5
+        
+        if direction == 'left':
+            angle = random.uniform(-30, 30)
         else:
-            self.expression += str(char)
-            self.result_var.set(self.expression)
+            angle = random.uniform(150, 210)
+        
+        dx = ball_speed * math.cos(math.radians(angle))
+        dy = ball_speed * math.sin(math.radians(angle))
 
-def main():
+    def create_particles(x, y, color):
+        for _ in range(15):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(2, 6)
+            particles.append({
+                'x': x,
+                'y': y,
+                'dx': math.cos(angle) * speed,
+                'dy': math.sin(angle) * speed,
+                'life': 30,
+                'color': color
+            })
+
+    def draw_dashed_line():
+        for y in range(0, h, 20):
+            pygame.draw.rect(screen, (100, 100, 100), (w // 2 - 2, y, 4, 10))
+
+    running = True
+    game_over = False
+    winner = ""
+
+    while running:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+            if e.type == pygame.KEYDOWN and game_over:
+                if e.key == pygame.K_SPACE:
+                    score1, score2 = 0, 0
+                    game_over = False
+                    reset_ball(random.choice(['left', 'right']))
+        
+        if not game_over:
+            # Paddle controls
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_w] and p1[1] > 0:
+                p1[1] -= paddle_speed
+            if keys[pygame.K_s] and p1[1] < h - paddle_height:
+                p1[1] += paddle_speed
+            if keys[pygame.K_UP] and p2[1] > 0:
+                p2[1] -= paddle_speed
+            if keys[pygame.K_DOWN] and p2[1] < h - paddle_height:
+                p2[1] += paddle_speed
+            
+            # Ball movement
+            ball[0] += dx
+            ball[1] += dy
+            
+            # Ball collision with top/bottom walls
+            if ball[1] - ball_radius < 0 or ball[1] + ball_radius > h:
+                dy *= -1
+                ball[1] = max(ball_radius, min(h - ball_radius, ball[1]))
+                create_particles(ball[0], ball[1], (255, 255, 255))
+            
+            # Paddle collision detection
+            # Left paddle
+            if (p1[0] < ball[0] - ball_radius < p1[0] + paddle_width and 
+                p1[1] < ball[1] < p1[1] + paddle_height):
+                dx = abs(dx)
+                ball_speed = min(ball_speed + 0.5, 12)
+                
+                # Add spin based on where ball hits paddle
+                hit_pos = (ball[1] - p1[1]) / paddle_height - 0.5
+                dy += hit_pos * 3
+                
+                dx = ball_speed * math.cos(math.atan2(dy, dx))
+                create_particles(ball[0], ball[1], (255, 100, 100))
+            
+            # Right paddle
+            if (p2[0] < ball[0] + ball_radius < p2[0] + paddle_width and 
+                p2[1] < ball[1] < p2[1] + paddle_height):
+                dx = -abs(dx)
+                ball_speed = min(ball_speed + 0.5, 12)
+                
+                # Add spin based on where ball hits paddle
+                hit_pos = (ball[1] - p2[1]) / paddle_height - 0.5
+                dy += hit_pos * 3
+                
+                dx = -ball_speed * math.cos(math.atan2(dy, abs(dx)))
+                create_particles(ball[0], ball[1], (100, 100, 255))
+            
+            # Scoring
+            if ball[0] < 0:
+                score2 += 1
+                create_particles(ball[0], ball[1], (255, 0, 0))
+                if score2 >= max_score:
+                    game_over = True
+                    winner = "Player 2"
+                else:
+                    reset_ball('right')
+            
+            if ball[0] > w:
+                score1 += 1
+                create_particles(ball[0], ball[1], (255, 0, 0))
+                if score1 >= max_score:
+                    game_over = True
+                    winner = "Player 1"
+                else:
+                    reset_ball('left')
+        
+        # Update particles
+        for particle in particles[:]:
+            particle['x'] += particle['dx']
+            particle['y'] += particle['dy']
+            particle['life'] -= 1
+            if particle['life'] <= 0:
+                particles.remove(particle)
+        
+        # Drawing
+        screen.fill((20, 20, 30))
+        
+        # Draw center line
+        draw_dashed_line()
+        
+        # Draw particles
+        for particle in particles:
+            alpha = particle['life'] / 30
+            size = int(4 * alpha)
+            pygame.draw.circle(screen, particle['color'], 
+                            (int(particle['x']), int(particle['y'])), size)
+        
+        # Draw paddles with glow effect
+        pygame.draw.rect(screen, (255, 50, 50), (*p1, paddle_width, paddle_height))
+        pygame.draw.rect(screen, (255, 100, 100), (p1[0] - 2, p1[1] - 2, 
+                        paddle_width + 4, paddle_height + 4), 2)
+        
+        pygame.draw.rect(screen, (50, 50, 255), (*p2, paddle_width, paddle_height))
+        pygame.draw.rect(screen, (100, 100, 255), (p2[0] - 2, p2[1] - 2, 
+                        paddle_width + 4, paddle_height + 4), 2)
+        
+        # Draw ball with trail effect
+        trail_positions = 5
+        for i in range(trail_positions):
+            trail_x = ball[0] - dx * i * 0.3
+            trail_y = ball[1] - dy * i * 0.3
+            alpha = 255 - i * 50
+            trail_color = (alpha, alpha, alpha)
+            pygame.draw.circle(screen, trail_color, 
+                            (int(trail_x), int(trail_y)), 
+                            ball_radius - i)
+        
+        pygame.draw.circle(screen, (255, 255, 255), 
+                        (int(ball[0]), int(ball[1])), ball_radius)
+        
+        # Draw scores
+        score_text1 = font.render(str(score1), True, (255, 100, 100))
+        score_text2 = font.render(str(score2), True, (100, 100, 255))
+        screen.blit(score_text1, (w // 4 - score_text1.get_width() // 2, 30))
+        screen.blit(score_text2, (3 * w // 4 - score_text2.get_width() // 2, 30))
+        
+        # Draw controls hint
+        controls1 = small_font.render('W/S', True, (150, 150, 150))
+        controls2 = small_font.render('UP/DOWN', True, (150, 150, 150))
+        screen.blit(controls1, (20, h - 40))
+        screen.blit(controls2, (w - 120, h - 40))
+        
+        # Game over screen
+        if game_over:
+            overlay = pygame.Surface((w, h))
+            overlay.set_alpha(200)
+            overlay.fill((0, 0, 0))
+            screen.blit(overlay, (0, 0))
+            
+            winner_text = font.render(f'{winner} Wins!', True, (255, 255, 0))
+            restart_text = small_font.render('Press SPACE to restart', True, (200, 200, 200))
+            
+            screen.blit(winner_text, (w // 2 - winner_text.get_width() // 2, h // 2 - 50))
+            screen.blit(restart_text, (w // 2 - restart_text.get_width() // 2, h // 2 + 20))
+        
+        pygame.display.flip()
+        clock.tick(60)
+
+    pygame.quit()`
+    },
+    {
+    title: "Space Invaders",
+    category: "games",
+    description: "Enhanced retro space shooter with enemy waves, enemy bullets, power-ups, shields, score system, and increasing difficulty levels.",
+    tags: ["pygame", "sprites", "collision-detection", "shooter", "arcade"],
+    difficulty: 4,
+    lines: "~150 lines",
+    code: `import pygame
+    import random
+    import math
+
+    pygame.init()
+    w, h = 800, 600
+    screen = pygame.display.set_mode((w, h))
+    pygame.display.set_caption("Space Invaders")
+    clock = pygame.time.Clock()
+    font = pygame.font.Font(None, 36)
+    small_font = pygame.font.Font(None, 24)
+
+    # Player
+    player = [w // 2 - 20, h - 80]
+    player_width, player_height = 40, 30
+    player_speed = 6
+    player_lives = 3
+
+    # Bullets
+    bullets = []
+    bullet_speed = 12
+    bullet_cooldown = 0
+
+    # Enemy bullets
+    enemy_bullets = []
+    enemy_shoot_cooldown = 0
+
+    # Enemies
+    enemies = []
+    enemy_rows = 4
+    enemy_cols = 10
+    enemy_width, enemy_height = 40, 30
+    enemy_spacing_x = 60
+    enemy_spacing_y = 50
+    dx_enemy = 2
+    dy_enemy = 0
+    move_down = False
+
+    # Shields
+    shields = []
+    for i in range(4):
+        shield_x = 100 + i * 180
+        shield_blocks = []
+        for row in range(3):
+            for col in range(8):
+                if not (row == 2 and (col == 0 or col == 7)):
+                    shield_blocks.append([shield_x + col * 8, 450 + row * 8])
+        shields.append(shield_blocks)
+
+    # Power-ups
+    powerups = []
+
+    # Particles
+    particles = []
+
+    # Game state
+    score = 0
+    level = 1
+    game_over = False
+    wave_cleared = False
+
+    def create_enemies():
+        global enemies, dx_enemy
+        enemies = []
+        start_y = 80 + (level - 1) * 10
+        for row in range(enemy_rows):
+            for col in range(enemy_cols):
+                x = 100 + col * enemy_spacing_x
+                y = start_y + row * enemy_spacing_y
+                enemy_type = min(row // 2, 2)
+                enemies.append({'x': x, 'y': y, 'type': enemy_type})
+        dx_enemy = 2 + level * 0.5
+
+    def create_particles(x, y, color, count=20):
+        for _ in range(count):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(2, 8)
+            particles.append({
+                'x': x,
+                'y': y,
+                'dx': math.cos(angle) * speed,
+                'dy': math.sin(angle) * speed,
+                'life': 30,
+                'color': color
+            })
+
+    def spawn_powerup(x, y):
+        if random.random() < 0.15:
+            powerup_type = random.choice(['health', 'rapid', 'shield'])
+            powerups.append({'x': x, 'y': y, 'type': powerup_type, 'dy': 2})
+
+    create_enemies()
+
+    running = True
+    rapid_fire = 0
+    shield_active = 0
+
+    while running:
+        dt = clock.tick(60) / 1000.0
+        
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+            if e.type == pygame.KEYDOWN and game_over:
+                if e.key == pygame.K_SPACE:
+                    player = [w // 2 - 20, h - 80]
+                    player_lives = 3
+                    score = 0
+                    level = 1
+                    bullets = []
+                    enemy_bullets = []
+                    powerups = []
+                    particles = []
+                    game_over = False
+                    create_enemies()
+        
+        if not game_over:
+            # Player controls
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT] and player[0] > 0:
+                player[0] -= player_speed
+            if keys[pygame.K_RIGHT] and player[0] < w - player_width:
+                player[0] += player_speed
+            
+            # Shooting
+            if bullet_cooldown > 0:
+                bullet_cooldown -= 1
+            
+            shoot_delay = 5 if rapid_fire > 0 else 15
+            if keys[pygame.K_SPACE] and bullet_cooldown <= 0:
+                bullets.append({'x': player[0] + player_width // 2 - 2, 
+                            'y': player[1], 'width': 4, 'height': 15})
+                bullet_cooldown = shoot_delay
+            
+            # Update bullets
+            for b in bullets[:]:
+                b['y'] -= bullet_speed
+                if b['y'] < 0:
+                    bullets.remove(b)
+            
+            # Enemy movement
+            move_down = False
+            for enemy in enemies:
+                enemy['x'] += dx_enemy
+                if enemy['x'] < 20 or enemy['x'] > w - enemy_width - 20:
+                    move_down = True
+            
+            if move_down:
+                dx_enemy *= -1
+                for enemy in enemies:
+                    enemy['y'] += 30
+                    if enemy['y'] > h - 150:
+                        game_over = True
+            
+            # Enemy shooting
+            if enemies and random.random() < 0.02:
+                shooter = random.choice(enemies)
+                enemy_bullets.append({'x': shooter['x'] + enemy_width // 2, 
+                                    'y': shooter['y'] + enemy_height})
+            
+            # Update enemy bullets
+            for eb in enemy_bullets[:]:
+                eb['y'] += 5
+                if eb['y'] > h:
+                    enemy_bullets.remove(eb)
+            
+            # Bullet-enemy collision
+            for b in bullets[:]:
+                for enemy in enemies[:]:
+                    if (enemy['x'] < b['x'] < enemy['x'] + enemy_width and
+                        enemy['y'] < b['y'] < enemy['y'] + enemy_height):
+                        bullets.remove(b)
+                        enemies.remove(enemy)
+                        score += (enemy['type'] + 1) * 10
+                        colors = [(255, 0, 0), (255, 165, 0), (255, 255, 0)]
+                        create_particles(enemy['x'] + enemy_width // 2, 
+                                    enemy['y'] + enemy_height // 2, 
+                                    colors[enemy['type']])
+                        spawn_powerup(enemy['x'], enemy['y'])
+                        break
+            
+            # Bullet-shield collision
+            for b in bullets[:]:
+                for shield in shields:
+                    for block in shield[:]:
+                        if (block[0] < b['x'] < block[0] + 8 and
+                            block[1] < b['y'] < block[1] + 8):
+                            if b in bullets:
+                                bullets.remove(b)
+                            shield.remove(block)
+                            break
+            
+            # Enemy bullet-shield collision
+            for eb in enemy_bullets[:]:
+                for shield in shields:
+                    for block in shield[:]:
+                        if (block[0] < eb['x'] < block[0] + 8 and
+                            block[1] < eb['y'] < block[1] + 8):
+                            if eb in enemy_bullets:
+                                enemy_bullets.remove(eb)
+                            shield.remove(block)
+                            break
+            
+            # Enemy bullet-player collision
+            if shield_active <= 0:
+                for eb in enemy_bullets[:]:
+                    if (player[0] < eb['x'] < player[0] + player_width and
+                        player[1] < eb['y'] < player[1] + player_height):
+                        enemy_bullets.remove(eb)
+                        player_lives -= 1
+                        create_particles(player[0] + player_width // 2, 
+                                    player[1] + player_height // 2, 
+                                    (0, 255, 0), 30)
+                        if player_lives <= 0:
+                            game_over = True
+            
+            # Update powerups
+            for powerup in powerups[:]:
+                powerup['y'] += powerup['dy']
+                if powerup['y'] > h:
+                    powerups.remove(powerup)
+                elif (player[0] < powerup['x'] + 20 < player[0] + player_width and
+                    player[1] < powerup['y'] + 20 < player[1] + player_height):
+                    if powerup['type'] == 'health' and player_lives < 5:
+                        player_lives += 1
+                    elif powerup['type'] == 'rapid':
+                        rapid_fire = 300
+                    elif powerup['type'] == 'shield':
+                        shield_active = 300
+                    powerups.remove(powerup)
+                    create_particles(powerup['x'], powerup['y'], (255, 255, 0), 15)
+            
+            # Update particles
+            for particle in particles[:]:
+                particle['x'] += particle['dx']
+                particle['y'] += particle['dy']
+                particle['dy'] += 0.3
+                particle['life'] -= 1
+                if particle['life'] <= 0:
+                    particles.remove(particle)
+            
+            # Decrease powerup timers
+            if rapid_fire > 0:
+                rapid_fire -= 1
+            if shield_active > 0:
+                shield_active -= 1
+            
+            # Check for wave cleared
+            if not enemies:
+                level += 1
+                create_enemies()
+                shields = []
+                for i in range(4):
+                    shield_x = 100 + i * 180
+                    shield_blocks = []
+                    for row in range(3):
+                        for col in range(8):
+                            if not (row == 2 and (col == 0 or col == 7)):
+                                shield_blocks.append([shield_x + col * 8, 450 + row * 8])
+                    shields.append(shield_blocks)
+        
+        # Drawing
+        screen.fill((10, 10, 30))
+        
+        # Draw stars background
+        for i in range(50):
+            star_x = (i * 137) % w
+            star_y = (i * 211 + pygame.time.get_ticks() // 50) % h
+            pygame.draw.circle(screen, (100, 100, 150), (star_x, star_y), 1)
+        
+        # Draw particles
+        for particle in particles:
+            alpha = particle['life'] / 30
+            size = int(3 * alpha) + 1
+            pygame.draw.circle(screen, particle['color'], 
+                            (int(particle['x']), int(particle['y'])), size)
+        
+        # Draw shields
+        for shield in shields:
+            for block in shield:
+                pygame.draw.rect(screen, (0, 255, 255), (*block, 8, 8))
+        
+        # Draw player
+        player_color = (100, 255, 100)
+        pygame.draw.polygon(screen, player_color, [
+            (player[0] + player_width // 2, player[1]),
+            (player[0], player[1] + player_height),
+            (player[0] + player_width, player[1] + player_height)
+        ])
+        
+        # Draw shield effect
+        if shield_active > 0:
+            shield_alpha = min(150, shield_active * 0.5)
+            for i in range(3):
+                pygame.draw.circle(screen, (100, 200, 255), 
+                                (player[0] + player_width // 2, player[1] + player_height // 2),
+                                30 + i * 5, 2)
+        
+        # Draw bullets
+        for b in bullets:
+            pygame.draw.rect(screen, (255, 255, 100), (b['x'], b['y'], b['width'], b['height']))
+        
+        # Draw enemy bullets
+        for eb in enemy_bullets:
+            pygame.draw.circle(screen, (255, 0, 255), (int(eb['x']), int(eb['y'])), 4)
+        
+        # Draw enemies
+        for enemy in enemies:
+            colors = [(255, 50, 50), (255, 150, 50), (255, 255, 50)]
+            color = colors[enemy['type']]
+            pygame.draw.rect(screen, color, (enemy['x'], enemy['y'], enemy_width, enemy_height))
+            pygame.draw.rect(screen, (200, 200, 200), (enemy['x'], enemy['y'], enemy_width, enemy_height), 2)
+        
+        # Draw powerups
+        powerup_colors = {'health': (0, 255, 0), 'rapid': (255, 255, 0), 'shield': (0, 200, 255)}
+        for powerup in powerups:
+            color = powerup_colors[powerup['type']]
+            pygame.draw.circle(screen, color, (int(powerup['x'] + 10), int(powerup['y'] + 10)), 10)
+            pygame.draw.circle(screen, (255, 255, 255), (int(powerup['x'] + 10), int(powerup['y'] + 10)), 10, 2)
+        
+        # Draw UI
+        score_text = font.render(f'Score: {score}', True, (255, 255, 255))
+        level_text = small_font.render(f'Level: {level}', True, (255, 255, 255))
+        screen.blit(score_text, (10, 10))
+        screen.blit(level_text, (10, 50))
+        
+        # Draw lives
+        for i in range(player_lives):
+            pygame.draw.polygon(screen, (0, 255, 0), [
+                (w - 50 - i * 35 + 15, 20),
+                (w - 50 - i * 35, 40),
+                (w - 50 - i * 35 + 30, 40)
+            ])
+        
+        # Draw powerup indicators
+        if rapid_fire > 0:
+            rapid_text = small_font.render(f'Rapid: {rapid_fire // 60}s', True, (255, 255, 0))
+            screen.blit(rapid_text, (10, 80))
+        if shield_active > 0:
+            shield_text = small_font.render(f'Shield: {shield_active // 60}s', True, (0, 200, 255))
+            screen.blit(shield_text, (10, 110))
+        
+        # Game over screen
+        if game_over:
+            overlay = pygame.Surface((w, h))
+            overlay.set_alpha(200)
+            overlay.fill((0, 0, 0))
+            screen.blit(overlay, (0, 0))
+            
+            game_over_text = font.render('GAME OVER', True, (255, 0, 0))
+            final_score = small_font.render(f'Final Score: {score}', True, (255, 255, 255))
+            restart_text = small_font.render('Press SPACE to restart', True, (200, 200, 200))
+            
+            screen.blit(game_over_text, (w // 2 - game_over_text.get_width() // 2, h // 2 - 60))
+            screen.blit(final_score, (w // 2 - final_score.get_width() // 2, h // 2))
+            screen.blit(restart_text, (w // 2 - restart_text.get_width() // 2, h // 2 + 40))
+        
+        pygame.display.flip()
+
+    pygame.quit()`
+    },
+    {
+    title: "Flappy Bird Clone",
+    category: "games",
+    description: "Enhanced side-scrolling game where you navigate a bird through pipes with scoring, animations, particle effects, and difficulty progression.",
+    tags: ["pygame", "gravity", "endless-runner", "flappy-bird", "arcade"],
+    difficulty: 3,
+    lines: "~120 lines",
+    code: `import pygame
+    import random
+    import math
+
+    pygame.init()
+    w, h = 400, 700
+    screen = pygame.display.set_mode((w, h))
+    pygame.display.set_caption("Flappy Bird")
+    clock = pygame.time.Clock()
+    font = pygame.font.Font(None, 72)
+    small_font = pygame.font.Font(None, 36)
+
+    # Bird
+    bird = {'x': 80, 'y': h // 2, 'vy': 0, 'angle': 0}
+    bird_radius = 15
+    gravity = 0.6
+    jump_strength = -10
+    flap_cooldown = 0
+
+    # Pipes
+    pipes = []
+    pipe_width = 70
+    pipe_gap = 180
+    pipe_speed = 3
+    pipe_spacing = 200
+    next_pipe_x = 400
+
+    # Ground
+    ground_x = 0
+    ground_speed = 3
+
+    # Game state
+    score = 0
+    high_score = 0
+    game_over = False
+    game_started = False
+
+    # Particles
+    particles = []
+
+    # Clouds
+    clouds = []
+    for i in range(5):
+        clouds.append({
+            'x': random.randint(0, w),
+            'y': random.randint(50, 250),
+            'size': random.randint(40, 80),
+            'speed': random.uniform(0.3, 0.8)
+        })
+
+    def create_pipe():
+        gap_y = random.randint(150, h - 250)
+        return {
+            'x': w,
+            'gap_y': gap_y,
+            'scored': False
+        }
+
+    def create_particles(x, y, color, count=15):
+        for _ in range(count):
+            angle = random.uniform(0, 2 * math.pi)
+            speed = random.uniform(2, 6)
+            particles.append({
+                'x': x,
+                'y': y,
+                'dx': math.cos(angle) * speed,
+                'dy': math.sin(angle) * speed,
+                'life': 40,
+                'color': color
+            })
+
+    def reset_game():
+        global bird, pipes, score, game_over, game_started, next_pipe_x, ground_x, particles
+        bird = {'x': 80, 'y': h // 2, 'vy': 0, 'angle': 0}
+        pipes = []
+        score = 0
+        game_over = False
+        game_started = False
+        next_pipe_x = 400
+        ground_x = 0
+        particles = []
+
+    def draw_bird():
+        # Bird body
+        color = (255, 255, 100) if not game_over else (150, 150, 150)
+        pygame.draw.circle(screen, color, (int(bird['x']), int(bird['y'])), bird_radius)
+        
+        # Eye
+        eye_x = int(bird['x'] + 5)
+        eye_y = int(bird['y'] - 3)
+        pygame.draw.circle(screen, (255, 255, 255), (eye_x, eye_y), 5)
+        pygame.draw.circle(screen, (0, 0, 0), (eye_x + 2, eye_y), 3)
+        
+        # Beak
+        beak_angle = bird['angle'] * math.pi / 180
+        beak_points = [
+            (bird['x'] + bird_radius, bird['y']),
+            (bird['x'] + bird_radius + 12, bird['y'] - 3),
+            (bird['x'] + bird_radius + 12, bird['y'] + 3)
+        ]
+        pygame.draw.polygon(screen, (255, 150, 0), beak_points)
+        
+        # Wing
+        wing_offset_y = math.sin(pygame.time.get_ticks() * 0.01) * 3
+        wing_x = int(bird['x'] - 8)
+        wing_y = int(bird['y'] + wing_offset_y)
+        pygame.draw.ellipse(screen, (255, 200, 100), (wing_x, wing_y, 12, 8))
+
+    def draw_pipe(pipe):
+        # Top pipe
+        pygame.draw.rect(screen, (100, 200, 100), 
+                        (pipe['x'], 0, pipe_width, pipe['gap_y']))
+        pygame.draw.rect(screen, (80, 180, 80), 
+                        (pipe['x'], 0, pipe_width, pipe['gap_y']), 3)
+        # Top pipe cap
+        pygame.draw.rect(screen, (120, 220, 120), 
+                        (pipe['x'] - 5, pipe['gap_y'] - 25, pipe_width + 10, 25))
+        pygame.draw.rect(screen, (80, 180, 80), 
+                        (pipe['x'] - 5, pipe['gap_y'] - 25, pipe_width + 10, 25), 3)
+        
+        # Bottom pipe
+        bottom_y = pipe['gap_y'] + pipe_gap
+        pygame.draw.rect(screen, (100, 200, 100), 
+                        (pipe['x'], bottom_y + 25, pipe_width, h - bottom_y))
+        pygame.draw.rect(screen, (80, 180, 80), 
+                        (pipe['x'], bottom_y + 25, pipe_width, h - bottom_y), 3)
+        # Bottom pipe cap
+        pygame.draw.rect(screen, (120, 220, 120), 
+                        (pipe['x'] - 5, bottom_y, pipe_width + 10, 25))
+        pygame.draw.rect(screen, (80, 180, 80), 
+                        (pipe['x'] - 5, bottom_y, pipe_width + 10, 25), 3)
+
+    def check_collision(pipe):
+        # Check if bird is in pipe x range
+        if pipe['x'] < bird['x'] + bird_radius and pipe['x'] + pipe_width > bird['x'] - bird_radius:
+            # Check if bird hits top or bottom pipe
+            if bird['y'] - bird_radius < pipe['gap_y'] or bird['y'] + bird_radius > pipe['gap_y'] + pipe_gap:
+                return True
+        return False
+
+    # Initial pipes
+    for i in range(3):
+        pipes.append(create_pipe())
+        pipes[-1]['x'] = 400 + i * pipe_spacing
+
+    running = True
+    while running:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_SPACE:
+                    if game_over:
+                        reset_game()
+                    elif not game_started:
+                        game_started = True
+                        bird['vy'] = jump_strength
+                        flap_cooldown = 15
+                    elif flap_cooldown <= 0:
+                        bird['vy'] = jump_strength
+                        flap_cooldown = 15
+                        create_particles(bird['x'], bird['y'], (255, 255, 200), 8)
+        
+        if game_started and not game_over:
+            # Bird physics
+            bird['vy'] += gravity
+            bird['y'] += bird['vy']
+            
+            # Bird rotation based on velocity
+            bird['angle'] = max(-30, min(30, -bird['vy'] * 3))
+            
+            # Update flap cooldown
+            if flap_cooldown > 0:
+                flap_cooldown -= 1
+            
+            # Check ground and ceiling collision
+            if bird['y'] + bird_radius > h - 100 or bird['y'] - bird_radius < 0:
+                game_over = True
+                create_particles(bird['x'], bird['y'], (255, 0, 0), 30)
+                if score > high_score:
+                    high_score = score
+            
+            # Move pipes
+            for pipe in pipes:
+                pipe['x'] -= pipe_speed
+                
+                # Check collision
+                if check_collision(pipe):
+                    game_over = True
+                    create_particles(bird['x'], bird['y'], (255, 0, 0), 30)
+                    if score > high_score:
+                        high_score = score
+                
+                # Score when passing pipe
+                if not pipe['scored'] and pipe['x'] + pipe_width < bird['x']:
+                    pipe['scored'] = True
+                    score += 1
+                    create_particles(bird['x'] + 30, bird['y'], (255, 255, 0), 10)
+            
+            # Remove off-screen pipes and add new ones
+            if pipes and pipes[0]['x'] < -pipe_width:
+                pipes.pop(0)
+            
+            if pipes[-1]['x'] < w - pipe_spacing:
+                pipes.append(create_pipe())
+            
+            # Move ground
+            ground_x -= ground_speed
+            if ground_x <= -50:
+                ground_x = 0
+        
+        # Update clouds
+        for cloud in clouds:
+            cloud['x'] -= cloud['speed']
+            if cloud['x'] < -cloud['size']:
+                cloud['x'] = w + cloud['size']
+                cloud['y'] = random.randint(50, 250)
+        
+        # Update particles
+        for particle in particles[:]:
+            particle['x'] += particle['dx']
+            particle['y'] += particle['dy']
+            particle['dy'] += 0.3
+            particle['life'] -= 1
+            if particle['life'] <= 0:
+                particles.remove(particle)
+        
+        # Drawing
+        # Sky gradient
+        for y in range(h):
+            color_factor = y / h
+            sky_color = (
+                int(135 + (50 * color_factor)),
+                int(206 + (30 * color_factor)),
+                int(235 + (20 * color_factor))
+            )
+            pygame.draw.line(screen, sky_color, (0, y), (w, y))
+        
+        # Draw clouds
+        for cloud in clouds:
+            pygame.draw.ellipse(screen, (255, 255, 255), 
+                            (cloud['x'], cloud['y'], cloud['size'], cloud['size'] * 0.6))
+            pygame.draw.ellipse(screen, (255, 255, 255), 
+                            (cloud['x'] + cloud['size'] * 0.3, cloud['y'] - 10, 
+                            cloud['size'] * 0.7, cloud['size'] * 0.5))
+        
+        # Draw pipes
+        for pipe in pipes:
+            draw_pipe(pipe)
+        
+        # Draw particles
+        for particle in particles:
+            alpha = particle['life'] / 40
+            size = int(4 * alpha) + 1
+            pygame.draw.circle(screen, particle['color'], 
+                            (int(particle['x']), int(particle['y'])), size)
+        
+        # Draw bird
+        draw_bird()
+        
+        # Draw ground
+        for x in range(-50, w + 50, 50):
+            ground_pos_x = x + ground_x
+            pygame.draw.rect(screen, (222, 184, 135), (ground_pos_x, h - 100, 50, 100))
+            pygame.draw.rect(screen, (160, 130, 90), (ground_pos_x, h - 100, 50, 100), 2)
+        
+        # Draw score
+        if game_started:
+            score_text = font.render(str(score), True, (255, 255, 255))
+            score_outline = font.render(str(score), True, (0, 0, 0))
+            screen.blit(score_outline, (w // 2 - score_text.get_width() // 2 + 2, 52))
+            screen.blit(score_text, (w // 2 - score_text.get_width() // 2, 50))
+        
+        # Start message
+        if not game_started and not game_over:
+            start_text = small_font.render('Press SPACE to Start', True, (255, 255, 255))
+            start_outline = small_font.render('Press SPACE to Start', True, (0, 0, 0))
+            screen.blit(start_outline, (w // 2 - start_text.get_width() // 2 + 2, h // 2 + 2))
+            screen.blit(start_text, (w // 2 - start_text.get_width() // 2, h // 2))
+        
+        # Game over screen
+        if game_over:
+            overlay = pygame.Surface((w, h))
+            overlay.set_alpha(150)
+            overlay.fill((0, 0, 0))
+            screen.blit(overlay, (0, 0))
+            
+            game_over_text = font.render('GAME OVER', True, (255, 100, 100))
+            final_score = small_font.render(f'Score: {score}', True, (255, 255, 255))
+            high_score_text = small_font.render(f'Best: {high_score}', True, (255, 255, 0))
+            restart_text = small_font.render('Press SPACE to Restart', True, (200, 200, 200))
+            
+            screen.blit(game_over_text, (w // 2 - game_over_text.get_width() // 2, h // 2 - 100))
+            screen.blit(final_score, (w // 2 - final_score.get_width() // 2, h // 2 - 20))
+            screen.blit(high_score_text, (w // 2 - high_score_text.get_width() // 2, h // 2 + 20))
+            screen.blit(restart_text, (w // 2 - restart_text.get_width() // 2, h // 2 + 70))
+        
+        pygame.display.flip()
+        clock.tick(60)
+
+    pygame.quit()`
+    },
+    {
+    title: "Pac-Man Game",
+    category: "games",
+    description: "Enhanced classic maze game with ghosts, pellets, power-ups, ghost AI with different behaviors, score system, levels, and animations.",
+    tags: ["pygame", "pathfinding", "game-ai", "pacman", "maze"],
+    difficulty: 5,
+    lines: "~200 lines",
+    code: `import pygame
+    import random
+    import math
+
+    pygame.init()
+    w, h = 560, 620
+    screen = pygame.display.set_mode((w, h))
+    pygame.display.set_caption("Pac-Man")
+    clock = pygame.time.Clock()
+    font = pygame.font.Font(None, 36)
+    small_font = pygame.font.Font(None, 24)
+
+    # Colors
+    BLACK = (0, 0, 0)
+    YELLOW = (255, 255, 0)
+    BLUE = (33, 33, 255)
+    WHITE = (255, 255, 255)
+
+    # Maze (1 = wall, 0 = path, 2 = pellet, 3 = power pellet)
+    maze = [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,1],
+        [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
+        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+        [1,2,1,1,2,1,2,1,1,1,1,1,1,2,1,2,1,1,2,1],
+        [1,2,2,2,2,1,2,2,2,1,1,2,2,2,1,2,2,2,2,1],
+        [1,1,1,1,2,1,1,1,0,1,1,0,1,1,1,2,1,1,1,1],
+        [1,1,1,1,2,1,0,0,0,0,0,0,0,0,1,2,1,1,1,1],
+        [1,1,1,1,2,1,0,1,1,0,0,1,1,0,1,2,1,1,1,1],
+        [0,0,0,0,2,0,0,1,0,0,0,0,1,0,0,2,0,0,0,0],
+        [1,1,1,1,2,1,0,1,1,1,1,1,1,0,1,2,1,1,1,1],
+        [1,1,1,1,2,1,0,0,0,0,0,0,0,0,1,2,1,1,1,1],
+        [1,1,1,1,2,1,0,1,1,1,1,1,1,0,1,2,1,1,1,1],
+        [1,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,1],
+        [1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,2,1],
+        [1,3,2,1,2,2,2,2,2,2,2,2,2,2,2,2,1,2,3,1],
+        [1,1,2,1,2,1,2,1,1,1,1,1,1,2,1,2,1,2,1,1],
+        [1,2,2,2,2,1,2,2,2,1,1,2,2,2,1,2,2,2,2,1],
+        [1,2,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,2,1],
+        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ]
+
+    cell_size = 28
+
+    # Player
+    player = {'x': 10, 'y': 15, 'direction': 0, 'next_direction': 0, 'mouth_open': 0}
+    player_speed = 0.15
+
+    # Ghosts with different behaviors
+    ghosts = [
+        {'x': 9, 'y': 9, 'target_x': 10, 'target_y': 15, 'color': (255, 0, 0), 'mode': 'chase', 'name': 'blinky'},
+        {'x': 10, 'y': 9, 'target_x': 10, 'target_y': 15, 'color': (255, 184, 255), 'mode': 'chase', 'name': 'pinky'},
+        {'x': 9, 'y': 10, 'target_x': 10, 'target_y': 15, 'color': (0, 255, 255), 'mode': 'scatter', 'name': 'inky'},
+        {'x': 10, 'y': 10, 'target_x': 10, 'target_y': 15, 'color': (255, 184, 82), 'mode': 'scatter', 'name': 'clyde'}
+    ]
+    ghost_speed = 0.1
+    frightened_timer = 0
+    frightened_duration = 300
+
+    # Game state
+    score = 0
+    lives = 3
+    level = 1
+    pellet_count = 0
+    game_over = False
+    win = False
+
+    # Count pellets
+    for row in maze:
+        pellet_count += row.count(2) + row.count(3)
+
+    total_pellets = pellet_count
+
+    def reset_positions():
+        global player, ghosts
+        player = {'x': 10, 'y': 15, 'direction': 0, 'next_direction': 0, 'mouth_open': 0}
+        ghosts = [
+            {'x': 9, 'y': 9, 'target_x': 10, 'target_y': 15, 'color': (255, 0, 0), 'mode': 'chase', 'name': 'blinky'},
+            {'x': 10, 'y': 9, 'target_x': 10, 'target_y': 15, 'color': (255, 184, 255), 'mode': 'chase', 'name': 'pinky'},
+            {'x': 9, 'y': 10, 'target_x': 10, 'target_y': 15, 'color': (0, 255, 255), 'mode': 'scatter', 'name': 'inky'},
+            {'x': 10, 'y': 10, 'target_x': 10, 'target_y': 15, 'color': (255, 184, 82), 'mode': 'scatter', 'name': 'clyde'}
+        ]
+
+    def can_move(x, y):
+        grid_x = int(x)
+        grid_y = int(y)
+        if 0 <= grid_y < len(maze) and 0 <= grid_x < len(maze[0]):
+            return maze[grid_y][grid_x] != 1
+        return False
+
+    def move_player(direction):
+        dx, dy = [(0, 0), (-1, 0), (1, 0), (0, -1), (0, 1)][direction]
+        new_x = player['x'] + dx * player_speed
+        new_y = player['y'] + dy * player_speed
+        
+        if can_move(new_x, new_y):
+            player['x'] = new_x
+            player['y'] = new_y
+            player['direction'] = direction
+            return True
+        return False
+
+    def get_next_move(ghost, target_x, target_y):
+        possible_moves = []
+        directions = [(0, -1), (0, 1), (-1, 0), (1, 0)]
+        
+        for dx, dy in directions:
+            new_x = ghost['x'] + dx * ghost_speed
+            new_y = ghost['y'] + dy * ghost_speed
+            
+            if can_move(new_x, new_y):
+                dist = math.sqrt((new_x - target_x)**2 + (new_y - target_y)**2)
+                possible_moves.append((dist, new_x, new_y))
+        
+        if possible_moves:
+            if frightened_timer > 0:
+                return random.choice(possible_moves)[1:]
+            else:
+                possible_moves.sort()
+                return possible_moves[0][1:]
+        return ghost['x'], ghost['y']
+
+    def move_ghosts():
+        global lives, game_over, frightened_timer, score
+        
+        for ghost in ghosts:
+            if frightened_timer > 0:
+                target_x, target_y = random.randint(0, 19), random.randint(0, 20)
+            elif ghost['mode'] == 'chase':
+                target_x, target_y = player['x'], player['y']
+            else:
+                corners = {'blinky': (19, 0), 'pinky': (0, 0), 'inky': (19, 20), 'clyde': (0, 20)}
+                target_x, target_y = corners.get(ghost['name'], (10, 10))
+            
+            new_x, new_y = get_next_move(ghost, target_x, target_y)
+            ghost['x'] = new_x
+            ghost['y'] = new_y
+            
+            # Check collision with player
+            if abs(ghost['x'] - player['x']) < 0.5 and abs(ghost['y'] - player['y']) < 0.5:
+                if frightened_timer > 0:
+                    ghost['x'] = 10
+                    ghost['y'] = 9
+                    score += 200
+                else:
+                    lives -= 1
+                    if lives <= 0:
+                        game_over = True
+                    else:
+                        reset_positions()
+
+    def draw_maze():
+        for y, row in enumerate(maze):
+            for x, cell in enumerate(row):
+                screen_x = x * cell_size
+                screen_y = y * cell_size
+                
+                if cell == 1:
+                    pygame.draw.rect(screen, BLUE, (screen_x, screen_y, cell_size, cell_size))
+                    pygame.draw.rect(screen, (100, 100, 255), (screen_x, screen_y, cell_size, cell_size), 2)
+                elif cell == 2:
+                    pygame.draw.circle(screen, WHITE, 
+                                    (screen_x + cell_size // 2, screen_y + cell_size // 2), 3)
+                elif cell == 3:
+                    pulse = abs(pygame.time.get_ticks() % 1000 - 500) / 500
+                    size = int(6 + 3 * pulse)
+                    pygame.draw.circle(screen, WHITE, 
+                                    (screen_x + cell_size // 2, screen_y + cell_size // 2), size)
+
+    def draw_pacman():
+        screen_x = int(player['x'] * cell_size + cell_size // 2)
+        screen_y = int(player['y'] * cell_size + cell_size // 2)
+        
+        player['mouth_open'] = (player['mouth_open'] + 5) % 60
+        mouth_angle = abs(player['mouth_open'] - 30)
+        
+        # Rotation based on direction
+        rotation = {0: 0, 1: 180, 2: 0, 3: 90, 4: 270}[player['direction']]
+        
+        start_angle = rotation + mouth_angle
+        end_angle = rotation + 360 - mouth_angle
+        
+        # Draw pac-man as a circle with mouth
+        points = [(screen_x, screen_y)]
+        for angle in range(int(start_angle), int(end_angle) + 1, 5):
+            rad = math.radians(angle)
+            x = screen_x + int(cell_size // 2 * math.cos(rad))
+            y = screen_y + int(cell_size // 2 * math.sin(rad))
+            points.append((x, y))
+        
+        if len(points) > 2:
+            pygame.draw.polygon(screen, YELLOW, points)
+        pygame.draw.circle(screen, (255, 200, 0), (screen_x, screen_y), cell_size // 2, 2)
+
+    def draw_ghost(ghost):
+        screen_x = int(ghost['x'] * cell_size + cell_size // 2)
+        screen_y = int(ghost['y'] * cell_size + cell_size // 2)
+        
+        color = ghost['color']
+        if frightened_timer > 0:
+            if frightened_timer < 100:
+                color = (255, 255, 255) if (frightened_timer // 10) % 2 else (0, 0, 255)
+            else:
+                color = (0, 0, 255)
+        
+        # Ghost body (semicircle top, wavy bottom)
+        radius = cell_size // 2
+        pygame.draw.circle(screen, color, (screen_x, screen_y - 2), radius)
+        pygame.draw.rect(screen, color, (screen_x - radius, screen_y - 2, radius * 2, radius))
+        
+        # Wavy bottom
+        wave_points = [(screen_x - radius, screen_y + radius)]
+        for i in range(4):
+            x = screen_x - radius + i * (radius // 2)
+            y = screen_y + radius - 5 if i % 2 else screen_y + radius
+            wave_points.append((x, y))
+        wave_points.append((screen_x + radius, screen_y + radius))
+        wave_points.append((screen_x + radius, screen_y - 2))
+        pygame.draw.polygon(screen, color, wave_points)
+        
+        # Eyes
+        if frightened_timer == 0:
+            eye_color = WHITE
+            pupil_color = BLUE
+            pygame.draw.circle(screen, eye_color, (screen_x - 5, screen_y - 3), 4)
+            pygame.draw.circle(screen, eye_color, (screen_x + 5, screen_y - 3), 4)
+            pygame.draw.circle(screen, pupil_color, (screen_x - 5, screen_y - 3), 2)
+            pygame.draw.circle(screen, pupil_color, (screen_x + 5, screen_y - 3), 2)
+
+    running = True
+    while running:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+            if e.type == pygame.KEYDOWN:
+                if e.key == pygame.K_LEFT:
+                    player['next_direction'] = 1
+                elif e.key == pygame.K_RIGHT:
+                    player['next_direction'] = 2
+                elif e.key == pygame.K_UP:
+                    player['next_direction'] = 3
+                elif e.key == pygame.K_DOWN:
+                    player['next_direction'] = 4
+                
+                if (game_over or win) and e.key == pygame.K_SPACE:
+                    # Reset game
+                    maze = [
+                        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                        [1,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,1],
+                        [1,3,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,3,1],
+                        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+                        [1,2,1,1,2,1,2,1,1,1,1,1,1,2,1,2,1,1,2,1],
+                        [1,2,2,2,2,1,2,2,2,1,1,2,2,2,1,2,2,2,2,1],
+                        [1,1,1,1,2,1,1,1,0,1,1,0,1,1,1,2,1,1,1,1],
+                        [1,1,1,1,2,1,0,0,0,0,0,0,0,0,1,2,1,1,1,1],
+                        [1,1,1,1,2,1,0,1,1,0,0,1,1,0,1,2,1,1,1,1],
+                        [0,0,0,0,2,0,0,1,0,0,0,0,1,0,0,2,0,0,0,0],
+                        [1,1,1,1,2,1,0,1,1,1,1,1,1,0,1,2,1,1,1,1],
+                        [1,1,1,1,2,1,0,0,0,0,0,0,0,0,1,2,1,1,1,1],
+                        [1,1,1,1,2,1,0,1,1,1,1,1,1,0,1,2,1,1,1,1],
+                        [1,2,2,2,2,2,2,2,2,1,1,2,2,2,2,2,2,2,2,1],
+                        [1,2,1,1,2,1,1,1,2,1,1,2,1,1,1,2,1,1,2,1],
+                        [1,3,2,1,2,2,2,2,2,2,2,2,2,2,2,2,1,2,3,1],
+                        [1,1,2,1,2,1,2,1,1,1,1,1,1,2,1,2,1,2,1,1],
+                        [1,2,2,2,2,1,2,2,2,1,1,2,2,2,1,2,2,2,2,1],
+                        [1,2,1,1,1,1,1,1,2,1,1,2,1,1,1,1,1,1,2,1],
+                        [1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,1],
+                        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+                    ]
+                    score = 0
+                    lives = 3
+                    level = 1
+                    pellet_count = total_pellets
+                    game_over = False
+                    win = False
+                    reset_positions()
+        
+        if not game_over and not win:
+            # Try to move in next direction
+            if player['next_direction'] != 0:
+                if move_player(player['next_direction']):
+                    player['next_direction'] = 0
+            
+            # Continue in current direction
+            if player['direction'] != 0:
+                move_player(player['direction'])
+            
+            # Wrap around
+            if player['x'] < 0:
+                player['x'] = 19.9
+            elif player['x'] > 19.9:
+                player['x'] = 0
+            
+            # Collect pellets
+            grid_x = int(player['x'])
+            grid_y = int(player['y'])
+            
+            if maze[grid_y][grid_x] == 2:
+                maze[grid_y][grid_x] = 0
+                score += 10
+                pellet_count -= 1
+            elif maze[grid_y][grid_x] == 3:
+                maze[grid_y][grid_x] = 0
+                score += 50
+                pellet_count -= 1
+                frightened_timer = frightened_duration
+            
+            # Check win
+            if pellet_count == 0:
+                win = True
+            
+            # Move ghosts
+            move_ghosts()
+            
+            # Update frightened timer
+            if frightened_timer > 0:
+                frightened_timer -= 1
+        
+        # Drawing
+        screen.fill(BLACK)
+        draw_maze()
+        
+        for ghost in ghosts:
+            draw_ghost(ghost)
+        
+        draw_pacman()
+        
+        # Draw UI
+        score_text = font.render(f'Score: {score}', True, WHITE)
+        level_text = small_font.render(f'Level: {level}', True, WHITE)
+        screen.blit(score_text, (10, h - 50))
+        screen.blit(level_text, (10, h - 25))
+        
+        # Draw lives
+        for i in range(lives):
+            life_x = w - 40 - i * 30
+            points = [(life_x, h - 35)]
+            for angle in range(30, 330, 5):
+                rad = math.radians(angle)
+                x = life_x + int(12 * math.cos(rad))
+                y = h - 35 + int(12 * math.sin(rad))
+                points.append((x, y))
+            pygame.draw.polygon(screen, YELLOW, points)
+        
+        # Game over screen
+        if game_over:
+            overlay = pygame.Surface((w, h))
+            overlay.set_alpha(200)
+            overlay.fill(BLACK)
+            screen.blit(overlay, (0, 0))
+            
+            game_over_text = font.render('GAME OVER', True, (255, 0, 0))
+            final_score = small_font.render(f'Final Score: {score}', True, WHITE)
+            restart_text = small_font.render('Press SPACE to Restart', True, WHITE)
+            
+            screen.blit(game_over_text, (w // 2 - game_over_text.get_width() // 2, h // 2 - 60))
+            screen.blit(final_score, (w // 2 - final_score.get_width() // 2, h // 2))
+            screen.blit(restart_text, (w // 2 - restart_text.get_width() // 2, h // 2 + 40))
+        
+        # Win screen
+        if win:
+            overlay = pygame.Surface((w, h))
+            overlay.set_alpha(200)
+            overlay.fill(BLACK)
+            screen.blit(overlay, (0, 0))
+            
+            win_text = font.render('YOU WIN!', True, (0, 255, 0))
+            final_score = small_font.render(f'Final Score: {score}', True, WHITE)
+            restart_text = small_font.render('Press SPACE to Play Again', True, WHITE)
+            
+            screen.blit(win_text, (w // 2 - win_text.get_width() // 2, h // 2 - 60))
+            screen.blit(final_score, (w // 2 - final_score.get_width() // 2, h // 2))
+            screen.blit(restart_text, (w // 2 - restart_text.get_width() // 2, h // 2 + 40))
+        
+        pygame.display.flip()
+        clock.tick(60)
+
+    pygame.quit()`
+    },
+    {
+    title: "2048 Game",
+    category: "games",
+    description: "Enhanced number puzzle game where you combine tiles to reach 2048 with smooth animations, scoring, and proper game mechanics.",
+    tags: ["tkinter", "matrix-operations", "game-logic", "2048", "puzzle"],
+    difficulty: 3,
+    lines: "~180 lines",
+    code: `import tkinter as tk
+    import random
+    import copy
+
+    # Colors for different tile values
+    COLORS = {
+        0: "#cdc1b4",
+        2: "#eee4da",
+        4: "#ede0c8",
+        8: "#f2b179",
+        16: "#f59563",
+        32: "#f67c5f",
+        64: "#f65e3b",
+        128: "#edcf72",
+        256: "#edcc61",
+        512: "#edc850",
+        1024: "#edc53f",
+        2048: "#edc22e",
+        4096: "#3c3a32"
+    }
+
+    TEXT_COLORS = {
+        0: "#776e65",
+        2: "#776e65",
+        4: "#776e65",
+        8: "#f9f6f2",
+        16: "#f9f6f2"
+    }
+
+    class Game2048:
+        def __init__(self, root):
+            self.root = root
+            self.root.title("2048 Game")
+            self.root.configure(bg="#faf8ef")
+            
+            self.grid = [[0] * 4 for _ in range(4)]
+            self.score = 0
+            self.best_score = 0
+            self.game_over = False
+            self.won = False
+            
+            # Header frame
+            header_frame = tk.Frame(root, bg="#faf8ef")
+            header_frame.pack(pady=10)
+            
+            # Title
+            title_label = tk.Label(header_frame, text="2048", font=("Arial", 48, "bold"),
+                                bg="#faf8ef", fg="#776e65")
+            title_label.grid(row=0, column=0, padx=20)
+            
+            # Score frame
+            score_frame = tk.Frame(header_frame, bg="#faf8ef")
+            score_frame.grid(row=0, column=1, padx=10)
+            
+            self.score_label = tk.Label(score_frame, text="SCORE", font=("Arial", 12, "bold"),
+                                        bg="#bbada0", fg="#eee4da", padx=15, pady=5)
+            self.score_label.pack()
+            
+            self.score_value = tk.Label(score_frame, text="0", font=("Arial", 20, "bold"),
+                                        bg="#bbada0", fg="#ffffff", padx=15, pady=5)
+            self.score_value.pack()
+            
+            # Best score frame
+            best_frame = tk.Frame(header_frame, bg="#faf8ef")
+            best_frame.grid(row=0, column=2, padx=10)
+            
+            self.best_label = tk.Label(best_frame, text="BEST", font=("Arial", 12, "bold"),
+                                    bg="#bbada0", fg="#eee4da", padx=15, pady=5)
+            self.best_label.pack()
+            
+            self.best_value = tk.Label(best_frame, text="0", font=("Arial", 20, "bold"),
+                                    bg="#bbada0", fg="#ffffff", padx=15, pady=5)
+            self.best_value.pack()
+            
+            # Instructions
+            instructions = tk.Label(root, text="Use arrow keys to move tiles. Combine tiles with the same number!",
+                                font=("Arial", 10), bg="#faf8ef", fg="#776e65")
+            instructions.pack(pady=5)
+            
+            # Game canvas
+            self.canvas = tk.Canvas(root, width=440, height=440, bg="#bbada0", highlightthickness=0)
+            self.canvas.pack(pady=10)
+            
+            # New game button
+            new_game_btn = tk.Button(root, text="New Game", font=("Arial", 14, "bold"),
+                                    bg="#8f7a66", fg="#f9f6f2", padx=20, pady=10,
+                                    command=self.new_game, cursor="hand2")
+            new_game_btn.pack(pady=10)
+            
+            # Bind keys
+            self.root.bind("<Left>", lambda e: self.move("left"))
+            self.root.bind("<Right>", lambda e: self.move("right"))
+            self.root.bind("<Up>", lambda e: self.move("up"))
+            self.root.bind("<Down>", lambda e: self.move("down"))
+            
+            # Start new game
+            self.new_game()
+        
+        def new_game(self):
+            self.grid = [[0] * 4 for _ in range(4)]
+            self.score = 0
+            self.game_over = False
+            self.won = False
+            self.add_random_tile()
+            self.add_random_tile()
+            self.update_display()
+        
+        def add_random_tile(self):
+            empty_cells = [(i, j) for i in range(4) for j in range(4) if self.grid[i][j] == 0]
+            if empty_cells:
+                i, j = random.choice(empty_cells)
+                self.grid[i][j] = 2 if random.random() < 0.9 else 4
+        
+        def compress(self, row):
+            new_row = [i for i in row if i != 0]
+            new_row += [0] * (4 - len(new_row))
+            return new_row
+        
+        def merge(self, row):
+            for i in range(3):
+                if row[i] != 0 and row[i] == row[i + 1]:
+                    row[i] *= 2
+                    row[i + 1] = 0
+                    self.score += row[i]
+                    if row[i] == 2048:
+                        self.won = True
+            return row
+        
+        def move_left(self):
+            new_grid = []
+            moved = False
+            for row in self.grid:
+                compressed = self.compress(row)
+                merged = self.merge(compressed)
+                new_row = self.compress(merged)
+                new_grid.append(new_row)
+                if new_row != row:
+                    moved = True
+            return new_grid, moved
+        
+        def reverse(self, grid):
+            return [row[::-1] for row in grid]
+        
+        def transpose(self, grid):
+            return [list(row) for row in zip(*grid)]
+        
+        def move(self, direction):
+            if self.game_over:
+                return
+            
+            old_grid = copy.deepcopy(self.grid)
+            moved = False
+            
+            if direction == "left":
+                self.grid, moved = self.move_left()
+            elif direction == "right":
+                self.grid = self.reverse(self.grid)
+                self.grid, moved = self.move_left()
+                self.grid = self.reverse(self.grid)
+            elif direction == "up":
+                self.grid = self.transpose(self.grid)
+                self.grid, moved = self.move_left()
+                self.grid = self.transpose(self.grid)
+            elif direction == "down":
+                self.grid = self.transpose(self.grid)
+                self.grid = self.reverse(self.grid)
+                self.grid, moved = self.move_left()
+                self.grid = self.reverse(self.grid)
+                self.grid = self.transpose(self.grid)
+            
+            if moved:
+                self.add_random_tile()
+                self.update_display()
+                
+                if not self.can_move():
+                    self.game_over = True
+                    self.show_game_over()
+                elif self.won:
+                    self.show_win()
+        
+        def can_move(self):
+            # Check for empty cells
+            for i in range(4):
+                for j in range(4):
+                    if self.grid[i][j] == 0:
+                        return True
+            
+            # Check for possible merges
+            for i in range(4):
+                for j in range(4):
+                    if j < 3 and self.grid[i][j] == self.grid[i][j + 1]:
+                        return True
+                    if i < 3 and self.grid[i][j] == self.grid[i + 1][j]:
+                        return True
+            
+            return False
+        
+        def update_display(self):
+            self.canvas.delete("all")
+            
+            # Draw grid background
+            for i in range(4):
+                for j in range(4):
+                    x1 = j * 110 + 5
+                    y1 = i * 110 + 5
+                    x2 = x1 + 100
+                    y2 = y1 + 100
+                    
+                    value = self.grid[i][j]
+                    color = COLORS.get(value, COLORS[4096])
+                    text_color = TEXT_COLORS.get(value, "#f9f6f2")
+                    
+                    # Draw tile background
+                    self.canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="")
+                    
+                    # Draw tile value
+                    if value != 0:
+                        font_size = 48 if value < 100 else (40 if value < 1000 else 32)
+                        self.canvas.create_text((x1 + x2) / 2, (y1 + y2) / 2,
+                                            text=str(value),
+                                            font=("Arial", font_size, "bold"),
+                                            fill=text_color)
+            
+            # Update score
+            self.score_value.config(text=str(self.score))
+            if self.score > self.best_score:
+                self.best_score = self.score
+                self.best_value.config(text=str(self.best_score))
+        
+        def show_game_over(self):
+            # Create semi-transparent overlay
+            self.canvas.create_rectangle(0, 0, 440, 440, fill="#eee4da", stipple="gray50")
+            
+            # Game over text
+            self.canvas.create_text(220, 180, text="Game Over!",
+                                font=("Arial", 48, "bold"), fill="#776e65")
+            
+            # Final score
+            self.canvas.create_text(220, 240, text=f"Final Score: {self.score}",
+                                font=("Arial", 20), fill="#776e65")
+            
+            # Instruction
+            self.canvas.create_text(220, 280, text="Click 'New Game' to try again",
+                                font=("Arial", 14), fill="#776e65")
+        
+        def show_win(self):
+            # Create semi-transparent overlay
+            overlay = self.canvas.create_rectangle(0, 0, 440, 440, fill="#edc22e", stipple="gray50")
+            
+            # Win text
+            self.canvas.create_text(220, 180, text="You Win!",
+                                font=("Arial", 48, "bold"), fill="#f9f6f2")
+            
+            # Score
+            self.canvas.create_text(220, 240, text=f"Score: {self.score}",
+                                font=("Arial", 20), fill="#f9f6f2")
+            
+            # Continue instruction
+            self.canvas.create_text(220, 280, text="Keep playing or start a new game!",
+                                font=("Arial", 14), fill="#f9f6f2")
+            
+            # Allow continued play
+            self.won = False
+
+    # Run the game
     root = tk.Tk()
-    calc = Calculator(root)
-    root.mainloop()
+    game = Game2048(root)
+    root.mainloop()`
+    },
+    {
+    title: "Tic Tac Toe AI",
+    category: "games",
+    description: "Enhanced Tic Tac Toe with intelligent AI opponent using minimax algorithm, score tracking, difficulty levels, and polished UI.",
+    tags: ["tkinter", "minimax", "ai", "tic-tac-toe", "game"],
+    difficulty: 3,
+    lines: "~200 lines",
+    code: `import tkinter as tk
+    from tkinter import messagebox
+    import copy
 
-if __name__ == '__main__':
-    main()`
-  },
-  {
-    title: "Hash Generator",
-    category: "tools",
-    description: "Generate various hash values (MD5, SHA1, SHA256) for text or files.",
-    tags: ["hashlib", "security", "hashing"],
-    difficulty: 2,
-    lines: "~100 lines"
-  },
-  {
-    title: "Image Metadata Extractor",
-    category: "tools",
-    description: "Extract EXIF and other metadata from image files.",
-    tags: ["PIL", "exifread", "metadata"],
-    difficulty: 2,
-    lines: "~120 lines"
-  },
-  {
-    title: "Duplicate File Finder",
-    category: "tools",
-    description: "Find and remove duplicate files based on content comparison.",
-    tags: ["os", "hashlib", "file-management"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Clipboard Manager",
-    category: "tools",
-    description: "Manage clipboard history with search and categorization.",
-    tags: ["pyperclip", "tkinter", "clipboard"],
-    difficulty: 3,
-    lines: "~250 lines"
-  },
-  {
-    title: "Screen Recorder",
-    category: "tools",
-    description: "Record screen activity and save as video files.",
-    tags: ["opencv", "pyautogui", "screen-recording"],
-    difficulty: 4,
-    lines: "~300 lines"
-  },
-  {
-    title: "Pomodoro Timer",
-    category: "tools",
-    description: "Productivity timer with work/break intervals and notifications.",
-    tags: ["tkinter", "threading", "productivity"],
-    difficulty: 2,
-    lines: "~180 lines"
-  },
-  {
-    title: "Bandwidth Monitor",
-    category: "tools",
-    description: "Monitor network bandwidth usage and generate reports.",
-    tags: ["psutil", "matplotlib", "networking"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "System Information Tool",
-    category: "tools",
-    description: "Display detailed system information including hardware and software.",
-    tags: ["psutil", "platform", "system-info"],
-    difficulty: 2,
-    lines: "~150 lines"
-  },
-  {
-    title: "Regex Tester",
-    category: "tools",
-    description: "Test regular expressions with real-time matching and explanation.",
-    tags: ["re", "tkinter", "regex"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "JSON Formatter",
-    category: "tools",
-    description: "Format, validate, and prettify JSON data with syntax highlighting.",
-    tags: ["json", "tkinter", "formatting"],
-    difficulty: 2,
-    lines: "~150 lines"
-  },
-  {
-    title: "Base64 Encoder/Decoder",
-    category: "tools",
-    description: "Encode and decode text or files to/from Base64 format.",
-    tags: ["base64", "encoding", "tkinter"],
+    class TicTacToeAI:
+        def __init__(self, root):
+            self.root = root
+            self.root.title("Tic Tac Toe AI")
+            self.root.configure(bg="#1e1e1e")
+            self.root.resizable(False, False)
+            
+            self.board = [["" for _ in range(3)] for _ in range(3)]
+            self.buttons = [[None for _ in range(3)] for _ in range(3)]
+            self.current_player = "X"  # X is human, O is AI
+            self.game_over = False
+            self.difficulty = "hard"  # easy, medium, hard
+            
+            # Score tracking
+            self.scores = {"X": 0, "O": 0, "Draw": 0}
+            
+            self.create_ui()
+        
+        def create_ui(self):
+            # Header frame
+            header_frame = tk.Frame(self.root, bg="#1e1e1e")
+            header_frame.pack(pady=10)
+            
+            # Title
+            title = tk.Label(header_frame, text="TIC TAC TOE", font=("Arial", 28, "bold"),
+                            bg="#1e1e1e", fg="#00ff88")
+            title.pack()
+            
+            subtitle = tk.Label(header_frame, text="You (X) vs AI (O)", font=("Arial", 12),
+                            bg="#1e1e1e", fg="#888888")
+            subtitle.pack()
+            
+            # Score frame
+            score_frame = tk.Frame(self.root, bg="#2a2a2a", padx=20, pady=10)
+            score_frame.pack(pady=10)
+            
+            self.score_label = tk.Label(score_frame, 
+                                        text=f"You: {self.scores['X']}  |  AI: {self.scores['O']}  |  Draw: {self.scores['Draw']}",
+                                        font=("Arial", 14, "bold"), bg="#2a2a2a", fg="#ffffff")
+            self.score_label.pack()
+            
+            # Game board frame
+            board_frame = tk.Frame(self.root, bg="#1e1e1e")
+            board_frame.pack(pady=10)
+            
+            # Create buttons
+            for i in range(3):
+                for j in range(3):
+                    btn = tk.Button(board_frame, text="", font=("Arial", 48, "bold"),
+                                width=4, height=2, bg="#2a2a2a", fg="#ffffff",
+                                activebackground="#3a3a3a", relief="flat",
+                                command=lambda r=i, c=j: self.make_move(r, c))
+                    btn.grid(row=i, column=j, padx=3, pady=3)
+                    self.buttons[i][j] = btn
+            
+            # Control frame
+            control_frame = tk.Frame(self.root, bg="#1e1e1e")
+            control_frame.pack(pady=10)
+            
+            # Difficulty selection
+            difficulty_label = tk.Label(control_frame, text="AI Difficulty:", 
+                                        font=("Arial", 12), bg="#1e1e1e", fg="#888888")
+            difficulty_label.grid(row=0, column=0, padx=5)
+            
+            self.difficulty_var = tk.StringVar(value="hard")
+            difficulties = ["easy", "medium", "hard"]
+            for idx, diff in enumerate(difficulties):
+                rb = tk.Radiobutton(control_frame, text=diff.capitalize(), 
+                                variable=self.difficulty_var, value=diff,
+                                font=("Arial", 11), bg="#1e1e1e", fg="#ffffff",
+                                selectcolor="#2a2a2a", activebackground="#1e1e1e",
+                                activeforeground="#00ff88", command=self.set_difficulty)
+                rb.grid(row=0, column=idx+1, padx=5)
+            
+            # Buttons frame
+            button_frame = tk.Frame(self.root, bg="#1e1e1e")
+            button_frame.pack(pady=10)
+            
+            # New game button
+            new_game_btn = tk.Button(button_frame, text="New Game", font=("Arial", 14, "bold"),
+                                    bg="#00ff88", fg="#1e1e1e", padx=20, pady=10,
+                                    command=self.reset_game, cursor="hand2", relief="flat")
+            new_game_btn.grid(row=0, column=0, padx=5)
+            
+            # Reset scores button
+            reset_score_btn = tk.Button(button_frame, text="Reset Scores", font=("Arial", 14, "bold"),
+                                        bg="#ff6b6b", fg="#ffffff", padx=20, pady=10,
+                                        command=self.reset_scores, cursor="hand2", relief="flat")
+            reset_score_btn.grid(row=0, column=1, padx=5)
+        
+        def set_difficulty(self):
+            self.difficulty = self.difficulty_var.get()
+            self.reset_game()
+        
+        def make_move(self, row, col):
+            if self.board[row][col] == "" and not self.game_over and self.current_player == "X":
+                self.board[row][col] = "X"
+                self.buttons[row][col].config(text="X", fg="#00ff88")
+                
+                if self.check_winner("X"):
+                    self.end_game("X")
+                elif self.is_board_full():
+                    self.end_game("Draw")
+                else:
+                    self.current_player = "O"
+                    self.root.after(500, self.ai_move)
+        
+        def ai_move(self):
+            if self.game_over:
+                return
+            
+            if self.difficulty == "easy":
+                move = self.random_move()
+            elif self.difficulty == "medium":
+                # 50% chance of optimal move, 50% random
+                import random
+                if random.random() < 0.5:
+                    move = self.minimax_move()
+                else:
+                    move = self.random_move()
+            else:  # hard
+                move = self.minimax_move()
+            
+            if move:
+                row, col = move
+                self.board[row][col] = "O"
+                self.buttons[row][col].config(text="O", fg="#ff6b6b")
+                
+                if self.check_winner("O"):
+                    self.end_game("O")
+                elif self.is_board_full():
+                    self.end_game("Draw")
+                else:
+                    self.current_player = "X"
+        
+        def random_move(self):
+            import random
+            empty_cells = [(i, j) for i in range(3) for j in range(3) if self.board[i][j] == ""]
+            return random.choice(empty_cells) if empty_cells else None
+        
+        def minimax_move(self):
+            best_score = float('-inf')
+            best_move = None
+            
+            for i in range(3):
+                for j in range(3):
+                    if self.board[i][j] == "":
+                        self.board[i][j] = "O"
+                        score = self.minimax(self.board, 0, False)
+                        self.board[i][j] = ""
+                        
+                        if score > best_score:
+                            best_score = score
+                            best_move = (i, j)
+            
+            return best_move
+        
+        def minimax(self, board, depth, is_maximizing):
+            if self.check_winner("O"):
+                return 10 - depth
+            if self.check_winner("X"):
+                return depth - 10
+            if self.is_board_full():
+                return 0
+            
+            if is_maximizing:
+                best_score = float('-inf')
+                for i in range(3):
+                    for j in range(3):
+                        if board[i][j] == "":
+                            board[i][j] = "O"
+                            score = self.minimax(board, depth + 1, False)
+                            board[i][j] = ""
+                            best_score = max(score, best_score)
+                return best_score
+            else:
+                best_score = float('inf')
+                for i in range(3):
+                    for j in range(3):
+                        if board[i][j] == "":
+                            board[i][j] = "X"
+                            score = self.minimax(board, depth + 1, True)
+                            board[i][j] = ""
+                            best_score = min(score, best_score)
+                return best_score
+        
+        def check_winner(self, player):
+            # Check rows
+            for i in range(3):
+                if all(self.board[i][j] == player for j in range(3)):
+                    return True
+            
+            # Check columns
+            for j in range(3):
+                if all(self.board[i][j] == player for i in range(3)):
+                    return True
+            
+            # Check diagonals
+            if all(self.board[i][i] == player for i in range(3)):
+                return True
+            if all(self.board[i][2-i] == player for i in range(3)):
+                return True
+            
+            return False
+        
+        def is_board_full(self):
+            return all(self.board[i][j] != "" for i in range(3) for j in range(3))
+        
+        def end_game(self, winner):
+            self.game_over = True
+            
+            # Highlight winning line
+            if winner != "Draw":
+                self.highlight_winner(winner)
+            
+            # Update scores
+            if winner == "Draw":
+                self.scores["Draw"] += 1
+                message = "It's a Draw!"
+                color = "#ffaa00"
+            elif winner == "X":
+                self.scores["X"] += 1
+                message = "You Win! 🎉"
+                color = "#00ff88"
+            else:
+                self.scores["O"] += 1
+                message = "AI Wins! 🤖"
+                color = "#ff6b6b"
+            
+            self.update_score_display()
+            
+            # Show result after a delay
+            self.root.after(800, lambda: self.show_result(message, color))
+        
+        def highlight_winner(self, player):
+            color = "#00ff88" if player == "X" else "#ff6b6b"
+            
+            # Check rows
+            for i in range(3):
+                if all(self.board[i][j] == player for j in range(3)):
+                    for j in range(3):
+                        self.buttons[i][j].config(bg=color, fg="#1e1e1e")
+                    return
+            
+            # Check columns
+            for j in range(3):
+                if all(self.board[i][j] == player for i in range(3)):
+                    for i in range(3):
+                        self.buttons[i][j].config(bg=color, fg="#1e1e1e")
+                    return
+            
+            # Check diagonals
+            if all(self.board[i][i] == player for i in range(3)):
+                for i in range(3):
+                    self.buttons[i][i].config(bg=color, fg="#1e1e1e")
+                return
+            
+            if all(self.board[i][2-i] == player for i in range(3)):
+                for i in range(3):
+                    self.buttons[i][2-i].config(bg=color, fg="#1e1e1e")
+                return
+        
+        def show_result(self, message, color):
+            result = messagebox.showinfo("Game Over", message)
+            self.reset_game()
+        
+        def update_score_display(self):
+            self.score_label.config(
+                text=f"You: {self.scores['X']}  |  AI: {self.scores['O']}  |  Draw: {self.scores['Draw']}"
+            )
+        
+        def reset_game(self):
+            self.board = [["" for _ in range(3)] for _ in range(3)]
+            self.current_player = "X"
+            self.game_over = False
+            
+            for i in range(3):
+                for j in range(3):
+                    self.buttons[i][j].config(text="", bg="#2a2a2a", fg="#ffffff")
+        
+        def reset_scores(self):
+            self.scores = {"X": 0, "O": 0, "Draw": 0}
+            self.update_score_display()
+            self.reset_game()
+
+    # Run the game
+    if __name__ == "__main__":
+        root = tk.Tk()
+        game = TicTacToeAI(root)
+        root.mainloop()`
+    },
+    {
+    title: "Rock Paper Scissors",
+    category: "games",
+    description: "Enhanced GUI game to play Rock Paper Scissors against the computer with score tracking, animations, visual effects, and game history.",
+    tags: ["tkinter", "random", "gui", "rock-paper-scissors", "game"],
     difficulty: 1,
-    lines: "~80 lines"
-  },
-  {
-    title: "Port Scanner",
-    category: "tools",
-    description: "Scan for open ports on target hosts with threading support.",
-    tags: ["socket", "threading", "networking"],
-    difficulty: 3,
-    lines: "~180 lines"
-  },
-  {
-    title: "Markdown to HTML Converter",
-    category: "tools",
-    description: "Convert Markdown files to HTML with custom styling options.",
-    tags: ["markdown", "html", "conversion"],
-    difficulty: 2,
-    lines: "~120 lines"
-  },
+    lines: "~150 lines",
+    code: `import tkinter as tk
+    from tkinter import font as tkfont
+    import random
 
-  // Educational Category
-  {
-    title: "Typing Speed Test",
-    category: "educational",
-    description: "Test and improve typing speed with accuracy tracking and statistics.",
-    tags: ["tkinter", "typing", "statistics"],
-    difficulty: 3,
-    lines: "~250 lines"
-  },
-  {
-    title: "Math Quiz Game",
-    category: "educational",
-    description: "Interactive math quiz with different difficulty levels and progress tracking.",
-    tags: ["tkinter", "math", "quiz"],
-    difficulty: 2,
-    lines: "~200 lines"
-  },
-  {
-    title: "Flashcard App",
-    category: "educational",
-    description: "Digital flashcards for studying with spaced repetition algorithm.",
-    tags: ["tkinter", "sqlite", "spaced-repetition"],
-    difficulty: 3,
-    lines: "~300 lines"
-  },
-  {
-    title: "Periodic Table Explorer",
-    category: "educational",
-    description: "Interactive periodic table with element information and properties.",
-    tags: ["tkinter", "chemistry", "data-visualization"],
-    difficulty: 3,
-    lines: "~400 lines"
-  },
-  {
-    title: "Language Learning Tool",
-    category: "educational",
-    description: "Learn vocabulary and phrases in different languages with audio support.",
-    tags: ["tkinter", "pyttsx3", "language-learning"],
-    difficulty: 4,
-    lines: "~350 lines"
-  },
-  {
-    title: "Code Syntax Highlighter",
-    category: "educational",
-    description: "Highlight syntax for various programming languages with themes.",
-    tags: ["pygments", "tkinter", "syntax-highlighting"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Algorithm Visualizer",
-    category: "educational",
-    description: "Visualize sorting and searching algorithms with step-by-step animation.",
-    tags: ["pygame", "algorithms", "visualization"],
-    difficulty: 4,
-    lines: "~400 lines"
-  },
-  {
-    title: "Binary/Decimal Converter",
-    category: "educational",
-    description: "Convert between different number systems with educational explanations.",
-    tags: ["tkinter", "number-systems", "education"],
-    difficulty: 2,
-    lines: "~150 lines"
-  },
-  {
-    title: "Physics Simulator",
-    category: "educational",
-    description: "Simulate basic physics concepts like projectile motion and collisions.",
-    tags: ["pygame", "physics", "simulation"],
-    difficulty: 4,
-    lines: "~350 lines"
-  },
-  {
-    title: "Music Theory Trainer",
-    category: "educational",
-    description: "Learn music theory with interactive exercises and ear training.",
-    tags: ["pygame", "music-theory", "audio"],
-    difficulty: 4,
-    lines: "~400 lines"
-  },
-  {
-    title: "Geography Quiz",
-    category: "educational",
-    description: "Test geography knowledge with maps, capitals, and country information.",
-    tags: ["tkinter", "geography", "quiz"],
-    difficulty: 3,
-    lines: "~300 lines"
-  },
-  {
-    title: "Morse Code Translator",
-    category: "educational",
-    description: "Translate text to Morse code and vice versa with audio playback.",
-    tags: ["pygame", "morse-code", "audio"],
-    difficulty: 2,
-    lines: "~150 lines"
-  },
-  {
-    title: "Astronomy Viewer",
-    category: "educational",
-    description: "View constellations, planets, and astronomical data with interactive sky map.",
-    tags: ["matplotlib", "astronomy", "data-visualization"],
-    difficulty: 4,
-    lines: "~350 lines"
-  },
-  {
-    title: "Chemical Equation Balancer",
-    category: "educational",
-    description: "Balance chemical equations automatically with step-by-step solutions.",
-    tags: ["sympy", "chemistry", "equation-solving"],
-    difficulty: 4,
-    lines: "~250 lines"
-  },
-  {
-    title: "Statistics Calculator",
-    category: "educational",
-    description: "Calculate various statistical measures with data visualization.",
-    tags: ["numpy", "matplotlib", "statistics"],
-    difficulty: 3,
-    lines: "~200 lines"
-  },
-  {
-    title: "Coordinate Geometry Plotter",
-    category: "educational",
-    description: "Plot geometric shapes and analyze their properties interactively.",
-    tags: ["matplotlib", "geometry", "plotting"],
-    difficulty: 3,
-    lines: "~250 lines"
-  },
-  {
-    title: "DNA Sequence Analyzer",
-    category: "educational",
-    description: "Analyze DNA sequences for patterns, GC content, and mutations.",
-    tags: ["biopython", "bioinformatics", "sequence-analysis"],
-    difficulty: 4,
-    lines: "~300 lines"
-  },
-  {
-    title: "Logic Gate Simulator",
-    category: "educational",
-    description: "Simulate digital logic gates and circuits with truth tables.",
-    tags: ["tkinter", "logic-gates", "digital-circuits"],
-    difficulty: 3,
-    lines: "~300 lines"
-  },
-  {
-    title: "Fraction Calculator",
-    category: "educational",
-    description: "Perform operations on fractions with step-by-step explanations.",
-    tags: ["tkinter", "fractions", "math"],
-    difficulty: 2,
-    lines: "~180 lines"
-  },
-  {
-    title: "Drawing Tutor",
-    category: "educational",
-    description: "Learn to draw with guided tutorials and practice exercises.",
-    tags: ["pygame", "drawing", "tutorial"],
-    difficulty: 3,
-    lines: "~320 lines"
-  }
+    class RockPaperScissors:
+        def __init__(self, root):
+            self.root = root
+            self.root.title("Rock Paper Scissors")
+            self.root.configure(bg="#2c3e50")
+            self.root.resizable(False, False)
+            
+            self.choices = ["Rock", "Paper", "Scissors"]
+            self.emojis = {"Rock": "✊", "Paper": "✋", "Scissors": "✌️"}
+            
+            # Score tracking
+            self.scores = {"player": 0, "computer": 0, "ties": 0}
+            self.round_number = 0
+            self.history = []
+            
+            self.create_ui()
+        
+        def create_ui(self):
+            # Title
+            title_frame = tk.Frame(self.root, bg="#2c3e50")
+            title_frame.pack(pady=20)
+            
+            title = tk.Label(title_frame, text="ROCK PAPER SCISSORS", 
+                            font=("Arial", 32, "bold"),
+                            bg="#2c3e50", fg="#ecf0f1")
+            title.pack()
+            
+            subtitle = tk.Label(title_frame, text="Best of Infinite Rounds!", 
+                            font=("Arial", 12),
+                            bg="#2c3e50", fg="#95a5a6")
+            subtitle.pack()
+            
+            # Score board
+            score_frame = tk.Frame(self.root, bg="#34495e", padx=30, pady=15)
+            score_frame.pack(pady=10)
+            
+            # Player score
+            player_frame = tk.Frame(score_frame, bg="#34495e")
+            player_frame.grid(row=0, column=0, padx=20)
+            
+            tk.Label(player_frame, text="YOU", font=("Arial", 14, "bold"),
+                    bg="#34495e", fg="#3498db").pack()
+            self.player_score_label = tk.Label(player_frame, text="0", 
+                                            font=("Arial", 36, "bold"),
+                                            bg="#34495e", fg="#ecf0f1")
+            self.player_score_label.pack()
+            
+            # Separator
+            tk.Label(score_frame, text=":", font=("Arial", 36, "bold"),
+                    bg="#34495e", fg="#95a5a6").grid(row=0, column=1, padx=10)
+            
+            # Computer score
+            computer_frame = tk.Frame(score_frame, bg="#34495e")
+            computer_frame.grid(row=0, column=2, padx=20)
+            
+            tk.Label(computer_frame, text="COMPUTER", font=("Arial", 14, "bold"),
+                    bg="#34495e", fg="#e74c3c").pack()
+            self.computer_score_label = tk.Label(computer_frame, text="0", 
+                                                font=("Arial", 36, "bold"),
+                                                bg="#34495e", fg="#ecf0f1")
+            self.computer_score_label.pack()
+            
+            # Ties
+            self.ties_label = tk.Label(score_frame, text="Ties: 0", 
+                                    font=("Arial", 12),
+                                    bg="#34495e", fg="#95a5a6")
+            self.ties_label.grid(row=1, column=0, columnspan=3, pady=(10, 0))
+            
+            # Display area
+            display_frame = tk.Frame(self.root, bg="#2c3e50")
+            display_frame.pack(pady=20)
+            
+            # Player choice display
+            player_display = tk.Frame(display_frame, bg="#34495e", padx=20, pady=20)
+            player_display.grid(row=0, column=0, padx=15)
+            
+            tk.Label(player_display, text="Your Choice", font=("Arial", 12, "bold"),
+                    bg="#34495e", fg="#3498db").pack()
+            self.player_choice_label = tk.Label(player_display, text="❓", 
+                                            font=("Arial", 64),
+                                            bg="#34495e", fg="#ecf0f1")
+            self.player_choice_label.pack(pady=10)
+            
+            # VS label
+            tk.Label(display_frame, text="VS", font=("Arial", 24, "bold"),
+                    bg="#2c3e50", fg="#e67e22").grid(row=0, column=1, padx=10)
+            
+            # Computer choice display
+            computer_display = tk.Frame(display_frame, bg="#34495e", padx=20, pady=20)
+            computer_display.grid(row=0, column=2, padx=15)
+            
+            tk.Label(computer_display, text="Computer Choice", font=("Arial", 12, "bold"),
+                    bg="#34495e", fg="#e74c3c").pack()
+            self.computer_choice_label = tk.Label(computer_display, text="❓", 
+                                                font=("Arial", 64),
+                                                bg="#34495e", fg="#ecf0f1")
+            self.computer_choice_label.pack(pady=10)
+            
+            # Result display
+            self.result_label = tk.Label(self.root, text="Make your choice!", 
+                                        font=("Arial", 20, "bold"),
+                                        bg="#2c3e50", fg="#ecf0f1", pady=15)
+            self.result_label.pack()
+            
+            # Choice buttons
+            button_frame = tk.Frame(self.root, bg="#2c3e50")
+            button_frame.pack(pady=20)
+            
+            button_colors = {"Rock": "#e74c3c", "Paper": "#3498db", "Scissors": "#f39c12"}
+            
+            for choice in self.choices:
+                btn = tk.Button(button_frame, 
+                            text=f"{self.emojis[choice]} {choice}", 
+                            font=("Arial", 16, "bold"),
+                            bg=button_colors[choice], 
+                            fg="white",
+                            activebackground=button_colors[choice],
+                            activeforeground="white",
+                            width=12, 
+                            height=2,
+                            cursor="hand2",
+                            relief="flat",
+                            command=lambda c=choice: self.play(c))
+                btn.pack(side=tk.LEFT, padx=10)
+            
+            # Control buttons
+            control_frame = tk.Frame(self.root, bg="#2c3e50")
+            control_frame.pack(pady=10)
+            
+            reset_btn = tk.Button(control_frame, text="Reset Game", 
+                                font=("Arial", 12, "bold"),
+                                bg="#95a5a6", fg="white",
+                                activebackground="#7f8c8d",
+                                padx=20, pady=8,
+                                cursor="hand2",
+                                relief="flat",
+                                command=self.reset_game)
+            reset_btn.pack(side=tk.LEFT, padx=5)
+            
+            history_btn = tk.Button(control_frame, text="View History", 
+                                font=("Arial", 12, "bold"),
+                                bg="#9b59b6", fg="white",
+                                activebackground="#8e44ad",
+                                padx=20, pady=8,
+                                cursor="hand2",
+                                relief="flat",
+                                command=self.show_history)
+            history_btn.pack(side=tk.LEFT, padx=5)
+            
+            # Round number
+            self.round_label = tk.Label(self.root, text="Round: 0", 
+                                    font=("Arial", 11),
+                                    bg="#2c3e50", fg="#95a5a6")
+            self.round_label.pack(pady=(5, 15))
+        
+        def play(self, player_choice):
+            # Increment round
+            self.round_number += 1
+            self.round_label.config(text=f"Round: {self.round_number}")
+            
+            # Computer makes random choice
+            computer_choice = random.choice(self.choices)
+            
+            # Update displays
+            self.player_choice_label.config(text=self.emojis[player_choice])
+            
+            # Animate computer choice
+            self.animate_computer_choice(computer_choice)
+            
+            # Determine winner
+            result = self.determine_winner(player_choice, computer_choice)
+            
+            # Update scores
+            if result == "win":
+                self.scores["player"] += 1
+                self.player_score_label.config(text=str(self.scores["player"]))
+                self.result_label.config(text="🎉 You Win!", fg="#2ecc71")
+            elif result == "lose":
+                self.scores["computer"] += 1
+                self.computer_score_label.config(text=str(self.scores["computer"]))
+                self.result_label.config(text="💔 You Lose!", fg="#e74c3c")
+            else:
+                self.scores["ties"] += 1
+                self.ties_label.config(text=f"Ties: {self.scores['ties']}")
+                self.result_label.config(text="🤝 It's a Tie!", fg="#f39c12")
+            
+            # Add to history
+            self.history.append({
+                "round": self.round_number,
+                "player": player_choice,
+                "computer": computer_choice,
+                "result": result
+            })
+        
+        def animate_computer_choice(self, final_choice):
+            # Simple animation: cycle through choices before showing final
+            animation_steps = 8
+            delay = 80
+            
+            for i in range(animation_steps):
+                random_emoji = self.emojis[random.choice(self.choices)]
+                self.root.after(i * delay, 
+                            lambda e=random_emoji: self.computer_choice_label.config(text=e))
+            
+            # Show final choice
+            self.root.after(animation_steps * delay, 
+                        lambda: self.computer_choice_label.config(text=self.emojis[final_choice]))
+        
+        def determine_winner(self, player, computer):
+            if player == computer:
+                return "tie"
+            
+            winning_combinations = {
+                "Rock": "Scissors",
+                "Paper": "Rock",
+                "Scissors": "Paper"
+            }
+            
+            if winning_combinations[player] == computer:
+                return "win"
+            else:
+                return "lose"
+        
+        def reset_game(self):
+            self.scores = {"player": 0, "computer": 0, "ties": 0}
+            self.round_number = 0
+            self.history = []
+            
+            self.player_score_label.config(text="0")
+            self.computer_score_label.config(text="0")
+            self.ties_label.config(text="Ties: 0")
+            self.round_label.config(text="Round: 0")
+            
+            self.player_choice_label.config(text="❓")
+            self.computer_choice_label.config(text="❓")
+            self.result_label.config(text="Make your choice!", fg="#ecf0f1")
+        
+        def show_history(self):
+            if not self.history:
+                history_window = tk.Toplevel(self.root)
+                history_window.title("Game History")
+                history_window.configure(bg="#2c3e50")
+                history_window.geometry("300x100")
+                
+                tk.Label(history_window, text="No games played yet!", 
+                        font=("Arial", 14),
+                        bg="#2c3e50", fg="#ecf0f1").pack(pady=30)
+                return
+            
+            history_window = tk.Toplevel(self.root)
+            history_window.title("Game History")
+            history_window.configure(bg="#2c3e50")
+            history_window.geometry("500x400")
+            
+            # Title
+            tk.Label(history_window, text="Game History", 
+                    font=("Arial", 18, "bold"),
+                    bg="#2c3e50", fg="#ecf0f1").pack(pady=10)
+            
+            # Create scrollable frame
+            canvas = tk.Canvas(history_window, bg="#34495e", highlightthickness=0)
+            scrollbar = tk.Scrollbar(history_window, orient="vertical", command=canvas.yview)
+            scrollable_frame = tk.Frame(canvas, bg="#34495e")
+            
+            scrollable_frame.bind(
+                "<Configure>",
+                lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            )
+            
+            canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+            canvas.configure(yscrollcommand=scrollbar.set)
+            
+            # Add history entries
+            for entry in reversed(self.history):
+                frame = tk.Frame(scrollable_frame, bg="#2c3e50", padx=10, pady=5)
+                frame.pack(fill="x", padx=10, pady=3)
+                
+                result_colors = {"win": "#2ecc71", "lose": "#e74c3c", "tie": "#f39c12"}
+                result_text = {"win": "WIN", "lose": "LOSS", "tie": "TIE"}
+                
+                text = f"Round {entry['round']}: {self.emojis[entry['player']]} vs {self.emojis[entry['computer']]} - {result_text[entry['result']]}"
+                
+                tk.Label(frame, text=text, font=("Arial", 11),
+                        bg="#2c3e50", fg=result_colors[entry['result']]).pack()
+            
+            canvas.pack(side="left", fill="both", expand=True)
+            scrollbar.pack(side="right", fill="y")
+
+    # Run the game
+    if __name__ == "__main__":
+        root = tk.Tk()
+        game = RockPaperScissors(root)
+        root.mainloop()`
+    },
 ];
 
 // Scroll function
