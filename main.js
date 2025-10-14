@@ -5801,6 +5801,1535 @@ if __name__ == "__main__":
     main()`
   },
   {
+  title: "Turtle Rainbow Spiral Galaxy",
+  category: "turtle",
+  description: "Create a mesmerizing spiral galaxy effect with rainbow colors and varying sizes.",
+  tags: ["turtle", "spiral", "rainbow"],
+  difficulty: 2,
+  lines: "~40 lines",
+  code: `import turtle
+import math
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+# Rainbow spiral galaxy
+for i in range(500):
+    # Rainbow color using HSV
+    hue = i / 500
+    r = int(255 * (0.5 + 0.5 * math.sin(2 * math.pi * hue)))
+    g = int(255 * (0.5 + 0.5 * math.sin(2 * math.pi * (hue + 0.33))))
+    b = int(255 * (0.5 + 0.5 * math.sin(2 * math.pi * (hue + 0.66))))
+    
+    t.pencolor((r/255, g/255, b/255))
+    t.width(2)
+    
+    # Spiral with varying radius
+    angle = i * 137.5  # Golden angle
+    radius = i * 0.3
+    
+    x = radius * math.cos(math.radians(angle))
+    y = radius * math.sin(math.radians(angle))
+    
+    t.penup()
+    t.goto(x, y)
+    t.pendown()
+    t.dot(8)
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Kaleidoscope",
+  category: "turtle",
+  description: "Interactive kaleidoscope pattern generator with symmetrical designs.",
+  tags: ["turtle", "patterns", "symmetry"],
+  difficulty: 3,
+  lines: "~50 lines",
+  code: `import turtle
+import random
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+def draw_kaleidoscope_segment(size, color):
+    t.color(color)
+    t.begin_fill()
+    for _ in range(3):
+        t.forward(size)
+        t.left(120)
+    t.end_fill()
+
+# Create kaleidoscope with 12-fold symmetry
+segments = 12
+colors = ["red", "orange", "yellow", "green", "cyan", "blue", "purple", "magenta"]
+
+for segment in range(segments):
+    angle = 360 / segments
+    
+    # Save position
+    t.penup()
+    t.home()
+    t.setheading(segment * angle)
+    t.pendown()
+    
+    # Draw pattern along radius
+    for i in range(5):
+        t.forward(30 * i)
+        color = random.choice(colors)
+        draw_kaleidoscope_segment(20 + i * 5, color)
+        t.backward(30 * i)
+        t.right(15)
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Snowflake Generator",
+  category: "turtle",
+  description: "Generate unique snowflakes using recursive Koch curve patterns.",
+  tags: ["turtle", "fractal", "recursion"],
+  difficulty: 3,
+  lines: "~45 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("navy")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+t.color("white")
+
+def koch_curve(length, depth):
+    if depth == 0:
+        t.forward(length)
+    else:
+        length = length / 3
+        koch_curve(length, depth - 1)
+        t.left(60)
+        koch_curve(length, depth - 1)
+        t.right(120)
+        koch_curve(length, depth - 1)
+        t.left(60)
+        koch_curve(length, depth - 1)
+
+def snowflake(size, depth):
+    for _ in range(6):
+        koch_curve(size, depth)
+        t.right(60)
+
+# Draw snowflake
+t.penup()
+t.goto(-150, 100)
+t.pendown()
+t.pensize(2)
+
+snowflake(300, 3)
+
+# Add decorative center
+t.penup()
+t.goto(0, 0)
+t.pendown()
+for _ in range(12):
+    t.forward(20)
+    t.dot(8)
+    t.backward(20)
+    t.right(30)
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Neon Circles",
+  category: "turtle",
+  description: "Create glowing neon circle effects with overlapping gradients.",
+  tags: ["turtle", "circles", "neon"],
+  difficulty: 2,
+  lines: "~35 lines",
+  code: `import turtle
+import random
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+# Neon colors
+neon_colors = ["#FF1493", "#00FF00", "#00FFFF", "#FF00FF", "#FFFF00", "#FF6600"]
+
+# Draw multiple neon circles
+for _ in range(30):
+    x = random.randint(-300, 300)
+    y = random.randint(-300, 300)
+    size = random.randint(30, 120)
+    color = random.choice(neon_colors)
+    
+    # Draw glow effect
+    for i in range(3, 0, -1):
+        t.penup()
+        t.goto(x, y - size - i * 5)
+        t.pendown()
+        t.pensize(i * 2)
+        t.color(color)
+        t.circle(size + i * 5)
+    
+    # Draw solid circle
+    t.penup()
+    t.goto(x, y - size)
+    t.pendown()
+    t.fillcolor(color)
+    t.begin_fill()
+    t.circle(size)
+    t.end_fill()
+
+screen.update()
+turtle.done()`
+},
+
+{
+  title: "Turtle Wave Pattern",
+  category: "turtle",
+  description: "Generate smooth sine wave patterns with multiple frequencies and colors.",
+  tags: ["turtle", "waves", "mathematics"],
+  difficulty: 2,
+  lines: "~40 lines",
+  code: `import turtle
+import math
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(900, 600)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+# Draw multiple wave patterns
+colors = ["#FF0080", "#0080FF", "#00FF80", "#FF8000", "#8000FF"]
+amplitudes = [50, 40, 60, 45, 55]
+frequencies = [1, 1.5, 2, 2.5, 3]
+
+for wave_num in range(5):
+    t.penup()
+    t.goto(-400, 0)
+    t.pendown()
+    
+    t.color(colors[wave_num])
+    t.pensize(3)
+    
+    amplitude = amplitudes[wave_num]
+    frequency = frequencies[wave_num]
+    
+    # Draw wave
+    for x in range(-400, 400, 2):
+        angle = (x + 400) * frequency * 0.02
+        y = amplitude * math.sin(angle) + wave_num * 20 - 50
+        t.goto(x, y)
+
+# Add decorative dots at peaks
+t.penup()
+for wave_num in range(5):
+    for peak in range(8):
+        x = -300 + peak * 100
+        angle = (x + 400) * frequencies[wave_num] * 0.02
+        y = amplitudes[wave_num] * math.sin(angle) + wave_num * 20 - 50
+        t.goto(x, y)
+        t.dot(8, colors[wave_num])
+
+turtle.done()`
+  },
+  {
+  title: "Turtle Hypnotic Spiral",
+  category: "turtle",
+  description: "Create a mesmerizing hypnotic spiral with alternating colors and expanding radius.",
+  tags: ["turtle", "spiral", "hypnotic"],
+  difficulty: 2,
+  lines: "~35 lines",
+  code: `import turtle
+import math
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+# Hypnotic spiral
+colors = ["#FF0066", "#00FF66", "#6600FF", "#FFFF00", "#00FFFF"]
+angle = 0
+
+for i in range(200):
+    color_index = i % len(colors)
+    t.color(colors[color_index])
+    t.width(3)
+    
+    # Calculate spiral position
+    radius = i * 1.5
+    angle += 15
+    
+    x = radius * math.cos(math.radians(angle))
+    y = radius * math.sin(math.radians(angle))
+    
+    if i == 0:
+        t.penup()
+        t.goto(x, y)
+        t.pendown()
+    else:
+        t.goto(x, y)
+    
+    # Draw small circle at each point
+    t.dot(10)
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Star Field",
+  category: "turtle",
+  description: "Generate a beautiful star field with twinkling stars of various sizes.",
+  tags: ["turtle", "stars", "space"],
+  difficulty: 2,
+  lines: "~40 lines",
+  code: `import turtle
+import random
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(900, 700)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+t.color("white")
+
+# Draw stars
+for _ in range(150):
+    x = random.randint(-400, 400)
+    y = random.randint(-300, 300)
+    size = random.randint(1, 4)
+    
+    t.penup()
+    t.goto(x, y)
+    t.pendown()
+    
+    # Random brightness
+    brightness = random.randint(100, 255)
+    t.color((brightness/255, brightness/255, brightness/255))
+    
+    if size > 2:
+        # Draw star shape for bigger stars
+        for _ in range(5):
+            t.forward(size * 3)
+            t.right(144)
+    else:
+        # Just a dot for small stars
+        t.dot(size * 2)
+
+# Add some colorful nebula stars
+nebula_colors = ["#FF69B4", "#87CEEB", "#9370DB", "#FFD700"]
+for _ in range(20):
+    x = random.randint(-400, 400)
+    y = random.randint(-300, 300)
+    t.penup()
+    t.goto(x, y)
+    t.dot(random.randint(8, 15), random.choice(nebula_colors))
+
+screen.update()
+turtle.done()`
+},
+
+{
+  title: "Turtle Geometric Rose",
+  category: "turtle",
+  description: "Draw a mathematical rose curve with customizable petals and colors.",
+  tags: ["turtle", "mathematics", "flowers"],
+  difficulty: 3,
+  lines: "~45 lines",
+  code: `import turtle
+import math
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+def draw_rose(n, d, size, colors):
+    """Draw a rose curve with n/d petals"""
+    t.penup()
+    t.goto(0, 0)
+    t.pendown()
+    
+    for i in range(360 * d):
+        angle = math.radians(i)
+        k = n / d
+        r = size * math.cos(k * angle)
+        
+        x = r * math.cos(angle)
+        y = r * math.sin(angle)
+        
+        # Change color gradually
+        color_idx = int((i / (360 * d)) * len(colors))
+        t.color(colors[color_idx % len(colors)])
+        t.goto(x, y)
+
+# Draw rose with 7 petals
+colors = ["#FF1493", "#FF69B4", "#FFB6C1", "#FFC0CB", "#FF69B4", "#FF1493"]
+t.pensize(2)
+draw_rose(7, 1, 200, colors)
+
+# Add center decoration
+t.penup()
+t.goto(0, -20)
+t.pendown()
+t.fillcolor("#FFD700")
+t.begin_fill()
+t.circle(20)
+t.end_fill()
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Pixel Art",
+  category: "turtle",
+  description: "Create retro pixel art patterns with colored squares in a grid.",
+  tags: ["turtle", "pixel", "retro"],
+  difficulty: 2,
+  lines: "~45 lines",
+  code: `import turtle
+import random
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+# Pixel size
+pixel_size = 20
+grid_size = 20
+
+# Retro color palette
+colors = ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", 
+          "#FF00FF", "#00FFFF", "#FFA500", "#800080"]
+
+# Draw pixel grid
+start_x = -(grid_size * pixel_size) / 2
+start_y = (grid_size * pixel_size) / 2
+
+for row in range(grid_size):
+    for col in range(grid_size):
+        # Random chance to draw a pixel
+        if random.random() < 0.4:
+            x = start_x + col * pixel_size
+            y = start_y - row * pixel_size
+            
+            t.penup()
+            t.goto(x, y)
+            t.pendown()
+            
+            # Draw pixel
+            color = random.choice(colors)
+            t.fillcolor(color)
+            t.begin_fill()
+            for _ in range(4):
+                t.forward(pixel_size)
+                t.right(90)
+            t.end_fill()
+
+# Add border
+t.penup()
+t.goto(start_x - 5, start_y + 5)
+t.pendown()
+t.color("white")
+t.pensize(3)
+for _ in range(4):
+    t.forward(grid_size * pixel_size + 10)
+    t.right(90)
+
+screen.update()
+turtle.done()`
+},
+
+{
+  title: "Turtle Lightning Bolt",
+  category: "turtle",
+  description: "Generate random lightning bolt effects with branching patterns.",
+  tags: ["turtle", "effects", "random"],
+  difficulty: 3,
+  lines: "~50 lines",
+  code: `import turtle
+import random
+
+screen = turtle.Screen()
+screen.bgcolor("midnightblue")
+screen.setup(800, 800)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+def draw_lightning(x, y, length, angle, branches=2):
+    """Recursively draw lightning bolt"""
+    if length < 10:
+        return
+    
+    t.penup()
+    t.goto(x, y)
+    t.setheading(angle)
+    t.pendown()
+    
+    # Draw main bolt segment
+    segments = random.randint(3, 6)
+    for _ in range(segments):
+        t.color("yellow" if random.random() > 0.3 else "white")
+        t.pensize(max(1, int(length / 20)))
+        
+        segment_length = length / segments
+        jitter = random.randint(-20, 20)
+        t.setheading(angle + jitter)
+        t.forward(segment_length)
+        
+        # Chance to create branch
+        if random.random() < 0.3 and branches > 0:
+            current_x, current_y = t.pos()
+            branch_angle = angle + random.randint(-45, 45)
+            draw_lightning(current_x, current_y, 
+                         length * 0.6, branch_angle, branches - 1)
+
+# Draw multiple lightning bolts
+for _ in range(5):
+    start_x = random.randint(-300, 300)
+    start_y = 350
+    draw_lightning(start_x, start_y, random.randint(150, 250), 
+                  270 + random.randint(-30, 30), branches=3)
+
+# Add glow effect around bolts
+t.penup()
+for _ in range(30):
+    x = random.randint(-400, 400)
+    y = random.randint(-300, 350)
+    t.goto(x, y)
+    t.dot(random.randint(3, 8), "lightyellow")
+
+screen.update()
+turtle.done()`
+},
+
+{
+  title: "Turtle Hexagon Tessellation",
+  category: "turtle",
+  description: "Create a honeycomb pattern with colored hexagons in a tessellation.",
+  tags: ["turtle", "tessellation", "geometry"],
+  difficulty: 3,
+  lines: "~55 lines",
+  code: `import turtle
+import math
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(900, 700)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+def draw_hexagon(size, color):
+    """Draw a filled hexagon"""
+    t.fillcolor(color)
+    t.begin_fill()
+    for _ in range(6):
+        t.forward(size)
+        t.left(60)
+    t.end_fill()
+
+# Hexagon size
+hex_size = 30
+
+# Color palette
+colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", 
+          "#98D8C8", "#F7DC6F", "#BB8FCE", "#85C1E2"]
+
+# Calculate hexagon spacing
+h_spacing = hex_size * 1.5
+v_spacing = hex_size * math.sqrt(3)
+
+# Draw hexagon grid
+rows = 10
+cols = 12
+
+for row in range(rows):
+    for col in range(cols):
+        # Offset every other row
+        x = col * h_spacing - 300
+        if row % 2 == 1:
+            x += h_spacing / 2
+        
+        y = row * v_spacing - 250
+        
+        t.penup()
+        t.goto(x, y)
+        t.setheading(0)
+        t.pendown()
+        
+        # Pick color based on position pattern
+        color_idx = (row + col) % len(colors)
+        color = colors[color_idx]
+        
+        t.pensize(2)
+        t.pencolor("white")
+        draw_hexagon(hex_size, color)
+
+screen.update()
+turtle.done()`
+},
+
+{
+  title: "Turtle Vortex",
+  category: "turtle",
+  description: "Create a spinning vortex effect with rotating lines and gradients.",
+  tags: ["turtle", "vortex", "rotation"],
+  difficulty: 2,
+  lines: "~40 lines",
+  code: `import turtle
+import math
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+# Create vortex
+num_lines = 100
+max_length = 300
+
+for i in range(num_lines):
+    # Calculate position on spiral
+    angle = i * 13  # Golden-ish angle
+    distance = (i / num_lines) * max_length
+    
+    # Start position
+    start_angle = angle
+    start_dist = distance * 0.3
+    
+    start_x = start_dist * math.cos(math.radians(start_angle))
+    start_y = start_dist * math.sin(math.radians(start_angle))
+    
+    # End position
+    end_x = distance * math.cos(math.radians(angle))
+    end_y = distance * math.sin(math.radians(angle))
+    
+    # Color gradient
+    hue = i / num_lines
+    r = int(255 * (1 - hue))
+    g = int(255 * hue)
+    b = 200
+    
+    t.penup()
+    t.goto(start_x, start_y)
+    t.pendown()
+    
+    t.color((r/255, g/255, b/255))
+    t.pensize(2)
+    t.goto(end_x, end_y)
+
+# Add center glow
+t.penup()
+t.goto(0, 0)
+for size in range(20, 0, -2):
+    t.dot(size, (1, 1, 1, 0.5))
+
+turtle.done()`
+},
+
+{
+  title: "Turtle DNA Helix",
+  category: "turtle",
+  description: "Draw a double helix DNA structure with connecting base pairs.",
+  tags: ["turtle", "biology", "helix"],
+  difficulty: 3,
+  lines: "~50 lines",
+  code: `import turtle
+import math
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+# DNA parameters
+amplitude = 100
+wavelength = 50
+num_turns = 4
+height = 600
+
+# Draw DNA helix
+base_pair_colors = ["#FF6B9D", "#C44569", "#FFA502", "#F79F1F"]
+
+for i in range(0, height, 5):
+    # Calculate position on helix
+    angle = (i / wavelength) * 2 * math.pi
+    
+    # First strand
+    x1 = amplitude * math.cos(angle)
+    y1 = i - height / 2
+    
+    # Second strand (180 degrees out of phase)
+    x2 = amplitude * math.cos(angle + math.pi)
+    y2 = y1
+    
+    # Draw strands
+    t.penup()
+    t.goto(x1, y1)
+    t.pendown()
+    t.dot(8, "#4ECDC4")
+    
+    t.penup()
+    t.goto(x2, y2)
+    t.pendown()
+    t.dot(8, "#4ECDC4")
+    
+    # Draw connecting base pairs every 10 units
+    if i % 10 == 0:
+        color = base_pair_colors[int(i / 10) % len(base_pair_colors)]
+        t.penup()
+        t.goto(x1, y1)
+        t.pendown()
+        t.color(color)
+        t.pensize(3)
+        t.goto(x2, y2)
+        
+        # Draw base pair markers
+        t.penup()
+        t.goto((x1 + x2) / 2, y1)
+        t.dot(6, color)
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Concentric Polygons",
+  category: "turtle",
+  description: "Create mesmerizing patterns with nested polygons of varying sides.",
+  tags: ["turtle", "polygons", "patterns"],
+  difficulty: 2,
+  lines: "~40 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+def draw_polygon(sides, size, color):
+    """Draw a polygon with n sides"""
+    angle = 360 / sides
+    t.color(color)
+    t.pensize(2)
+    
+    for _ in range(sides):
+        t.forward(size)
+        t.right(angle)
+
+# Color gradient
+colors = ["#FF0000", "#FF7F00", "#FFFF00", "#00FF00", 
+          "#0000FF", "#4B0082", "#9400D3"]
+
+# Draw multiple nested polygons
+for layer in range(15, 0, -1):
+    # Vary sides from 3 to 8
+    sides = 3 + (layer % 6)
+    size = layer * 15
+    
+    # Position at center
+    t.penup()
+    start_x = -size / 2
+    start_y = -size / 2
+    t.goto(start_x, start_y)
+    t.pendown()
+    
+    color = colors[layer % len(colors)]
+    draw_polygon(sides, size, color)
+    
+    # Rotate slightly for next layer
+    t.right(10)
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Aurora Borealis",
+  category: "turtle",
+  description: "Simulate the Northern Lights with flowing wavy patterns and colors.",
+  tags: ["turtle", "waves", "nature"],
+  difficulty: 3,
+  lines: "~55 lines",
+  code: `import turtle
+import math
+import random
+
+screen = turtle.Screen()
+screen.bgcolor("#0a0a2e")
+screen.setup(900, 700)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+def draw_aurora_wave(y_offset, color, amplitude, frequency):
+    """Draw one wave of aurora"""
+    t.penup()
+    t.goto(-400, y_offset)
+    t.pendown()
+    
+    t.color(color)
+    t.pensize(random.randint(3, 6))
+    
+    for x in range(-400, 400, 3):
+        angle = x * frequency * 0.01
+        y = y_offset + amplitude * math.sin(angle)
+        
+        # Add randomness for flickering effect
+        y += random.randint(-5, 5)
+        
+        t.goto(x, y)
+
+# Aurora colors (green, blue, purple, pink)
+aurora_colors = [
+    "#00ff88", "#00ffaa", "#00ff66",
+    "#6666ff", "#8888ff", "#aaaaff",
+    "#ff00ff", "#ff66ff", "#ff88ff",
+    "#00ffff", "#66ffff"
+]
+
+# Draw multiple overlapping waves
+for wave in range(15):
+    y_base = random.randint(-100, 200)
+    amplitude = random.randint(30, 80)
+    frequency = random.uniform(0.8, 2.0)
+    color = random.choice(aurora_colors)
+    
+    draw_aurora_wave(y_base, color, amplitude, frequency)
+
+# Add stars in background
+t.penup()
+for _ in range(100):
+    x = random.randint(-400, 400)
+    y = random.randint(-300, 300)
+    t.goto(x, y)
+    size = random.randint(1, 3)
+    brightness = random.randint(150, 255)
+    t.dot(size, (brightness/255, brightness/255, brightness/255))
+
+screen.update()
+turtle.done()`
+  },
+  {
+  title: "Turtle Circular Grid",
+  category: "turtle",
+  description: "Create a radial grid pattern with circles expanding from center.",
+  tags: ["turtle", "circles", "grid"],
+  difficulty: 2,
+  lines: "~30 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+t.color("cyan")
+
+# Draw concentric circles
+for radius in range(20, 300, 20):
+    t.penup()
+    t.goto(0, -radius)
+    t.pendown()
+    t.circle(radius)
+
+# Draw radial lines
+for angle in range(0, 360, 15):
+    t.penup()
+    t.goto(0, 0)
+    t.setheading(angle)
+    t.pendown()
+    t.forward(300)
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Square Spiral",
+  category: "turtle",
+  description: "Draw an expanding square spiral with rainbow colors.",
+  tags: ["turtle", "spiral", "squares"],
+  difficulty: 1,
+  lines: "~25 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+colors = ["red", "orange", "yellow", "green", "cyan", "blue", "purple"]
+
+distance = 0
+for i in range(200):
+    t.color(colors[i % len(colors)])
+    t.forward(distance)
+    t.right(90)
+    distance += 2
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Dotted Spiral",
+  category: "turtle",
+  description: "Create a spiral pattern using dots instead of lines.",
+  tags: ["turtle", "dots", "spiral"],
+  difficulty: 2,
+  lines: "~30 lines",
+  code: `import turtle
+import math
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+colors = ["#FF1493", "#00CED1", "#FFD700", "#32CD32", "#FF6347"]
+
+for i in range(300):
+    angle = i * 10
+    radius = i * 0.5
+    
+    x = radius * math.cos(math.radians(angle))
+    y = radius * math.sin(math.radians(angle))
+    
+    t.penup()
+    t.goto(x, y)
+    
+    color = colors[i % len(colors)]
+    size = 8 + (i % 10)
+    t.dot(size, color)
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Pentagon Pattern",
+  category: "turtle",
+  description: "Draw rotating pentagons creating a flower-like pattern.",
+  tags: ["turtle", "pentagons", "patterns"],
+  difficulty: 2,
+  lines: "~25 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+colors = ["red", "orange", "yellow", "green", "blue", "purple"]
+
+for i in range(36):
+    t.color(colors[i % len(colors)])
+    t.pensize(2)
+    
+    for _ in range(5):
+        t.forward(100)
+        t.right(72)
+    
+    t.right(10)
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Checkerboard",
+  category: "turtle",
+  description: "Create a colorful checkerboard pattern with alternating squares.",
+  tags: ["turtle", "grid", "pattern"],
+  difficulty: 2,
+  lines: "~40 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("white")
+screen.setup(800, 800)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+square_size = 50
+rows = 10
+cols = 10
+
+colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#FFA07A", "#98D8C8"]
+
+start_x = -250
+start_y = 250
+
+for row in range(rows):
+    for col in range(cols):
+        x = start_x + col * square_size
+        y = start_y - row * square_size
+        
+        t.penup()
+        t.goto(x, y)
+        t.pendown()
+        
+        # Checkerboard pattern
+        if (row + col) % 2 == 0:
+            t.fillcolor(colors[(row + col) % len(colors)])
+        else:
+            t.fillcolor("white")
+        
+        t.begin_fill()
+        for _ in range(4):
+            t.forward(square_size)
+            t.right(90)
+        t.end_fill()
+
+screen.update()
+turtle.done()`
+},
+
+{
+  title: "Turtle Triangle Spiral",
+  category: "turtle",
+  description: "Create a spiral made of expanding triangles.",
+  tags: ["turtle", "triangles", "spiral"],
+  difficulty: 2,
+  lines: "~25 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+colors = ["red", "blue", "green", "yellow", "orange", "purple", "pink"]
+
+size = 10
+for i in range(100):
+    t.color(colors[i % len(colors)])
+    t.pensize(2)
+    
+    for _ in range(3):
+        t.forward(size)
+        t.left(120)
+    
+    t.right(5)
+    size += 2
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Color Wheel",
+  category: "turtle",
+  description: "Draw a color wheel showing gradual color transitions.",
+  tags: ["turtle", "colors", "circle"],
+  difficulty: 2,
+  lines: "~35 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+# Draw color wheel segments
+num_segments = 36
+
+for i in range(num_segments):
+    angle = i * 10
+    
+    # Calculate RGB values for rainbow effect
+    hue = i / num_segments
+    
+    if hue < 1/6:
+        r, g, b = 1, hue * 6, 0
+    elif hue < 2/6:
+        r, g, b = 2 - hue * 6, 1, 0
+    elif hue < 3/6:
+        r, g, b = 0, 1, hue * 6 - 2
+    elif hue < 4/6:
+        r, g, b = 0, 4 - hue * 6, 1
+    elif hue < 5/6:
+        r, g, b = hue * 6 - 4, 0, 1
+    else:
+        r, g, b = 1, 0, 6 - hue * 6
+    
+    t.color((r, g, b))
+    t.fillcolor((r, g, b))
+    
+    t.penup()
+    t.goto(0, 0)
+    t.setheading(angle)
+    t.pendown()
+    
+    t.begin_fill()
+    t.forward(200)
+    t.right(90)
+    t.circle(200, 10)
+    t.goto(0, 0)
+    t.end_fill()
+
+screen.update()
+turtle.done()`
+},
+
+{
+  title: "Turtle Starburst",
+  category: "turtle",
+  description: "Create a starburst effect with radiating lines.",
+  tags: ["turtle", "lines", "radial"],
+  difficulty: 1,
+  lines: "~25 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+colors = ["#FF1493", "#00FFFF", "#FFD700", "#00FF00", "#FF6347"]
+
+for i in range(72):
+    t.color(colors[i % len(colors)])
+    t.pensize(2)
+    
+    t.penup()
+    t.goto(0, 0)
+    t.setheading(i * 5)
+    t.pendown()
+    
+    t.forward(250)
+    t.dot(10)
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Crosshatch",
+  category: "turtle",
+  description: "Create a crosshatch shading pattern with intersecting lines.",
+  tags: ["turtle", "lines", "pattern"],
+  difficulty: 2,
+  lines: "~35 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+t.color("cyan")
+
+# Draw horizontal lines
+spacing = 20
+for y in range(-300, 301, spacing):
+    t.penup()
+    t.goto(-300, y)
+    t.pendown()
+    t.goto(300, y)
+
+# Draw vertical lines
+for x in range(-300, 301, spacing):
+    t.penup()
+    t.goto(x, -300)
+    t.pendown()
+    t.goto(x, 300)
+
+# Draw diagonal lines (right)
+t.color("magenta")
+for start in range(-600, 601, spacing):
+    t.penup()
+    t.goto(start, -300)
+    t.setheading(45)
+    t.pendown()
+    t.forward(850)
+
+# Draw diagonal lines (left)
+t.color("yellow")
+for start in range(-600, 601, spacing):
+    t.penup()
+    t.goto(start, -300)
+    t.setheading(135)
+    t.pendown()
+    t.forward(850)
+
+screen.update()
+turtle.done()`
+},
+
+{
+  title: "Turtle Circular Flowers",
+  category: "turtle",
+  description: "Draw multiple flowers made from circles arranged in patterns.",
+  tags: ["turtle", "circles", "flowers"],
+  difficulty: 2,
+  lines: "~35 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+def draw_flower(x, y, petal_color, center_color):
+    # Draw petals
+    for angle in range(0, 360, 45):
+        t.penup()
+        t.goto(x, y)
+        t.setheading(angle)
+        t.forward(30)
+        t.pendown()
+        
+        t.fillcolor(petal_color)
+        t.begin_fill()
+        t.circle(20)
+        t.end_fill()
+    
+    # Draw center
+    t.penup()
+    t.goto(x, y - 15)
+    t.pendown()
+    t.fillcolor(center_color)
+    t.begin_fill()
+    t.circle(15)
+    t.end_fill()
+
+# Draw multiple flowers
+positions = [(-150, 150), (150, 150), (0, 0), (-150, -150), (150, -150)]
+petal_colors = ["#FF69B4", "#87CEEB", "#FFD700", "#98FB98", "#DDA0DD"]
+center_colors = ["#FFD700", "#FF1493", "#FF6347", "#FFD700", "#FF1493"]
+
+for i, (x, y) in enumerate(positions):
+    draw_flower(x, y, petal_colors[i], center_colors[i])
+
+screen.update()
+turtle.done()`
+},
+
+{
+  title: "Turtle Zigzag Pattern",
+  category: "turtle",
+  description: "Create a zigzag lightning bolt pattern with multiple colors.",
+  tags: ["turtle", "zigzag", "pattern"],
+  difficulty: 2,
+  lines: "~30 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+colors = ["red", "orange", "yellow", "green", "cyan", "blue", "purple"]
+
+t.pensize(3)
+t.penup()
+t.goto(-300, 200)
+t.pendown()
+
+segment_length = 50
+direction = 1
+
+for i in range(30):
+    t.color(colors[i % len(colors)])
+    
+    t.forward(segment_length)
+    
+    if direction == 1:
+        t.right(120)
+    else:
+        t.left(120)
+    
+    direction *= -1
+    
+    t.forward(segment_length)
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Nested Squares",
+  category: "turtle",
+  description: "Draw rotating nested squares creating a tunnel effect.",
+  tags: ["turtle", "squares", "rotation"],
+  difficulty: 2,
+  lines: "~25 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+colors = ["red", "orange", "yellow", "green", "cyan", "blue", "purple"]
+
+size = 300
+for i in range(30):
+    t.color(colors[i % len(colors)])
+    t.pensize(2)
+    
+    for _ in range(4):
+        t.forward(size)
+        t.right(90)
+    
+    t.right(6)
+    size -= 10
+
+turtle.done()`
+},
+
+{
+  title: "Turtle Bubble Pattern",
+  category: "turtle",
+  description: "Create a pattern of overlapping colorful bubbles.",
+  tags: ["turtle", "circles", "bubbles"],
+  difficulty: 2,
+  lines: "~35 lines",
+  code: `import turtle
+import random
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+colors = ["#FF6B9D", "#C44569", "#4ECDC4", "#95E1D3", 
+          "#F8B500", "#6C5CE7", "#A29BFE", "#FD79A8"]
+
+# Draw bubbles
+for _ in range(50):
+    x = random.randint(-350, 350)
+    y = random.randint(-350, 350)
+    size = random.randint(20, 80)
+    
+    t.penup()
+    t.goto(x, y - size)
+    t.pendown()
+    
+    color = random.choice(colors)
+    t.color(color)
+    t.pensize(3)
+    t.circle(size)
+    
+    # Add highlight
+    t.penup()
+    t.goto(x - size//3, y + size//3)
+    t.pendown()
+    t.color("white")
+    t.dot(size//4)
+
+screen.update()
+turtle.done()`
+},
+
+{
+  title: "Turtle Diamond Grid",
+  category: "turtle",
+  description: "Create a grid of diamond shapes with alternating colors.",
+  tags: ["turtle", "diamonds", "grid"],
+  difficulty: 2,
+  lines: "~40 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+def draw_diamond(x, y, size, color):
+    t.penup()
+    t.goto(x, y)
+    t.setheading(0)
+    t.pendown()
+    
+    t.fillcolor(color)
+    t.begin_fill()
+    for _ in range(4):
+        t.forward(size)
+        t.left(90)
+        t.forward(size)
+        t.left(90)
+        t.forward(size)
+        t.right(90)
+        t.forward(size)
+        t.right(90)
+    t.end_fill()
+
+colors = ["#FF1493", "#00CED1", "#FFD700", "#32CD32"]
+
+size = 40
+rows = 6
+cols = 6
+
+for row in range(rows):
+    for col in range(cols):
+        x = -150 + col * size * 1.5
+        y = 150 - row * size * 1.5
+        
+        color = colors[(row + col) % len(colors)]
+        
+        t.penup()
+        t.goto(x, y)
+        t.setheading(45)
+        t.pendown()
+        
+        t.fillcolor(color)
+        t.begin_fill()
+        for _ in range(4):
+            t.forward(size)
+            t.right(90)
+        t.end_fill()
+
+screen.update()
+turtle.done()`
+},
+
+{
+  title: "Turtle Sunburst",
+  category: "turtle",
+  description: "Create a sunburst pattern with triangular rays.",
+  tags: ["turtle", "rays", "sun"],
+  difficulty: 2,
+  lines: "~35 lines",
+  code: `import turtle
+
+screen = turtle.Screen()
+screen.bgcolor("black")
+screen.setup(800, 800)
+screen.tracer(0)
+
+t = turtle.Turtle()
+t.speed(0)
+t.hideturtle()
+
+# Draw rays
+num_rays = 24
+colors = ["#FFD700", "#FFA500", "#FF8C00"]
+
+for i in range(num_rays):
+    angle = i * (360 / num_rays)
+    
+    t.penup()
+    t.goto(0, 0)
+    t.setheading(angle)
+    t.pendown()
+    
+    color = colors[i % len(colors)]
+    t.fillcolor(color)
+    t.begin_fill()
+    
+    t.forward(200)
+    t.right(150)
+    t.forward(80)
+    t.goto(0, 0)
+    
+    t.end_fill()
+
+# Draw center circle
+t.penup()
+t.goto(0, -50)
+t.pendown()
+t.fillcolor("#FFD700")
+t.begin_fill()
+t.circle(50)
+t.end_fill()
+
+screen.update()
+turtle.done()`
+  
+  },
+  {
     title: "Turtle Mandala Creator",
     category: "turtle",
     description: "Draw intricate mandala patterns with perfect symmetry, 5 styles, and 8 color schemes.",
@@ -12833,6 +14362,5225 @@ if __name__ == "__main__":
         root = tk.Tk()
         game = RockPaperScissors(root)
         root.mainloop()`
+    },
+//terminal commands
+// ============ MORE TERMINAL TOOLS ============
+    {
+        title: "wget - File Downloader",
+        category: "terminal-tools",
+        description: "Download files from the web via HTTP/HTTPS/FTP. Resume downloads, mirror websites, download recursively!",
+        tags: ["terminal", "download", "http", "web"],
+        difficulty: 2,
+        lines: "Command: wget",
+        code: `# Pre-installed on most Linux systems
+    # macOS: brew install wget
+
+    # Basic download:
+    wget https://example.com/file.zip
+
+    # Save with different name:
+    wget -O newname.zip https://example.com/file.zip
+
+    # Resume download:
+    wget -c https://example.com/largefile.zip
+
+    # Download in background:
+    wget -b https://example.com/file.zip
+
+    # Multiple files:
+    wget -i urls.txt
+
+    # Limit download speed:
+    wget --limit-rate=200k https://example.com/file.zip
+
+    # Download entire website:
+    wget --mirror --convert-links --page-requisites https://example.com
+
+    # Download with user agent:
+    wget --user-agent="Mozilla/5.0" https://example.com/file.zip
+
+    # Authentication:
+    wget --user=username --password=pass https://example.com/file.zip
+
+    # FTP download:
+    wget ftp://ftp.example.com/file.zip
+
+    # Retry on failure:
+    wget --tries=10 https://example.com/file.zip
+
+    # Download to directory:
+    wget -P /download/path https://example.com/file.zip
+
+    # Quiet mode:
+    wget -q https://example.com/file.zip
+
+    # Check if file exists:
+    wget --spider https://example.com/file.zip
+
+    # Practical examples:
+    # Download with progress bar:
+    wget --progress=bar:force https://example.com/file.zip
+
+    # Download all PDFs from page:
+    wget -r -l1 -A.pdf https://example.com/documents/
+
+    # Continue all downloads:
+    wget -c -i download-list.txt`
+    },
+    {
+        title: "kill - Terminate Processes",
+        category: "terminal-tools",
+        description: "Send signals to processes. Stop, restart, or terminate running programs. Essential for process management!",
+        tags: ["terminal", "processes", "management", "system"],
+        difficulty: 2,
+        lines: "Command: kill",
+        code: `# Pre-installed on Unix systems
+
+    # Kill by PID:
+    kill 1234
+
+    # Force kill:
+    kill -9 1234
+    kill -KILL 1234
+
+    # Graceful termination:
+    kill -15 1234
+    kill -TERM 1234
+
+    # Kill by name (killall):
+    killall firefox
+    killall -9 chrome
+
+    # Kill by name (pkill):
+    pkill firefox
+    pkill -f "python script.py"
+
+    # List all signals:
+    kill -l
+
+    # Common signals:
+    # 1  (HUP)  - Hangup
+    # 2  (INT)  - Interrupt (Ctrl+C)
+    # 9  (KILL) - Force kill (cannot be caught)
+    # 15 (TERM) - Graceful termination (default)
+    # 18 (CONT) - Continue if stopped
+    # 19 (STOP) - Stop process
+    # 20 (TSTP) - Terminal stop (Ctrl+Z)
+
+    # Stop (pause) process:
+    kill -STOP 1234
+
+    # Continue stopped process:
+    kill -CONT 1234
+
+    # Reload configuration:
+    kill -HUP 1234
+
+    # Find and kill:
+    ps aux | grep chrome | awk '{print $2}' | xargs kill
+
+    # Kill all user processes:
+    pkill -u username
+
+    # Kill by port:
+    kill $(lsof -t -i:8080)
+
+    # Interactive kill (choose from list):
+    ps aux | grep python | fzf | awk '{print $2}' | xargs kill
+
+    # Practical examples:
+    # Kill all Python processes:
+    pkill python
+
+    # Kill zombie processes:
+    kill -9 $(ps aux | grep 'Z' | awk '{print $2}')
+
+    # Kill process using a file:
+    fuser -k file.txt`
+    },
+    {
+        title: "top - Process Monitor",
+        category: "terminal-tools",
+        description: "Real-time system process monitor. See CPU, memory usage, running processes. The classic Unix monitoring tool!",
+        tags: ["terminal", "monitoring", "processes", "system"],
+        difficulty: 2,
+        lines: "Command: top",
+        code: `# Pre-installed on Unix systems
+
+    # Basic usage:
+    top
+
+    # Exit: Press 'q'
+
+    # Interactive commands (while running):
+    # h or ?: Help
+    # k: Kill process (enter PID)
+    # r: Renice (change priority)
+    # M: Sort by memory
+    # P: Sort by CPU
+    # T: Sort by time
+    # u: Filter by user
+    # c: Show full command
+    # 1: Show individual CPUs
+    # d: Change refresh interval
+    # W: Save configuration
+
+    # Sort by memory:
+    top -o %MEM
+
+    # Sort by CPU:
+    top -o %CPU
+
+    # Show specific user:
+    top -u username
+
+    # Batch mode (non-interactive):
+    top -b -n 1
+
+    # Limit to N processes:
+    top -n 10
+
+    # Custom refresh interval (seconds):
+    top -d 5
+
+    # Display summary info:
+    top -s
+
+    # Color mode:
+    top -c
+
+    # Output to file:
+    top -b -n 1 > top-output.txt
+
+    # Monitor specific process:
+    top -p 1234
+
+    # Monitor multiple processes:
+    top -p 1234,5678,9012
+
+    # Understanding the display:
+    # PID: Process ID
+    # USER: Process owner
+    # PR: Priority
+    # NI: Nice value
+    # VIRT: Virtual memory
+    # RES: Resident memory (actual RAM)
+    # SHR: Shared memory
+    # S: Status (R=running, S=sleeping, Z=zombie)
+    # %CPU: CPU usage
+    # %MEM: Memory usage
+    # TIME+: Total CPU time
+    # COMMAND: Process name
+
+    # Tips:
+    # - Press '1' to see all CPU cores
+    # - Press 'M' to sort by memory
+    # - Press 'c' to see full commands
+    # - Use htop for better interface!`
+    },
+    {
+        title: "alias - Create Shortcuts",
+        category: "terminal-tools",
+        description: "Create custom command shortcuts. Save time with aliases for long commands. Boost your productivity!",
+        tags: ["terminal", "productivity", "shortcuts", "efficiency"],
+        difficulty: 1,
+        lines: "Command: alias",
+        code: `# Pre-installed on Unix systems
+
+    # Create alias:
+    alias ll='ls -alh'
+    alias c='clear'
+    alias ..='cd ..'
+
+    # View all aliases:
+    alias
+
+    # View specific alias:
+    alias ll
+
+    # Remove alias:
+    unalias ll
+
+    # Temporary alias (current session only):
+    alias update='sudo apt update && sudo apt upgrade'
+
+    # Permanent alias (add to ~/.bashrc or ~/.zshrc):
+    echo "alias ll='ls -alh'" >> ~/.bashrc
+    source ~/.bashrc
+
+    # Useful aliases to add:
+
+    # Navigation:
+    alias ..='cd ..'
+    alias ...='cd ../..'
+    alias ....='cd ../../..'
+    alias ~='cd ~'
+    alias -- -='cd -'
+
+    # Listing:
+    alias ll='ls -alh'
+    alias la='ls -A'
+    alias l='ls -CF'
+    alias lt='ls -alht'
+    alias lsize='ls -alh --sort=size'
+
+    # Safety:
+    alias rm='rm -i'
+    alias cp='cp -i'
+    alias mv='mv -i'
+
+    # Git shortcuts:
+    alias gs='git status'
+    alias ga='git add'
+    alias gc='git commit'
+    alias gp='git push'
+    alias gl='git log --oneline'
+    alias gd='git diff'
+
+    # System:
+    alias update='sudo apt update && sudo apt upgrade -y'
+    alias ports='netstat -tulanp'
+    alias psmem='ps auxf | sort -nr -k 4 | head -10'
+    alias pscpu='ps auxf | sort -nr -k 3 | head -10'
+
+    # Network:
+    alias myip='curl ifconfig.me'
+    alias pingg='ping google.com'
+    alias fastping='ping -c 100 -i 0.2'
+
+    # Docker:
+    alias dps='docker ps'
+    alias dimg='docker images'
+    alias dexec='docker exec -it'
+
+    # Python:
+    alias py='python3'
+    alias pip='pip3'
+    alias venv='python3 -m venv'
+
+    # Editors:
+    alias v='vim'
+    alias nv='nvim'
+
+    # Misc:
+    alias c='clear'
+    alias h='history'
+    alias j='jobs -l'
+    alias path='echo $PATH | tr ":" "\n"'
+    alias now='date +"%T"'
+    alias nowdate='date +"%d-%m-%Y"'
+
+    # Fun:
+    alias matrix='cmatrix'
+    alias starwars='telnet towel.blinkenlights.nl'
+
+    # Functions as aliases:
+    mkcd() { mkdir -p "$1" && cd "$1"; }
+    extract() { tar -xzf "$1"; }`
+    },
+    {
+        title: "du - Disk Usage",
+        category: "terminal-tools",
+        description: "Estimate file and directory disk usage. Find what's taking up space on your drive!",
+        tags: ["terminal", "disk", "storage", "space"],
+        difficulty: 1,
+        lines: "Command: du",
+        code: `# Pre-installed on Unix systems
+
+    # Basic usage:
+    du
+
+    # Human readable:
+    du -h
+
+    # Summary (total only):
+    du -sh /path/to/directory
+
+    # All files:
+    du -ah /path/to/directory
+
+    # Depth limit:
+    du -h --max-depth=1
+    du -h -d 1  # macOS
+
+    # Sort by size:
+    du -h | sort -h
+    du -h | sort -hr  # Reverse (largest first)
+
+    # Exclude files:
+    du -h --exclude="*.log"
+
+    # Show only directories:
+    du -h --max-depth=1 | sort -hr
+
+    # Top 10 largest directories:
+    du -h --max-depth=1 | sort -hr | head -10
+
+    # Show total at end:
+    du -ch
+
+    # Apparent size vs disk usage:
+    du -h --apparent-size
+
+    # One filesystem only:
+    du -x
+
+    # Count files:
+    du --inodes
+
+    # Practical examples:
+
+    # Find largest directories:
+    du -h / 2>/dev/null | sort -hr | head -20
+
+    # Check home directory:
+    du -sh ~/*
+
+    # Find large files in current directory:
+    du -ah . | sort -hr | head -20
+
+    # Disk usage of specific type:
+    find . -name "*.log" -exec du -ch {} + | tail -1
+
+    # Compare directories:
+    du -sh dir1 dir2 dir3
+
+    # Watch disk usage change:
+    watch -n 5 'du -sh /var/log'
+
+    # Exclude multiple patterns:
+    du -h --exclude="node_modules" --exclude=".git" .
+
+    # With timestamp:
+    du -sh * | while read size name; do echo "$(date): $size $name"; done
+
+    # Alternative (better): Use ncdu for interactive!
+    ncdu`
+    },
+    {
+        title: "ps - Process Status",
+        category: "terminal-tools",
+        description: "Display information about running processes. See PIDs, CPU usage, memory, and more!",
+        tags: ["terminal", "processes", "system", "monitoring"],
+        difficulty: 2,
+        lines: "Command: ps",
+        code: `# Pre-installed on Unix systems
+
+    # Show all processes:
+    ps aux
+    ps -ef
+
+    # Show processes for current user:
+    ps u
+
+    # Show process tree:
+    ps auxf
+    ps -ejH
+    pstree  # Better visualization
+
+    # Show specific user processes:
+    ps -u username
+
+    # Show processes by name:
+    ps aux | grep firefox
+
+    # Show specific columns:
+    ps -eo pid,user,cmd
+    ps -eo pid,ppid,%cpu,%mem,cmd
+
+    # Sort by CPU:
+    ps aux --sort=-%cpu | head -10
+
+    # Sort by memory:
+    ps aux --sort=-%mem | head -10
+
+    # Show threads:
+    ps -eLf
+
+    # Show process by PID:
+    ps -p 1234
+
+    # Show child processes:
+    ps --ppid 1234
+
+    # Watch processes (update every 2s):
+    watch -n 2 'ps aux | head -20'
+
+    # Show full command:
+    ps auxww
+
+    # Practical examples:
+
+    # Find memory hogs:
+    ps aux | sort -nrk 4 | head -10
+
+    # Find CPU hogs:
+    ps aux | sort -nrk 3 | head -10
+
+    # Count processes:
+    ps aux | wc -l
+
+    # Find zombie processes:
+    ps aux | grep 'Z'
+
+    # Show processes using swap:
+    for file in /proc/*/status; do awk '/VmSwap|Name/{printf $2 " " $3}END{ print ""}' $file; done | sort -k 2 -n -r | head
+
+    # Custom format:
+    ps -eo pid,ppid,user,%cpu,%mem,cmd --sort=-%mem | head
+
+    # Find process by port:
+    lsof -i :8080
+    netstat -tulpn | grep :8080
+
+    # Kill all processes by name:
+    ps aux | grep firefox | awk '{print $2}' | xargs kill
+
+    # Show process start time:
+    ps -eo pid,lstart,cmd
+
+    # Group by user:
+    ps aux | awk '{print $1}' | sort | uniq -c
+
+    # Compare: ps vs top vs htop
+    # ps: One-time snapshot
+    # top: Real-time updates
+    # htop: Interactive, colorful`
+    },
+    {
+        title: "vim - Text Editor",
+        category: "terminal-tools",
+        description: "Powerful modal text editor. Edit files efficiently with keyboard shortcuts. The editor loved by developers worldwide!",
+        tags: ["terminal", "editor", "vim", "productivity"],
+        difficulty: 3,
+        lines: "Command: vim",
+        code: `# Pre-installed on most systems
+
+    # Open file:
+    vim filename.txt
+
+    # Open at specific line:
+    vim +42 filename.txt
+    vim +/pattern filename.txt
+
+    # Open multiple files:
+    vim file1.txt file2.txt
+
+    # Modes:
+    # Normal mode: Default, press Esc
+    # Insert mode: Press i, a, o
+    # Visual mode: Press v
+    # Command mode: Press :
+
+    # Basic commands:
+
+    # Insert mode:
+    i  # Insert before cursor
+    a  # Insert after cursor
+    o  # New line below
+    O  # New line above
+    I  # Insert at line start
+    A  # Insert at line end
+
+    # Navigation:
+    h/j/k/l  # Left/Down/Up/Right
+    w        # Next word
+    b        # Previous word
+    0        # Line start
+    $        # Line end
+    gg       # File start
+    G        # File end
+    :42      # Go to line 42
+
+    # Editing:
+    x    # Delete character
+    dd   # Delete line
+    yy   # Copy line
+    p    # Paste
+    u    # Undo
+    Ctrl+r  # Redo
+
+    # Search:
+    /pattern   # Search forward
+    ?pattern   # Search backward
+    n          # Next match
+    N          # Previous match
+
+    # Replace:
+    :s/old/new/      # Replace in line
+    :s/old/new/g     # Replace all in line
+    :%s/old/new/g    # Replace all in file
+    :%s/old/new/gc   # Replace with confirmation
+
+    # Save and quit:
+    :w       # Save
+    :q       # Quit
+    :wq      # Save and quit
+    :q!      # Quit without saving
+    ZZ       # Save and quit
+
+    # Multiple files:
+    :e file.txt      # Open file
+    :bn              # Next buffer
+    :bp              # Previous buffer
+    :ls              # List buffers
+
+    # Split windows:
+    :split     # Horizontal split
+    :vsplit    # Vertical split
+    Ctrl+w w   # Switch windows
+    Ctrl+w q   # Close window
+
+    # Visual mode:
+    v    # Character visual
+    V    # Line visual
+    Ctrl+v  # Block visual
+
+    # Useful commands:
+    :set number      # Show line numbers
+    :set paste       # Paste mode
+    :syntax on       # Syntax highlighting
+    :!command        # Run shell command
+    :r !command      # Insert command output
+
+    # Tips:
+    # vimtutor  # Interactive tutorial
+    # :help     # Built-in help
+    # .vimrc    # Configuration file
+
+    # Common .vimrc settings:
+    # set number
+    # set autoindent
+    # set tabstop=4
+    # set shiftwidth=4
+    # set expandtab
+    # syntax on`
+    },
+    {
+        title: "ln - Create Links",
+        category: "terminal-tools",
+        description: "Create symbolic and hard links. Link files and directories, create shortcuts, manage file references!",
+        tags: ["terminal", "links", "filesystem", "files"],
+        difficulty: 2,
+        lines: "Command: ln",
+        code: `# Pre-installed on Unix systems
+
+    # Create symbolic link:
+    ln -s /path/to/original /path/to/link
+
+    # Create hard link:
+    ln /path/to/original /path/to/link
+
+    # Force overwrite existing link:
+    ln -sf /path/to/original /path/to/link
+
+    # Create link in current directory:
+    ln -s /usr/bin/python3 python
+
+    # Symbolic vs Hard links:
+
+    # Symbolic (soft) link:
+    # - Like a shortcut
+    # - Points to path (can break if original moves)
+    # - Can link directories
+    # - Can cross filesystems
+    # - Shows where it points: ls -l
+
+    # Hard link:
+    # - Direct reference to file data
+    # - Won't break if original moves
+    # - Cannot link directories
+    # - Must be on same filesystem
+    # - Same inode as original
+
+    # View links:
+    ls -l  # Shows -> for symbolic links
+
+    # Find broken symbolic links:
+    find . -type l ! -exec test -e {} \; -print
+
+    # List all symbolic links:
+    find . -type l
+
+    # Remove link:
+    rm linkname  # (doesn't delete original)
+    unlink linkname
+
+    # Practical examples:
+
+    # Link config file:
+    ln -s ~/dotfiles/.vimrc ~/.vimrc
+
+    # Link binary to PATH:
+    sudo ln -s /opt/app/binary /usr/local/bin/app
+
+    # Multiple links to same file:
+    ln -s ~/Documents/important.txt ~/Desktop/important.txt
+    ln -s ~/Documents/important.txt ~/important.txt
+
+    # Link directory:
+    ln -s /var/www/project ~/project
+
+    # Update link:
+    ln -sf /new/path /existing/link
+
+    # Create relative symbolic link:
+    ln -sr ../path/to/file linkname
+
+    # Link all files in directory:
+    for f in /source/*; do ln -s "$f" .; done
+
+    # Check if link exists:
+    if [ -L linkname ]; then echo "Is link"; fi
+
+    # Get link target:
+    readlink linkname
+    readlink -f linkname  # Follow to final target
+
+    # Common uses:
+    # - Config files (dotfiles)
+    # - Making binaries accessible
+    # - Organizing without duplicating
+    # - Version management (node -> node-v14)`
+    },
+    {
+        title: "head & tail - View File Parts",
+        category: "terminal-tools",
+        description: "View the beginning or end of files. Perfect for logs, large files, and monitoring file changes in real-time!",
+        tags: ["terminal", "files", "text", "viewing"],
+        difficulty: 1,
+        lines: "Command: head/tail",
+        code: `# Pre-installed on Unix systems
+
+    # HEAD - View beginning of file
+
+    # First 10 lines (default):
+    head file.txt
+
+    # First N lines:
+    head -n 20 file.txt
+    head -20 file.txt
+
+    # First N bytes:
+    head -c 100 file.txt
+
+    # Multiple files:
+    head file1.txt file2.txt
+
+    # All but last N lines:
+    head -n -5 file.txt
+
+    # TAIL - View end of file
+
+    # Last 10 lines (default):
+    tail file.txt
+
+    # Last N lines:
+    tail -n 20 file.txt
+    tail -20 file.txt
+
+    # Last N bytes:
+    tail -c 100 file.txt
+
+    # Follow file (real-time updates):
+    tail -f /var/log/syslog
+
+    # Follow with retry (if file doesn't exist yet):
+    tail -F logfile.log
+
+    # Follow multiple files:
+    tail -f file1.log file2.log
+
+    # Show file name headers:
+    tail -v file1.txt file2.txt
+
+    # Start from line N:
+    tail -n +50 file.txt  # From line 50 to end
+
+    # Practical examples:
+
+    # Monitor log file:
+    tail -f /var/log/apache2/access.log
+
+    # Last 100 lines:
+    tail -n 100 /var/log/syslog
+
+    # First 5 and last 5 lines:
+    head -n 5 file.txt && echo "..." && tail -n 5 file.txt
+
+    # View middle of file:
+    head -n 100 file.txt | tail -n 10  # Lines 91-100
+
+    # Follow with grep:
+    tail -f /var/log/syslog | grep ERROR
+
+    # Monitor multiple logs:
+    tail -f *.log
+
+    # Show last N lines every 2 seconds:
+    watch -n 2 'tail -n 20 logfile.log'
+
+    # Get line count then show last:
+    tail -n $(wc -l < file.txt | awk '{print $1/2}') file.txt
+
+    # Exclude first line (header):
+    tail -n +2 data.csv
+
+    # Real-time monitoring with timestamps:
+    tail -f logfile.log | while read line; do echo "$(date): $line"; done
+
+    # Follow and save:
+    tail -f access.log | tee -a saved.log
+
+    # Color output:
+    tail -f error.log | grep --color=auto ERROR
+
+    # Tips:
+    # Ctrl+C to stop tail -f
+    # Use less +F for follow with less features
+    # tail -f is perfect for debugging`
+    },
+    {
+        title: "chmod - Change Permissions",
+        category: "terminal-tools",
+        description: "Change file and directory permissions. Control who can read, write, and execute your files!",
+        tags: ["terminal", "permissions", "security", "files"],
+        difficulty: 2,
+        lines: "Command: chmod",
+        code: `# Pre-installed on Unix systems
+
+    # Numeric mode:
+    chmod 755 file.txt
+    chmod 644 file.txt
+    chmod 777 file.txt
+
+    # Permission numbers:
+    # 7 = rwx (read, write, execute)
+    # 6 = rw- (read, write)
+    # 5 = r-x (read, execute)
+    # 4 = r-- (read only)
+    # 0 = --- (no permissions)
+
+    # Format: [owner][group][others]
+    # 755 = rwxr-xr-x (owner: full, others: read+execute)
+    # 644 = rw-r--r-- (owner: read+write, others: read only)
+
+    # Symbolic mode:
+    chmod u+x file.txt    # Add execute for user
+    chmod g-w file.txt    # Remove write for group
+    chmod o+r file.txt    # Add read for others
+    chmod a+x file.txt    # Add execute for all
+
+    # Users:
+    # u = user (owner)
+    # g = group
+    # o = others
+    # a = all
+
+    # Operations:
+    # + = add permission
+    # - = remove permission
+    # = = set exact permission
+
+    # Permissions:
+    # r = read (4)
+    # w = write (2)
+    # x = execute (1)
+
+    # Recursive:
+    chmod -R 755 directory/
+
+    # Common permissions:
+
+    # Files:
+    chmod 644 file.txt     # Regular file
+    chmod 600 private.key  # Private file
+    chmod 755 script.sh    # Executable script
+
+    # Directories:
+    chmod 755 directory/   # Normal directory
+    chmod 700 private/     # Private directory
+    chmod 777 public/      # Fully open (not recommended!)
+
+    # Practical examples:
+
+    # Make script executable:
+    chmod +x script.sh
+    chmod u+x script.sh
+
+    # Remove all permissions:
+    chmod 000 file.txt
+
+    # Copy permissions from another file:
+    chmod --reference=file1.txt file2.txt
+
+    # Set permissions for new files:
+    chmod u+w,go-w file.txt
+
+    # Recursive for files only:
+    find . -type f -exec chmod 644 {} \;
+
+    # Recursive for directories only:
+    find . -type d -exec chmod 755 {} \;
+
+    # Set directory permissions properly:
+    chmod 755 $(find . -type d)
+    chmod 644 $(find . -type f)
+
+    # Special permissions:
+
+    # Setuid (4):
+    chmod 4755 file  # Run as file owner
+
+    # Setgid (2):
+    chmod 2755 dir/  # Inherit group
+
+    # Sticky bit (1):
+    chmod 1777 /tmp  # Only owner can delete
+
+    # View permissions:
+    ls -l file.txt
+
+    # Understanding ls -l output:
+    # -rw-r--r-- 1 user group size date file
+    # │└┬┘└┬┘└┬┘
+    # │ │  │  └─ others permissions
+    # │ │  └──── group permissions
+    # │ └─────── owner permissions
+    # └───────── file type (- = file, d = directory, l = link)
+
+    # Security best practices:
+    # - Never use 777 in production
+    # - Keep private keys at 600
+    # - Web files typically 644
+    # - Directories typically 755
+    # - Scripts need execute (+x)`
+    },
+    {
+        title: "sl - Steam Locomotive",
+        category: "terminal",
+        description: "A fun alternative to 'ls' - displays an ASCII art steam locomotive animation when you mistype 'ls'. Install with: brew install sl (Mac) or apt install sl (Linux)",
+        tags: ["terminal", "fun", "ascii-art", "animation"],
+        difficulty: 1,
+        lines: "Command: sl",
+        code: `# Installation:
+    # macOS: brew install sl
+    # Linux: sudo apt-get install sl
+    # Windows: Use WSL or install via chocolatey
+
+    # Usage:
+    sl
+
+    # Variations:
+    sl -a    # Add an accident
+    sl -l    # Little locomotive
+    sl -F    # Flying locomotive
+    sl -e    # Allow Ctrl+C to interrupt`
+    },
+    {
+        title: "cowsay - Talking Cow",
+        category: "terminal",
+        description: "Make an ASCII cow say anything you want! A classic terminal command for displaying messages in a speech bubble.",
+        tags: ["terminal", "fun", "ascii-art", "text"],
+        difficulty: 1,
+        lines: "Command: cowsay",
+        code: `# Installation:
+    # macOS: brew install cowsay
+    # Linux: sudo apt-get install cowsay
+    # Windows: pip install cowsay
+
+    # Basic usage:
+    cowsay "Hello World!"
+
+    # Different animals:
+    cowsay -f dragon "I'm a dragon!"
+    cowsay -f tux "Linux rules!"
+    cowsay -f stegosaurus "Rawr!"
+
+    # List all available animals:
+    cowsay -l
+
+    # Pipe output to cowsay:
+    fortune | cowsay
+
+    # Think instead of say:
+    cowthink "Hmm..."`
+    },
+    {
+        title: "fortune - Random Quotes",
+        category: "terminal",
+        description: "Displays random quotes, jokes, and fortunes. Great for adding to your .bashrc or .zshrc for a daily dose of wisdom!",
+        tags: ["terminal", "fun", "quotes", "text"],
+        difficulty: 1,
+        lines: "Command: fortune",
+        code: `# Installation:
+    # macOS: brew install fortune
+    # Linux: sudo apt-get install fortune-mod
+    # Windows: Use WSL
+
+    # Basic usage:
+    fortune
+
+    # Specific categories:
+    fortune -a        # All fortunes
+    fortune computers # Computer-related fortunes
+    fortune people    # People-related fortunes
+
+    # Short fortunes only:
+    fortune -s
+
+    # Long fortunes only:
+    fortune -l
+
+    # Combine with cowsay:
+    fortune | cowsay
+
+    # Add to your .bashrc or .zshrc:
+    echo "fortune | cowsay" >> ~/.bashrc`
+    },
+    {
+        title: "figlet - ASCII Art Text",
+        category: "terminal",
+        description: "Generate large ASCII art text banners in various fonts. Perfect for terminal headers and cool text displays.",
+        tags: ["terminal", "ascii-art", "text", "banner"],
+        difficulty: 1,
+        lines: "Command: figlet",
+        code: `# Installation:
+    # macOS: brew install figlet
+    # Linux: sudo apt-get install figlet
+    # Windows: Use WSL or download from figlet.org
+
+    # Basic usage:
+    figlet "Hello World"
+
+    # Different fonts:
+    figlet -f slant "Cool Text"
+    figlet -f banner "BANNER"
+    figlet -f digital "12345"
+    figlet -f bubble "Bubble"
+
+    # List all fonts:
+    figlet -l
+
+    # Center text:
+    figlet -c "Centered"
+
+    # Width control:
+    figlet -w 80 "Fixed Width"
+
+    # Combine with lolcat for colors:
+    figlet "Rainbow Text" | lolcat`
+    },
+    {
+        title: "lolcat - Rainbow Terminal Output",
+        category: "terminal",
+        description: "Make any terminal output rainbow colored! Pipe any command through lolcat for a colorful display.",
+        tags: ["terminal", "colors", "fun", "rainbow"],
+        difficulty: 1,
+        lines: "Command: lolcat",
+        code: `# Installation:
+    # macOS: brew install lolcat
+    # Linux: sudo apt-get install lolcat
+    # Windows: gem install lolcat (requires Ruby)
+
+    # Basic usage:
+    echo "Rainbow text!" | lolcat
+
+    # With figlet:
+    figlet "AWESOME" | lolcat
+
+    # List files with colors:
+    ls -la | lolcat
+
+    # Animate the rainbow:
+    echo "Animated!" | lolcat -a
+
+    # Speed control:
+    echo "Fast rainbow" | lolcat -a -d 1
+    echo "Slow rainbow" | lolcat -a -d 50
+
+    # Force colors:
+    fortune | lolcat -f
+
+    # Read a file with colors:
+    cat yourfile.txt | lolcat`
+    },
+    {
+        title: "cmatrix - Matrix Rain",
+        category: "terminal",
+        description: "Simulate the falling matrix code from The Matrix movies! A classic terminal screen saver with customizable colors and speed.",
+        tags: ["terminal", "animation", "matrix", "screensaver"],
+        difficulty: 1,
+        lines: "Command: cmatrix",
+        code: `# Installation:
+    # macOS: brew install cmatrix
+    # Linux: sudo apt-get install cmatrix
+    # Windows: Use WSL
+
+    # Basic usage:
+    cmatrix
+
+    # Exit: Press Ctrl+C or 'q'
+
+    # Bold characters:
+    cmatrix -b
+
+    # Different colors:
+    cmatrix -C red
+    cmatrix -C green
+    cmatrix -C blue
+    cmatrix -C yellow
+    cmatrix -C magenta
+    cmatrix -C cyan
+    cmatrix -C white
+
+    # Asynchronous scroll:
+    cmatrix -a
+
+    # Speed control (1-10):
+    cmatrix -u 2    # Slower
+    cmatrix -u 10   # Faster
+
+    # Screensaver mode (no bold):
+    cmatrix -s`
+    },
+    {
+        title: "htop - System Monitor",
+        category: "terminal",
+        description: "Interactive process viewer and system monitor. A beautiful, colorful alternative to the standard 'top' command with mouse support!",
+        tags: ["terminal", "system", "monitoring", "processes"],
+        difficulty: 2,
+        lines: "Command: htop",
+        code: `# Installation:
+    # macOS: brew install htop
+    # Linux: sudo apt-get install htop
+    # Windows: Use WSL
+
+    # Basic usage:
+    htop
+
+    # Navigation:
+    # Arrow keys - Navigate
+    # F1 - Help
+    # F2 - Setup
+    # F3 - Search process
+    # F4 - Filter
+    # F5 - Tree view
+    # F6 - Sort by column
+    # F9 - Kill process
+    # F10 - Quit
+
+    # Sort by CPU:
+    # Press F6, then select CPU%
+
+    # Sort by Memory:
+    # Press F6, then select MEM%
+
+    # Kill a process:
+    # Navigate to process, press F9, select signal
+
+    # Tree view (shows process hierarchy):
+    # Press F5`
+    },
+    {
+        title: "neofetch - System Info Display",
+        category: "terminal",
+        description: "Display system information alongside your distro's ASCII logo. Shows OS, kernel, CPU, GPU, memory, and more in a beautiful format!",
+        tags: ["terminal", "system-info", "ascii-art", "colorful"],
+        difficulty: 1,
+        lines: "Command: neofetch",
+        code: `# Installation:
+    # macOS: brew install neofetch
+    # Linux: sudo apt-get install neofetch
+    # Windows: Use WSL or scoop install neofetch
+
+    # Basic usage:
+    neofetch
+
+    # Disable ASCII art:
+    neofetch --off
+
+    # Use image instead of ASCII (requires terminal with image support):
+    neofetch --image /path/to/image.png
+
+    # Different ASCII art:
+    neofetch --ascii_distro arch
+    neofetch --ascii_distro ubuntu
+    neofetch --ascii_distro macos
+
+    # Custom colors:
+    neofetch --ascii_colors 1 2 3 4 5 6
+
+    # Show less info:
+    neofetch --disable gpu disk
+
+    # Show more info:
+    neofetch --enable term
+
+    # Add to .bashrc or .zshrc to run on terminal start:
+    echo "neofetch" >> ~/.bashrc`
+    },
+    {
+        title: "pipes.sh - Animated Pipes",
+        category: "terminal",
+        description: "Mesmerizing animated pipes flowing across your terminal. Highly customizable screensaver with multiple pipe styles and colors!",
+        tags: ["terminal", "animation", "screensaver", "art"],
+        difficulty: 1,
+        lines: "Command: pipes.sh",
+        code: `# Installation:
+    # macOS: brew install pipes-sh
+    # Linux: git clone https://github.com/pipeseroni/pipes.sh
+    #        cd pipes.sh && sudo make install
+    # Or: curl -o pipes.sh https://raw.githubusercontent.com/pipeseroni/pipes.sh/master/pipes.sh
+    #     chmod +x pipes.sh
+
+    # Basic usage:
+    pipes.sh
+
+    # Exit: Press Ctrl+C
+
+    # More pipes:
+    pipes.sh -p 5
+
+    # Different colors:
+    pipes.sh -c 1   # Red/Green
+    pipes.sh -c 2   # Blue/Cyan
+
+    # Different pipe types:
+    pipes.sh -t 1   # Standard
+    pipes.sh -t 2   # Curved
+    pipes.sh -t 3   # Angular
+
+    # Random colors:
+    pipes.sh -R
+
+    # Speed control:
+    pipes.sh -f 60  # Frames per second
+
+    # Combine options:
+    pipes.sh -p 10 -t 2 -R -f 75`
+    },
+    {
+        title: "asciiquarium - Underwater Animation",
+        category: "terminal",
+        description: "An ASCII aquarium animation with fish, sharks, whales, and sea creatures swimming across your terminal!",
+        tags: ["terminal", "animation", "ascii-art", "fun"],
+        difficulty: 1,
+        lines: "Command: asciiquarium",
+        code: `# Installation:
+    # macOS: brew install asciiquarium
+    # Linux: sudo apt-get install asciiquarium
+    # Windows: Use WSL
+
+    # Requires: libcurses-perl
+    # Install perl module first if needed:
+    sudo cpan Term::Animation
+
+    # Basic usage:
+    asciiquarium
+
+    # Exit: Press Ctrl+C or 'q'
+
+    # The aquarium shows:
+    # - Swimming fish
+    # - Sharks
+    # - Whales  
+    # - Dolphins
+    # - Seaweed
+    # - Bubbles
+    # - Submarines
+    # - And more!
+
+    # No additional options needed - just enjoy!`
+    },
+    {
+        title: "ranger - File Manager",
+        category: "terminal",
+        description: "Vi-inspired file manager for the terminal with image previews, tabs, bookmarks, and powerful keyboard navigation.",
+        tags: ["terminal", "file-manager", "vim", "productivity"],
+        difficulty: 2,
+        lines: "Command: ranger",
+        code: `# Installation:
+    # macOS: brew install ranger
+    # Linux: sudo apt-get install ranger
+    # Windows: pip install ranger-fm
+
+    # Basic usage:
+    ranger
+
+    # Navigation:
+    # h/j/k/l or Arrow keys - Navigate
+    # Enter - Open file/directory
+    # q - Quit
+    # S - Open shell in current directory
+
+    # File operations:
+    # yy - Copy file
+    # dd - Cut file
+    # pp - Paste file
+    # dD - Delete file
+    # / - Search
+    # n - Next search result
+
+    # View modes:
+    # i - Preview file
+    # zh - Show hidden files
+    # zp - Toggle preview
+
+    # Tabs:
+    # gn - Create new tab
+    # gt - Go to next tab
+    # gT - Go to previous tab
+
+    # Bookmarks:
+    # m<key> - Create bookmark
+    # '<key> - Go to bookmark`
+    },
+    {
+        title: "hollywood - Hacker Terminal",
+        category: "terminal",
+        description: "Fill your terminal with Hollywood-style hacker screens! Multiple terminal windows with various system monitoring and hacking animations.",
+        tags: ["terminal", "fun", "animation", "hacker"],
+        difficulty: 1,
+        lines: "Command: hollywood",
+        code: `# Installation:
+    # Ubuntu/Debian: sudo apt-get install hollywood
+    # Other Linux: Requires byobu, build from source
+    # macOS: Not officially available
+    # Windows: Use WSL with Ubuntu
+
+    # Basic usage:
+    hollywood
+
+    # Exit: Press Ctrl+C
+
+    # What it does:
+    # - Splits terminal into multiple panes
+    # - Runs various commands:
+    #   * htop (system monitor)
+    #   * Directory tree visualization
+    #   * Code compilation output
+    #   * Network traffic
+    #   * Log file streaming
+    #   * Matrix-style output
+    #   * And more!
+
+    # Makes you look like a movie hacker!
+    # Great for impressing non-technical friends!`
+    },
+    {
+        title: "toilet - ASCII Art Text",
+        category: "terminal",
+        description: "Like figlet but with color support! Create colorful ASCII art text with various fonts and effects including borders and filters.",
+        tags: ["terminal", "ascii-art", "text", "colors"],
+        difficulty: 1,
+        lines: "Command: toilet",
+        code: `# Installation:
+    # macOS: brew install toilet
+    # Linux: sudo apt-get install toilet
+    # Windows: Use WSL
+
+    # Basic usage:
+    toilet "Hello World"
+
+    # With colors:
+    toilet -f mono12 -F gay "Rainbow"
+    toilet -F metal "Metal Text"
+    toilet -F border "Bordered"
+
+    # Different fonts:
+    toilet -f standard "Standard"
+    toilet -f bigmono9 "Big Mono"
+    toilet -f pagga "Pagga"
+    toilet -f term "Terminal"
+
+    # List all fonts:
+    toilet -f list
+
+    # Filters:
+    toilet -F gay      # Rainbow colors
+    toilet -F metal    # Metal effect
+    toilet -F flip     # Flip vertically
+    toilet -F flop     # Flip horizontally
+    toilet -F 180      # Rotate 180°
+    toilet -F left     # Left alignment
+    toilet -F right    # Right alignment
+    toilet -F border   # Add border
+
+    # Combine filters:
+    toilet -F gay:border "Awesome"`
+    },
+    {
+        title: "bat - Better Cat",
+        category: "terminal",
+        description: "A cat clone with syntax highlighting, line numbers, and git integration. Beautiful file viewing with automatic paging!",
+        tags: ["terminal", "productivity", "syntax-highlighting", "file-viewer"],
+        difficulty: 1,
+        lines: "Command: bat",
+        code: `# Installation:
+    # macOS: brew install bat
+    # Linux: sudo apt-get install bat
+    # Windows: choco install bat
+
+    # Basic usage:
+    bat filename.py
+
+    # Show line numbers:
+    bat -n filename.py
+
+    # Show git changes:
+    bat filename.py
+
+    # Multiple files:
+    bat file1.txt file2.txt
+
+    # Specific line range:
+    bat -r 10:20 filename.py
+
+    # Different themes:
+    bat --theme="Dracula" filename.py
+    bat --theme="Monokai Extended" filename.py
+
+    # List themes:
+    bat --list-themes
+
+    # Plain output (no decorations):
+    bat -p filename.py
+
+    # Use as cat replacement:
+    alias cat='bat'
+
+    # Pipe support:
+    curl -s https://example.com | bat -l html`
+    },
+    {
+        title: "tldr - Simplified Man Pages",
+        category: "terminal",
+        description: "Community-driven simplified man pages. Get practical examples for any command without reading lengthy documentation!",
+        tags: ["terminal", "productivity", "documentation", "help"],
+        difficulty: 1,
+        lines: "Command: tldr",
+        code: `# Installation:
+    # Node.js: npm install -g tldr
+    # macOS: brew install tldr
+    # Linux: sudo apt-get install tldr
+    # Python: pip install tldr
+
+    # Update cache first:
+    tldr --update
+
+    # Basic usage:
+    tldr tar
+    tldr git
+    tldr ssh
+    tldr ffmpeg
+
+    # Search for command:
+    tldr --search "compress"
+
+    # List all pages:
+    tldr --list
+
+    # Render in specific language:
+    tldr -L es git  # Spanish
+    tldr -L fr tar  # French
+
+    # Examples of what you'll get:
+    # Instead of lengthy man pages, you get:
+    # - Clear command syntax
+    # - Practical examples
+    # - Common use cases
+    # - Easy to understand format`
+    },
+    {
+        title: "exa - Modern ls",
+        category: "terminal",
+        description: "A modern replacement for ls with colors, icons, git status, tree view, and more features. Written in Rust for speed!",
+        tags: ["terminal", "productivity", "file-listing", "modern"],
+        difficulty: 1,
+        lines: "Command: exa",
+        code: `# Installation:
+    # macOS: brew install exa
+    # Linux: sudo apt-get install exa
+    # Windows: cargo install exa
+
+    # Basic usage:
+    exa
+
+    # Long listing (like ls -l):
+    exa -l
+
+    # With icons:
+    exa --icons
+
+    # Show hidden files:
+    exa -a
+
+    # Tree view:
+    exa --tree
+    exa --tree --level=2
+
+    # Sort by:
+    exa --sort=size     # By size
+    exa --sort=modified # By date
+    exa --sort=name     # By name
+
+    # Git status:
+    exa -l --git
+
+    # Grid view:
+    exa --grid
+
+    # Combine options:
+    exa -la --icons --git --sort=modified
+
+    # Recommended aliases:
+    alias ls='exa --icons'
+    alias ll='exa -l --icons --git'
+    alias la='exa -la --icons --git'
+    alias lt='exa --tree --level=2 --icons'`
+    },
+    {
+        title: "cava - Audio Visualizer",
+        category: "terminal",
+        description: "Console-based Audio Visualizer for ALSA. See your music come alive with real-time spectrum analyzer bars in your terminal!",
+        tags: ["terminal", "audio", "music", "visualizer"],
+        difficulty: 2,
+        lines: "Command: cava",
+        code: `# Installation:
+    # macOS: brew install cava
+    # Linux: sudo apt-get install cava
+    # Arch: sudo pacman -S cava
+
+    # Basic usage:
+    cava
+
+    # Exit: Press Ctrl+C
+
+    # Configuration:
+    # Create config file:
+    mkdir -p ~/.config/cava
+    cava -p > ~/.config/cava/config
+
+    # Edit ~/.config/cava/config to customize:
+    # - Colors
+    # - Bar spacing
+    # - Sensitivity
+    # - Smoothing
+    # - And more!
+
+    # Different modes:
+    # Stereo mode, mono mode, wave mode
+
+    # Works with:
+    # - Spotify
+    # - YouTube
+    # - Any audio playing on your system
+
+    # Perfect for music lovers and streamers!`
+    },
+    {
+        title: "tmux - Terminal Multiplexer",
+        category: "terminal",
+        description: "Manage multiple terminal sessions in one window. Split panes, create tabs, detach/reattach sessions. Essential for serious terminal users!",
+        tags: ["terminal", "productivity", "multiplexer", "sessions"],
+        difficulty: 3,
+        lines: "Command: tmux",
+        code: `# Installation:
+    # macOS: brew install tmux
+    # Linux: sudo apt-get install tmux
+    # Windows: Use WSL
+
+    # Basic usage:
+    tmux
+
+    # Prefix key: Ctrl+b (press before all commands)
+
+    # Sessions:
+    tmux new -s mysession      # New named session
+    tmux attach -t mysession   # Attach to session
+    tmux ls                    # List sessions
+    Ctrl+b d                   # Detach from session
+    tmux kill-session -t name  # Kill session
+
+    # Windows (tabs):
+    Ctrl+b c    # Create new window
+    Ctrl+b n    # Next window
+    Ctrl+b p    # Previous window
+    Ctrl+b 0-9  # Switch to window number
+    Ctrl+b ,    # Rename window
+    Ctrl+b &    # Kill window
+
+    # Panes (splits):
+    Ctrl+b %    # Split vertically
+    Ctrl+b "    # Split horizontally
+    Ctrl+b →    # Move to right pane
+    Ctrl+b ←    # Move to left pane
+    Ctrl+b ↑    # Move to upper pane
+    Ctrl+b ↓    # Move to lower pane
+    Ctrl+b x    # Kill pane
+    Ctrl+b z    # Zoom pane (fullscreen toggle)
+
+    # Resize panes:
+    Ctrl+b :resize-pane -D 5   # Down
+    Ctrl+b :resize-pane -U 5   # Up
+    Ctrl+b :resize-pane -L 5   # Left
+    Ctrl+b :resize-pane -R 5   # Right`
+    },
+    {
+        title: "fzf - Fuzzy Finder",
+        category: "terminal",
+        description: "Blazing fast fuzzy finder for your command line. Search files, command history, processes, and more with lightning speed!",
+        tags: ["terminal", "productivity", "search", "finder"],
+        difficulty: 2,
+        lines: "Command: fzf",
+        code: `# Installation:
+    # macOS: brew install fzf
+    # Linux: sudo apt-get install fzf
+    # Git: git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+    #      ~/.fzf/install
+
+    # Basic usage:
+    fzf
+
+    # Find and open file:
+    vim $(fzf)
+
+    # Search command history:
+    history | fzf
+
+    # Search and cd to directory:
+    cd $(find . -type d | fzf)
+
+    # Kill process:
+    kill -9 $(ps aux | fzf | awk '{print $2}')
+
+    # Preview files:
+    fzf --preview 'cat {}'
+    fzf --preview 'bat --color=always {}'
+
+    # Multi-select:
+    fzf -m
+
+    # Keybindings (after installation):
+    Ctrl+t    # Paste selected files
+    Ctrl+r    # Paste from history
+    Alt+c     # cd into selected directory
+
+    # Aliases to add to .bashrc or .zshrc:
+    alias preview="fzf --preview 'bat --color=always --style=numbers --line-range=:500 {}'"
+    alias vimf="vim \$(fzf)"
+
+    # Integration with other commands:
+    export FZF_DEFAULT_COMMAND='fd --type f'
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"`
+    },
+    {
+        title: "glances - System Monitor",
+        category: "terminal",
+        description: "Cross-platform advanced system monitoring tool. Shows CPU, memory, network, disk I/O, processes, sensors, and more in one screen!",
+        tags: ["terminal", "monitoring", "system", "performance"],
+        difficulty: 2,
+        lines: "Command: glances",
+        code: `# Installation:
+    # Python: pip install glances
+    # macOS: brew install glances
+    # Linux: sudo apt-get install glances
+
+    # Basic usage:
+    glances
+
+    # Exit: Press 'q' or Ctrl+C
+
+    # Navigation:
+    # 1-9: Sort processes by different columns
+    # a: Auto-sort
+    # c: CPU
+    # m: Memory
+    # n: Network
+    # d: Disk I/O
+    # f: Filesystem
+    # s: Sensors
+    # w: Warnings
+    # l: Logs
+    # h: Help
+
+    # Export to file:
+    glances --export csv --export-csv-file /tmp/glances.csv
+
+    # Web server mode:
+    glances -w
+    # Then open http://localhost:61208 in browser
+
+    # Client/Server mode:
+    glances -s              # Server
+    glances -c localhost    # Client
+
+    # Show only specific stats:
+    glances --disable-network
+    glances --disable-disk
+
+    # Refresh interval:
+    glances -t 2    # Update every 2 seconds`
+    },
+    {
+        title: "speedtest-cli - Internet Speed Test",
+        category: "terminal",
+        description: "Test your internet speed directly from terminal. Check download/upload speeds and ping using Speedtest.net infrastructure.",
+        tags: ["terminal", "network", "speed-test", "internet"],
+        difficulty: 1,
+        lines: "Command: speedtest-cli",
+        code: `# Installation:
+    # Python: pip install speedtest-cli
+    # macOS: brew install speedtest-cli
+    # Linux: sudo apt-get install speedtest-cli
+
+    # Basic usage:
+    speedtest-cli
+
+    # Simple output (no progress bar):
+    speedtest-cli --simple
+
+    # Share results:
+    speedtest-cli --share
+
+    # List nearby servers:
+    speedtest-cli --list
+
+    # Use specific server:
+    speedtest-cli --server 12345
+
+    # JSON output:
+    speedtest-cli --json
+
+    # CSV output:
+    speedtest-cli --csv
+
+    # Bytes instead of bits:
+    speedtest-cli --bytes
+
+    # Secure connection:
+    speedtest-cli --secure
+
+    # No download test (upload only):
+    speedtest-cli --no-download
+
+    # No upload test (download only):
+    speedtest-cli --no-upload
+
+    # Create alias for quick tests:
+    alias speed='speedtest-cli --simple'`
+    },
+    {
+        title: "ncdu - Disk Usage Analyzer",
+        category: "terminal",
+        description: "NCurses Disk Usage analyzer. Find what's eating your disk space with an interactive, easy-to-navigate interface!",
+        tags: ["terminal", "disk", "storage", "analyzer"],
+        difficulty: 2,
+        lines: "Command: ncdu",
+        code: `# Installation:
+    # macOS: brew install ncdu
+    # Linux: sudo apt-get install ncdu
+    # Windows: Use WSL
+
+    # Basic usage:
+    ncdu
+
+    # Scan specific directory:
+    ncdu /home/user
+    ncdu ~/Downloads
+
+    # Navigation:
+    # ↑/↓: Navigate
+    # Enter: Enter directory
+    # Left: Go back
+    # d: Delete file/directory
+    # g: Show percentage/graph
+    # n: Sort by name
+    # s: Sort by size
+    # c: Show item counts
+    # e: Show hidden files
+    # i: Show file info
+    # r: Refresh/Recalculate
+    # q: Quit
+
+    # Export to file:
+    ncdu -o dump.txt
+
+    # Import from file:
+    ncdu -f dump.txt
+
+    # Exclude patterns:
+    ncdu --exclude .git --exclude node_modules
+
+    # Follow symlinks:
+    ncdu -L
+
+    # One filesystem only:
+    ncdu -x
+
+    # Show disk usage graph:
+    ncdu -g`
+    },
+    {
+        title: "tree - Directory Tree",
+        category: "terminal",
+        description: "Display directory structure as a tree. Beautiful ASCII art representation of your file hierarchy with colors and icons!",
+        tags: ["terminal", "files", "directory", "visualization"],
+        difficulty: 1,
+        lines: "Command: tree",
+        code: `# Installation:
+    # macOS: brew install tree
+    # Linux: sudo apt-get install tree
+    # Windows: Built-in or use WSL
+
+    # Basic usage:
+    tree
+
+    # Limit depth:
+    tree -L 2    # 2 levels deep
+    tree -L 1    # Only current directory
+
+    # Show hidden files:
+    tree -a
+
+    # Only directories:
+    tree -d
+
+    # Show file sizes:
+    tree -h
+
+    # Full path:
+    tree -f
+
+    # Show permissions:
+    tree -p
+
+    # Pattern matching:
+    tree -P "*.py"      # Only Python files
+    tree -I "node_modules" # Ignore node_modules
+
+    # Colorized output:
+    tree -C
+
+    # Output to file:
+    tree > structure.txt
+    tree -H . > tree.html  # HTML output
+
+    # File count summary:
+    tree --du
+
+    # Sort by:
+    tree -t    # Sort by modification time
+    tree -v    # Sort naturally
+
+    # Combine options:
+    tree -L 3 -C -h -I "node_modules|.git"`
+    },
+    {
+        title: "httrack - Website Copier",
+        category: "terminal",
+        description: "Download entire websites for offline browsing. Mirror websites to your local machine with all links working offline!",
+        tags: ["terminal", "web", "download", "scraping"],
+        difficulty: 2,
+        lines: "Command: httrack",
+        code: `# Installation:
+    # macOS: brew install httrack
+    # Linux: sudo apt-get install httrack
+    # Windows: Download from httrack.com
+
+    # Basic usage (interactive):
+    httrack
+
+    # Command line:
+    httrack "https://example.com" -O "/path/to/output"
+
+    # Download with options:
+    httrack "https://example.com" \\
+    -O "./website" \\
+    -%v \\  # Verbose
+    -r2    # Depth level 2
+
+    # Mirror single page:
+    httrack "https://example.com/page" -O "./page" -r1
+
+    # Download with filters:
+    # Only images:
+    httrack "https://example.com" -O "./images" +*.jpg +*.png
+
+    # Exclude certain files:
+    httrack "https://example.com" -O "./site" -*.pdf -*.zip
+
+    # Update existing mirror:
+    httrack --update "https://example.com" -O "./website"
+
+    # Bandwidth limit:
+    httrack "https://example.com" -O "./site" --max-rate=50000
+
+    # Warning: 
+    # - Respect robots.txt
+    # - Don't abuse servers
+    # - Use responsibly`
+    },
+    {
+        title: "youtube-dl - Video Downloader",
+        category: "terminal",
+        description: "Download videos from YouTube and 1000+ other sites. Extract audio, choose quality, get subtitles, and more!",
+        tags: ["terminal", "video", "download", "youtube"],
+        difficulty: 2,
+        lines: "Command: youtube-dl",
+        code: `# Installation:
+    # Python: pip install youtube-dl
+    # macOS: brew install youtube-dl
+    # Linux: sudo apt-get install youtube-dl
+    # Or: sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
+    #     sudo chmod a+rx /usr/local/bin/youtube-dl
+
+    # Note: yt-dlp is a more actively maintained fork
+    # Install: pip install yt-dlp
+
+    # Basic usage:
+    youtube-dl "VIDEO_URL"
+
+    # Best quality:
+    youtube-dl -f best "VIDEO_URL"
+
+    # Audio only (MP3):
+    youtube-dl -x --audio-format mp3 "VIDEO_URL"
+
+    # Specific quality:
+    youtube-dl -f 'bestvideo[height<=720]+bestaudio' "VIDEO_URL"
+
+    # List all formats:
+    youtube-dl -F "VIDEO_URL"
+
+    # Download playlist:
+    youtube-dl "PLAYLIST_URL"
+
+    # Download with subtitles:
+    youtube-dl --write-sub --sub-lang en "VIDEO_URL"
+
+    # Custom filename:
+    youtube-dl -o "%(title)s.%(ext)s" "VIDEO_URL"
+
+    # Download thumbnail:
+    youtube-dl --write-thumbnail "VIDEO_URL"
+
+    # Playlist range:
+    youtube-dl --playlist-start 1 --playlist-end 5 "PLAYLIST_URL"
+
+    # Resume download:
+    youtube-dl -c "VIDEO_URL"`
+    },
+    {
+        title: "mc - Midnight Commander",
+        category: "terminal",
+        description: "Visual file manager with two panels. Copy, move, edit files with an intuitive interface. Like Norton Commander but better!",
+        tags: ["terminal", "file-manager", "visual", "productivity"],
+        difficulty: 2,
+        lines: "Command: mc",
+        code: `# Installation:
+    # macOS: brew install mc
+    # Linux: sudo apt-get install mc
+    # Windows: Use WSL
+
+    # Basic usage:
+    mc
+
+    # Navigation:
+    # Tab: Switch panels
+    # Insert: Select/deselect file
+    # +: Select group
+    # -: Deselect group
+    # *: Invert selection
+
+    # Function keys:
+    # F1: Help
+    # F2: User menu
+    # F3: View file
+    # F4: Edit file
+    # F5: Copy
+    # F6: Move/rename
+    # F7: Make directory
+    # F8: Delete
+    # F9: Menu
+    # F10: Quit
+
+    # Quick search:
+    # Type filename to jump to it
+
+    # Internal editor:
+    mc -e filename
+
+    # Internal viewer:
+    mc -v filename
+
+    # FTP connection:
+    # F9 → Right/Left → FTP link
+    # Or: cd /#ftp:user@server
+
+    # Themes:
+    # F9 → Options → Appearance
+
+    # Virtual filesystem:
+    # Browse archives (tar, zip, etc.)
+    # Just navigate into them!`
+    },
+    {
+        title: "nmap - Network Scanner",
+        category: "terminal",
+        description: "Network exploration and security auditing tool. Discover hosts, services, operating systems, and find security vulnerabilities!",
+        tags: ["terminal", "network", "security", "scanning"],
+        difficulty: 3,
+        lines: "Command: nmap",
+        code: `# Installation:
+    # macOS: brew install nmap
+    # Linux: sudo apt-get install nmap
+    # Windows: Download from nmap.org
+
+    # WARNING: Only scan networks you own or have permission to scan!
+
+    # Basic scan:
+    nmap 192.168.1.1
+
+    # Scan subnet:
+    nmap 192.168.1.0/24
+
+    # Scan specific ports:
+    nmap -p 80,443 192.168.1.1
+
+    # Scan port range:
+    nmap -p 1-1000 192.168.1.1
+
+    # Scan all ports:
+    nmap -p- 192.168.1.1
+
+    # Fast scan (top 100 ports):
+    nmap -F 192.168.1.1
+
+    # Service version detection:
+    nmap -sV 192.168.1.1
+
+    # OS detection:
+    sudo nmap -O 192.168.1.1
+
+    # Aggressive scan:
+    sudo nmap -A 192.168.1.1
+
+    # Ping scan (find live hosts):
+    nmap -sn 192.168.1.0/24
+
+    # UDP scan:
+    sudo nmap -sU 192.168.1.1
+
+    # Stealth scan:
+    sudo nmap -sS 192.168.1.1
+
+    # Output to file:
+    nmap -oN output.txt 192.168.1.1
+    nmap -oX output.xml 192.168.1.1
+
+    # Scan with scripts:
+    nmap --script vuln 192.168.1.1`
+    },
+    {
+        title: "nyancat - Flying Cat Animation",
+        category: "terminal",
+        description: "Nyan Cat flies across your terminal with rainbow trail! A colorful, animated ASCII art version of the famous internet meme.",
+        tags: ["terminal", "fun", "animation", "meme"],
+        difficulty: 1,
+        lines: "Command: nyancat",
+        code: `# Installation:
+    # macOS: brew install nyancat
+    # Linux: sudo apt-get install nyancat
+    # Or compile from source:
+    # git clone https://github.com/klange/nyancat.git
+    # cd nyancat && make && sudo make install
+
+    # Basic usage:
+    nyancat
+
+    # Exit: Press Ctrl+C
+
+    # Telnet version (if installed):
+    telnet nyancat.dakko.us
+
+    # Features:
+    # - Animated Nyan Cat
+    # - Rainbow trail
+    # - Music (if terminal supports it)
+    # - Frame counter
+    # - Full color animation
+
+    # Great for:
+    # - Testing terminal colors
+    # - Impressing friends
+    # - Taking a break
+    # - Fun screensaver
+
+    # The cat flies forever!
+    # Watch the frame counter increase!`
+    },
+    {
+        title: "curl - Transfer Data",
+        category: "terminal",
+        description: "Transfer data from/to servers. Download files, test APIs, check websites, send data. The Swiss Army knife of data transfer!",
+        tags: ["terminal", "network", "http", "api"],
+        difficulty: 2,
+        lines: "Command: curl",
+        code: `# Usually pre-installed on most systems
+
+    # Basic GET request:
+    curl https://example.com
+
+    # Save to file:
+    curl -o filename.html https://example.com
+    curl -O https://example.com/file.zip  # Use remote filename
+
+    # Follow redirects:
+    curl -L https://example.com
+
+    # Download with progress bar:
+    curl -# -O https://example.com/file.zip
+
+    # Resume download:
+    curl -C - -O https://example.com/largefile.zip
+
+    # POST request:
+    curl -X POST https://api.example.com/data
+
+    # POST with data:
+    curl -X POST -d "name=John&age=30" https://api.example.com
+
+    # POST JSON:
+    curl -X POST -H "Content-Type: application/json" \\
+    -d '{"name":"John","age":30}' \\
+    https://api.example.com
+
+    # Authentication:
+    curl -u username:password https://example.com
+
+    # Headers:
+    curl -H "Authorization: Bearer TOKEN" https://api.example.com
+
+    # Show headers:
+    curl -I https://example.com
+    curl -i https://example.com  # Headers + body
+
+    # Verbose output:
+    curl -v https://example.com
+
+    # Silent mode:
+    curl -s https://example.com
+
+    # Check weather:
+    curl wttr.in
+    curl wttr.in/London
+
+    # Get public IP:
+    curl ifconfig.me
+    curl ipinfo.io`
+    },
+    {
+        title: "grep - Search Text",
+        category: "terminal",
+        description: "Search for patterns in files. The most powerful text searching tool in Unix with regex support and countless options!",
+        tags: ["terminal", "search", "text", "regex"],
+        difficulty: 2,
+        lines: "Command: grep",
+        code: `# Pre-installed on Unix systems
+
+    # Basic search:
+    grep "pattern" filename.txt
+
+    # Case insensitive:
+    grep -i "pattern" filename.txt
+
+    # Recursive search in directory:
+    grep -r "pattern" /path/to/dir
+
+    # Show line numbers:
+    grep -n "pattern" filename.txt
+
+    # Show only filenames:
+    grep -l "pattern" *.txt
+
+    # Invert match (lines NOT containing pattern):
+    grep -v "pattern" filename.txt
+
+    # Count matches:
+    grep -c "pattern" filename.txt
+
+    # Show context (lines before/after):
+    grep -A 3 "pattern" file.txt  # 3 lines after
+    grep -B 3 "pattern" file.txt  # 3 lines before
+    grep -C 3 "pattern" file.txt  # 3 lines both sides
+
+    # Multiple patterns (OR):
+    grep -E "pattern1|pattern2" filename.txt
+
+    # Extended regex:
+    grep -E "^[0-9]{3}-[0-9]{3}-[0-9]{4}$" contacts.txt
+
+    # Whole word match:
+    grep -w "word" filename.txt
+
+    # Color output:
+    grep --color "pattern" filename.txt
+
+    # Search in gzipped files:
+    zgrep "pattern" file.gz
+
+    # Exclude files/directories:
+    grep -r --exclude="*.log" "pattern" .
+    grep -r --exclude-dir=".git" "pattern" .
+
+    # Practical examples:
+    grep -r "TODO" .  # Find TODOs in code
+    grep -i "error" /var/log/syslog  # Find errors in logs
+    ps aux | grep python  # Find Python processes`
+    },
+    {
+        title: "jq - JSON Processor",
+        category: "terminal",
+        description: "Parse, filter, and manipulate JSON data like sed for JSON. Essential tool for working with APIs and JSON files!",
+        tags: ["terminal", "json", "parsing", "api"],
+        difficulty: 3,
+        lines: "Command: jq",
+        code: `# Installation:
+    # macOS: brew install jq
+    # Linux: sudo apt-get install jq
+    # Windows: choco install jq
+
+    # Pretty print JSON:
+    cat data.json | jq '.'
+    echo '{"name":"John","age":30}' | jq '.'
+
+    # Access field:
+    echo '{"name":"John","age":30}' | jq '.name'
+
+    # Access nested field:
+    jq '.user.address.city' data.json
+
+    # Array access:
+    jq '.[0]' array.json
+    jq '.[0:3]' array.json  # First 3 elements
+
+    # Filter array:
+    jq '.[] | select(.age > 25)' users.json
+
+    # Map array:
+    jq '.users | map(.name)' data.json
+
+    # Multiple fields:
+    jq '.name, .age' data.json
+
+    # Create new object:
+    jq '{username: .name, years: .age}' data.json
+
+    # Array of specific fields:
+    jq '[.[] | {name: .name, email: .email}]' users.json
+
+    # Count array elements:
+    jq '. | length' array.json
+
+    # Keys:
+    jq 'keys' data.json
+
+    # Sort:
+    jq 'sort_by(.age)' users.json
+
+    # Group by:
+    jq 'group_by(.category)' items.json
+
+    # API examples:
+    curl -s https://api.github.com/users/github | jq '.name'
+    curl -s https://api.github.com/users/github/repos | jq '.[].name'
+
+    # Multiple conditions:
+    jq '.[] | select(.age > 25 and .city == "NYC")' data.json
+
+    # Raw output (no quotes):
+    jq -r '.name' data.json`
+    },
+    // ============ TERMINAL GAMES ============
+// ============ MORE TERMINAL GAMES ============
+    {
+        title: "nethack - Roguelike Adventure",
+        category: "terminal-games",
+        description: "Classic dungeon crawler roguelike. Explore dungeons, fight monsters, find the Amulet of Yendor! Decades of gameplay depth.",
+        tags: ["terminal", "game", "roguelike", "rpg", "dungeon"],
+        difficulty: 4,
+        lines: "Command: nethack",
+        code: `# Installation:
+    # Linux: sudo apt-get install nethack-console
+    # macOS: brew install nethack
+    # Windows: Use WSL
+
+    # Basic usage:
+    nethack
+
+    # Controls:
+    # Numpad or vi keys (hjkl yubn): Move
+    # ?: Help
+    # i: Inventory
+    # e: Eat
+    # q: Quaff (drink)
+    # r: Read
+    # w: Wield weapon
+    # W: Wear armor
+    # T: Take off armor
+    # a: Apply item
+    # d: Drop
+    # p: Pay shopkeeper
+    # s: Search
+    # .: Rest
+    # >: Go down stairs
+    # <: Go up stairs
+    # Shift+S: Save and quit
+
+    # Character classes:
+    # - Archeologist
+    # - Barbarian
+    # - Caveman
+    # - Healer
+    # - Knight
+    # - Monk
+    # - Priest
+    # - Ranger
+    # - Rogue
+    # - Samurai
+    # - Tourist
+    # - Valkyrie
+    # - Wizard
+
+    # Tips for beginners:
+    # - Start with Valkyrie (easiest)
+    # - Always search for secret doors
+    # - Don't eat everything (some food is poisonous)
+    # - Pray when in trouble (but not too often)
+    # - Identify items before using
+    # - Engrave "Elbereth" for protection
+
+    # Features:
+    # - Permadeath
+    # - Procedural generation
+    # - Complex interactions
+    # - ASCII graphics
+    # - Hundreds of items
+    # - Deep strategic gameplay
+
+    # Famous for:
+    # "The DevTeam thinks of everything"
+    # Extremely detailed game world
+    # Dark sense of humor
+
+    # Warning: Extremely addictive!
+    # One of the deepest games ever made!`
+    },
+    {
+        title: "angband - Tolkien Roguelike",
+        category: "terminal-games",
+        description: "Roguelike set in Tolkien's Middle-earth! Fight Morgoth, explore 100 dungeon levels, find artifacts from LOTR!",
+        tags: ["terminal", "game", "roguelike", "tolkien", "fantasy"],
+        difficulty: 4,
+        lines: "Command: angband",
+        code: `# Installation:
+    # Linux: sudo apt-get install angband
+    # macOS: brew install angband
+    # Windows: Download from rephial.org
+
+    # Basic usage:
+    angband
+
+    # Controls:
+    # Arrow keys or vi keys: Move
+    # ,: Pick up
+    # d: Drop
+    # i: Inventory
+    # e: Equipment
+    # w: Wear/wield
+    # t: Take off
+    # E: Eat
+    # q: Quaff potion
+    # r: Read scroll
+    # a: Aim wand
+    # z: Zap staff
+    # f: Fire missile
+    # m: Cast spell
+    # R: Rest
+    # s: Search
+    # >: Go down
+    # <: Go up
+    # ?: Help
+
+    # Character creation:
+    # Choose race:
+    # - Human, Half-Elf, Elf, Hobbit
+    # - Dwarf, Half-Orc, Half-Troll
+    # - Dunadan, High-Elf
+
+    # Choose class:
+    # - Warrior, Mage, Priest, Rogue
+    # - Ranger, Paladin, Druid, Monk
+
+    # Gameplay:
+    # - 100 dungeon levels
+    # - Find artifacts from LOTR
+    # - Fight Morgoth (final boss)
+    # - Town above dungeon
+    # - Buy/sell items in shops
+    # - Permadeath
+
+    # Features:
+    # - Based on Tolkien's works
+    # - Deep character progression
+    # - Hundreds of monsters
+    # - Legendary artifacts
+    # - Magic system
+    # - Multiple towns
+
+    # Tips:
+    # - Start with Warrior/Ranger
+    # - Level up before going deep
+    # - Use detection spells
+    # - Hoard healing potions
+    # - Learn monster abilities
+    # - Use recall to return to town
+
+    # Variants available:
+    # - ZAngband (Zelazny + Angband)
+    # - ToME (Tales of Middle Earth)
+    # - Many more!`
+    },
+    {
+        title: "cataclysm-dda - Zombie Survival",
+        category: "terminal-games",
+        description: "Post-apocalyptic zombie survival roguelike! Craft, build, explore, survive. Incredibly detailed simulation with tile or ASCII graphics!",
+        tags: ["terminal", "game", "roguelike", "survival", "zombies"],
+        difficulty: 4,
+        lines: "Command: cataclysm-dda",
+        code: `# Installation:
+    # Linux: sudo apt-get install cataclysm-dda-curses
+    # macOS: brew install cataclysm-dda
+    # Or download from: cataclysmdda.org
+
+    # Basic usage:
+    cataclysm-dda
+
+    # Controls:
+    # Arrow keys or vi keys: Move
+    # e: Examine
+    # g: Pick up
+    # d: Drop
+    # i: Inventory
+    # w: Wear
+    # t: Take off
+    # a: Apply/Use
+    # f: Fire weapon
+    # r: Reload
+    # &: Craft
+    # *: Construction
+    # ^: Vehicles
+    # s: Smash
+    # o: Open
+    # c: Close
+    # B: Butcher
+    # .: Wait/Rest
+    # ?: Help
+
+    # Gameplay:
+    # - Open world survival
+    # - Craft weapons, armor, tools
+    # - Build bases and vehicles
+    # - Scavenge for supplies
+    # - Fight zombies and mutants
+    # - Hunger, thirst, temperature
+    # - Disease and injuries
+    # - Mutations and bionics
+
+    # Character creation:
+    # - Choose profession
+    # - Select traits
+    # - Distribute stats
+    # - Pick starting scenario
+
+    # Features:
+    # - Extremely detailed crafting
+    # - Realistic survival mechanics
+    # - Vehicle construction
+    # - Chemistry and cooking
+    # - Mutations and CBMs
+    # - Huge world to explore
+    # - Active development
+
+    # Tips:
+    # - Start in shelter
+    # - Boil water before drinking
+    # - Make a crowbar early
+    # - Avoid cities at first
+    # - Learn to craft
+    # - Build a safe base
+    # - Hoard non-perishables
+
+    # Scenarios:
+    # - Evacuee (standard start)
+    # - Lab escape
+    # - Prison break
+    # - Wilderness start
+    # - Many challenge scenarios
+
+    # One of the most detailed survival games!
+    # Incredible depth and replayability!`
+    },
+    {
+        title: "brogue - Elegant Roguelike",
+        category: "terminal-games",
+        description: "Beautiful, streamlined roguelike with stunning ASCII visuals! Easy to learn, hard to master. Perfect introduction to roguelikes!",
+        tags: ["terminal", "game", "roguelike", "dungeon", "elegant"],
+        difficulty: 3,
+        lines: "Command: brogue",
+        code: `# Installation:
+    # Linux: sudo apt-get install brogue
+    # macOS: brew install brogue
+    # Or download from: sites.google.com/site/broguegame
+
+    # Basic usage:
+    brogue
+
+    # Controls:
+    # Arrow keys or vi keys: Move
+    # i: Inventory
+    # d: Drop
+    # e: Eat
+    # r: Read scroll
+    # q: Quaff potion
+    # a: Apply staff
+    # w: Wield weapon
+    # W: Wear armor
+    # z: Zap wand
+    # t: Throw
+    # s: Search
+    # >: Descend stairs
+    # <: Ascend stairs
+    # ?: Help
+
+    # Objective:
+    # - Descend 26 dungeon levels
+    # - Find the Amulet of Yendor
+    # - Escape back to surface
+    # - Achieve high score
+
+    # Features:
+    # - Beautiful ASCII graphics
+    # - Smooth animations
+    # - Strategic gameplay
+    # - No grinding
+    # - Every item is useful
+    # - Environmental interactions
+    # - Fire, water, poison gas
+    # - Allied creatures
+
+    # Gameplay mechanics:
+    # - Permadeath
+    # - Procedural generation
+    # - Item identification
+    # - Light and darkness
+    # - Stealth system
+    # - Terrain effects
+
+    # Tips:
+    # - Learn item effects
+    # - Use environment tactically
+    # - Don't hoard consumables
+    # - Retreat when needed
+    # - Experiment with items
+    # - Enchant strategically
+    # - Make allies
+
+    # Why it's special:
+    # - Elegant design
+    # - No bloat
+    # - Beautiful to look at
+    # - Streamlined interface
+    # - Perfect difficulty curve
+    # - Every run is different
+
+    # Best roguelike for beginners!
+    # Clean, focused, challenging!`
+    },
+    {
+        title: "adom - Ancient Domains of Mystery",
+        category: "terminal-games",
+        description: "Complex fantasy roguelike with story elements! Choose from 12 races and classes, complete quests, save the world!",
+        tags: ["terminal", "game", "roguelike", "rpg", "fantasy"],
+        difficulty: 4,
+        lines: "Command: adom",
+        code: `# Installation:
+    # Linux: Download from adom.de
+    # macOS: Download from adom.de
+    # Or: sudo apt-get install adom (older version)
+
+    # Basic usage:
+    adom
+
+    # Controls:
+    # Numpad or vi keys: Move
+    # i: Inventory
+    # d: Drop
+    # e: Eat
+    # q: Quaff
+    # r: Read
+    # w: Wield
+    # W: Wear
+    # a: Apply
+    # z: Zap wand
+    # c: Close door
+    # o: Open door
+    # s: Search
+    # >: Down
+    # <: Up
+    # C: Chat
+    # ?: Help
+
+    # Races:
+    # - Human, Dwarf, Gnome, Hurthling
+    # - High Elf, Gray Elf, Dark Elf
+    # - Orc, Troll, Drakeling, Mist Elf, Ratling
+
+    # Classes:
+    # - Warrior, Paladin, Ranger, Thief
+    # - Assassin, Monk, Bard, Priest
+    # - Wizard, Elementalist, Druid, Necromancer
+
+    # Main Quest:
+    # - Close the Chaos Gate
+    # - Save the world from corruption
+    # - Complete various sub-quests
+    # - Prevent chaos from spreading
+
+    # Features:
+    # - Story-driven gameplay
+    # - Complex quest system
+    # - Corruption mechanics
+    # - Skills and talents
+    # - Multiple endings
+    # - Overworld + dungeons
+    # - Towns and NPCs
+    # - Crafting system
+
+    # Corruption system:
+    # - Chaos corrupts you over time
+    # - Gain mutations (good and bad)
+    # - Too much corruption = game over
+    # - Must balance exploration vs corruption
+
+    # Tips:
+    # - Talk to all NPCs
+    # - Complete early quests
+    # - Watch corruption level
+    # - Save often (if not playing hardcore)
+    # - Learn to cook
+    # - Train important skills
+    # - Don't rush the main quest
+
+    # One of the "major" roguelikes!
+    # Deep, complex, rewarding!`
+    },
+    {
+        title: "dwarf-fortress - Fortress Simulator",
+        category: "terminal-games",
+        description: "Incredibly complex fortress building and adventure game! Manage dwarves, build fortresses, face fun. Most complex game ever made!",
+        tags: ["terminal", "game", "simulation", "fortress", "complex"],
+        difficulty: 5,
+        lines: "Command: dwarffortress",
+        code: `# Installation:
+    # Download from: bay12games.com/dwarves
+    # Linux: Extract and run ./df
+    # macOS: Download Mac version
+    # Windows: Run Dwarf Fortress.exe
+
+    # Launch:
+    cd dwarffortress
+    ./df  # or ./dwarffortress
+
+    # Two game modes:
+
+    # FORTRESS MODE:
+    # - Build and manage dwarf fortress
+    # - Mine resources
+    # - Craft items
+    # - Trade with caravans
+    # - Defend from sieges
+    # - Manage 200+ dwarves
+
+    # ADVENTURE MODE:
+    # - Single character RPG
+    # - Explore generated world
+    # - Complete quests
+    # - Fight creatures
+    # - Roguelike gameplay
+
+    # Controls (Fortress Mode):
+    # Arrow keys: Move view
+    # u/k/m/h: Designate mining
+    # b: Build menu
+    # d: Designations
+    # q: Query building
+    # v: View units
+    # j: Jobs
+    # z: Status
+    # ESC: Cancel/Back
+
+    # Why it's legendary:
+    # - Insane complexity
+    # - Emergent storytelling
+    # - "Losing is fun!"
+    # - Procedural everything
+    # - Decades of development
+    # - Active community
+
+    # Features:
+    # - Entire world simulated
+    # - Thousands of years of history
+    # - Weather, seasons, geology
+    # - Complex materials system
+    # - Personality and emotions
+    # - Combat system (very detailed)
+    # - Legendary artifacts
+    # - Nobles and politics
+
+    # Famous stories:
+    # - Boatmurdered
+    # - The Hamlet of Tyranny
+    # - Countless fortress collapses
+
+    # Learning curve:
+    # Vertical. Nearly straight up.
+    # Use wiki extensively!
+    # Watch tutorials!
+
+    # Tips:
+    # - Use quickstart guide
+    # - Start with tutorial
+    # - Watch video tutorials
+    # - Use wiki constantly
+    # - Expect to fail
+    # - Embrace the chaos
+    # - "Losing is fun!"
+
+    # Most complex game ever created!
+    # Steam version has graphics!`
+    },
+    {
+        title: "zork - Text Adventure",
+        category: "terminal-games",
+        description: "Classic interactive fiction! Explore the Great Underground Empire, solve puzzles, find treasures. A piece of gaming history!",
+        tags: ["terminal", "game", "text-adventure", "classic", "puzzle"],
+        difficulty: 2,
+        lines: "Command: zork",
+        code: `# Installation:
+    # Linux: sudo apt-get install frotz zork1 zork2 zork3
+    # macOS: brew install frotz, then download zork files
+    # Or play online at: textadventures.co.uk
+
+    # Basic usage:
+    frotz /usr/games/zork1.dat
+
+    # Or if installed via package:
+    zork1
+
+    # How to play:
+    # Type commands in plain English:
+    go north
+    take lamp
+    open mailbox
+    read leaflet
+    attack troll with sword
+    inventory
+
+    # Common commands:
+    # Movement: n, s, e, w, ne, nw, se, sw, u, d
+    # Actions: take, drop, look, examine, open, close
+    # inventory (i): Show items
+    # look (l): Describe location
+    # save: Save game
+    # restore: Load game
+    # quit: Exit game
+
+    # Starting the game:
+    # "West of House"
+    # Famous opening: "You are standing in an open field
+    # west of a white house, with a boarded front door.
+    # There is a small mailbox here."
+
+    # Objective:
+    # - Explore underground empire
+    # - Collect 20 treasures
+    # - Return them to trophy case
+    # - Achieve "Master Adventurer" rank
+
+    # Tips:
+    # - EXAMINE everything
+    # - Draw a map!
+    # - Take notes
+    # - Try unusual commands
+    # - "XYZZY" is a famous command
+    # - Save often
+    # - Think creatively
+
+    # Famous puzzles:
+    # - The maze
+    # - The troll
+    # - The thief
+    # - The Flood Control Dam #3
+
+    # Famous quotes:
+    # "You are likely to be eaten by a grue."
+    # "It is pitch black."
+    # "Your lamp has run out of power."
+
+    # Why it's important:
+    # - First commercial text adventure
+    # - Defined the genre
+    # - Influenced countless games
+    # - Cultural phenomenon
+    # - Still fun today!
+
+    # Sequels:
+    # - Zork I
+    # - Zork II
+    # - Zork III
+    # - Many more!`
+    },
+    {
+        title: "adventure (colossal cave) - Original Text Adventure",
+        category: "terminal-games",
+        description: "The ORIGINAL text adventure from 1976! Explore Colossal Cave, collect treasures, solve puzzles. Where it all began!",
+        tags: ["terminal", "game", "text-adventure", "classic", "original"],
+        difficulty: 2,
+        lines: "Command: adventure",
+        code: `# Installation:
+    # Linux: sudo apt-get install bsdgames
+    # macOS: brew install adventure
+    # Then run: adventure
+
+    # Basic usage:
+    adventure
+
+    # How to play:
+    # Type simple commands (usually 1-2 words):
+    go east
+    get lamp
+    kill dragon
+    say xyzzy
+
+    # Common commands:
+    # Directions: n, s, e, w, ne, nw, se, sw, u, d, in, out
+    # Actions: get, drop, inventory, look, quit
+    # Special: xyzzy, plugh, plover
+
+    # The game:
+    # - Explore Colossal Cave
+    # - Find treasures
+    # - Solve puzzles
+    # - Avoid hazards
+    # - Get maximum score
+
+    # Starting text:
+    # "You are standing at the end of a road before a
+    # small brick building. Around you is a forest.
+    # A small stream flows out of the building and
+    # down a gully."
+
+    # Famous locations:
+    # - The Building
+    # - The Well House
+    # - The Hall of Mists
+    # - The Pit
+    # - Witt's End
+
+    # Magic words:
+    # xyzzy - Teleport command
+    # plugh - Another teleport
+    # plover - Access Plover Room
+    # fee fie foe foo - Special action
+
+    # Tips:
+    # - Light is important!
+    # - Save lamp battery
+    # - Draw a map
+    # - Take notes
+    # - Try obvious things
+    # - Nothing is too silly to try
+    # - Read messages carefully
+
+    # Items to find:
+    # - Keys
+    # - Lamp
+    # - Food
+    # - Water
+    # - Treasures (gold, diamonds, etc.)
+
+    # Hazards:
+    # - Darkness (grues?)
+    # - Dwarves with axes
+    # - Trolls
+    # - Dragons
+    # - Bottomless pits
+
+    # Historical significance:
+    # - Created in 1976
+    # - First adventure game
+    # - Inspired entire genre
+    # - Source code studied by generations
+    # - Gaming history artifact
+
+    # Fun fact:
+    # Based on real Mammoth Cave in Kentucky!
+    # Creator Will Crowther was a caver!
+
+    # The game that started it all!`
+    },
+    {
+        title: "frotz - Interactive Fiction Player",
+        category: "terminal-games",
+        description: "Play hundreds of interactive fiction games! Z-machine interpreter for Infocom games and modern IF. A whole genre in one tool!",
+        tags: ["terminal", "game", "text-adventure", "interactive-fiction", "player"],
+        difficulty: 1,
+        lines: "Command: frotz",
+        code: `# Installation:
+    # Linux: sudo apt-get install frotz
+    # macOS: brew install frotz
+    # Windows: Download from frotz.sourceforge.net
+
+    # Basic usage:
+    frotz gamefile.z5
+
+    # Find games:
+    # - ifdb.org (Interactive Fiction Database)
+    # - ifarchive.org (IF Archive)
+    # - itch.io (modern IF games)
+
+    # Common game formats:
+    # .z3, .z5, .z8 - Classic Infocom format
+    # .zblorb - Modern format with graphics/sound
+    # .ulx - Glulx games (newer, more powerful)
+
+    # Classic Infocom games:
+    # - All Zork games (I, II, III)
+    # - Hitchhiker's Guide to the Galaxy
+    # - Planetfall
+    # - A Mind Forever Voyaging
+    # - Trinity
+    # - Leather Goddesses of Phobos
+    # - Suspended
+    # - Deadline
+    # - Witness
+
+    # Modern IF recommendations:
+    # - Photopia (emotional)
+    # - Anchorhead (horror)
+    # - Spider and Web (spy thriller)
+    # - Counterfeit Monkey (wordplay)
+    # - Hadean Lands (alchemy)
+    # - 80 Days (Around the world)
+
+    # Standard commands:
+    # examine [object]
+    # take [object]
+    # drop [object]
+    # inventory
+    # look
+    # go [direction]
+    # talk to [character]
+    # save
+    # restore
+    # quit
+
+    # Advanced commands:
+    # undo - Take back last move
+    # restart - Start over
+    # script - Record session
+    # transcript off - Stop recording
+
+    # Tips:
+    # - Read carefully
+    # - Examine everything
+    # - Try unusual combinations
+    # - Save frequently
+    # - Use built-in hints (if available)
+    # - Map as you go
+
+    # Annual competitions:
+    # - IFComp (October each year)
+    # - Spring Thing
+    # - Many more!
+
+    # Why play IF:
+    # - Amazing stories
+    # - Pure imagination
+    # - Puzzle solving
+    # - Literary quality
+    # - Active community
+    # - Free games!
+
+    # Getting started:
+    # 1. Download frotz
+    # 2. Visit ifdb.org
+    # 3. Download a game
+    # 4. Run: frotz gamefile.z5
+    # 5. Type "help" in game
+
+    # Modern tools:
+    # - Twine (create IF in browser)
+    # - Inform 7 (IF programming language)
+    # - Quest (IF authoring)
+
+    # A whole genre of games!
+    # Thousands of stories to experience!`
+    },
+    {
+        title: "ski - Downhill Skiing",
+        category: "terminal-games",
+        description: "Simple but addictive ASCII skiing game! Dodge trees, make it down the mountain. Classic BSD game!",
+        tags: ["terminal", "game", "arcade", "skiing", "simple"],
+        difficulty: 1,
+        lines: "Command: ski",
+        code: `# Installation:
+    # Linux: sudo apt-get install bsdgames
+    # macOS: brew install bsdgames
+    # Then run: ski
+
+    # Basic usage:
+    ski
+
+    # Controls:
+    # Left arrow or ',': Move left
+    # Right arrow or '.': Move right
+    # Space: Jump (some versions)
+    # Ctrl+C: Quit
+
+    # Gameplay:
+    # - Ski down an endless slope
+    # - Dodge trees and obstacles
+    # - Try to go as far as possible
+    # - Speed increases over time
+
+    # Features:
+    # - Simple ASCII graphics
+    # - Procedurally generated slope
+    # - Increasing difficulty
+    # - Score tracking
+    # - Pure arcade fun
+
+    # ASCII art:
+    # | = Tree
+    # \ = Skier going left
+    # / = Skier going right
+    # | = Skier going straight
+
+    # Tips:
+    # - React quickly
+    # - Plan ahead
+    # - Stay centered
+    # - Watch for patterns
+    # - Don't panic!
+
+    # Variations:
+    # Different versions have:
+    # - Different speeds
+    # - Different controls
+    # - Jump mechanics
+    # - Special obstacles
+
+    # Why it's fun:
+    # - Quick games
+    # - Easy to learn
+    # - Hard to master
+    # - Perfect coffee break game
+    # - Nostalgic charm
+
+    # High score challenge:
+    # - Try to beat 1000m
+    # - Speed increases constantly
+    # - How far can you go?
+
+    # Similar games:
+    # - snake
+    # - worm
+    # - tetris-bsd
+
+    # Perfect for:
+    # - Quick gaming session
+    # - Testing reflexes
+    # - Nostalgia
+    # - Learning terminal games
+
+    # Simple, fun, classic!`
+    },
+    {
+        title: "myman - Pac-Man Clone",
+        category: "terminal-games",
+        description: "Pac-Man in your terminal! Eat dots, avoid ghosts, get power pellets. Classic arcade action in ASCII!",
+        tags: ["terminal", "game", "arcade", "pacman", "classic"],
+        difficulty: 1,
+        lines: "Command: myman",
+        code: `# Installation:
+    # Linux: Download from myman.sourceforge.net
+    #        or: git clone https://github.com/kifferltd/myman.git
+    #        cd myman && ./configure && make && sudo make install
+    # macOS: brew install myman (if available in tap)
+
+    # Or compile from source:
+    # git clone https://github.com/kifferltd/myman.git
+    # cd myman
+    # ./configure
+    # make
+    # sudo make install
+
+    # Basic usage:
+    myman
+
+    # Controls:
+    # Arrow keys: Move
+    # q: Quit
+    # p: Pause
+    # Space: Pause (some versions)
+
+    # Gameplay (classic Pac-Man):
+    # - Eat all dots to advance
+    # - Avoid ghosts (Inky, Blinky, Pinky, Clyde)
+    # - Eat power pellets to eat ghosts
+    # - Collect fruit for bonus points
+    # - Clear all mazes!
+
+    # Features:
+    # - Classic Pac-Man gameplay
+    # - Multiple maze variations
+    # - Ghost AI
+    # - Power-ups
+    # - Increasing difficulty
+    # - Score tracking
+    # - Lives system
+
+    # Ghost behavior:
+    # - Red (Blinky): Chases directly
+    # - Pink (Pinky): Ambushes ahead
+    # - Cyan (Inky): Unpredictable
+    # - Orange (Clyde): Wanders randomly
+
+    # Power pellets:
+    # - Make ghosts blue
+    # - Can eat ghosts temporarily
+    # - Ghosts return to center
+    # - Points multiplier
+
+    # Tips:
+    # - Learn ghost patterns
+    # - Save power pellets
+    # - Clear corners first
+    # - Use tunnels to escape
+    # - Chase combo points
+
+    # ASCII graphics:
+    # @ or C = Pac-Man
+    # & or M = Ghosts
+    # . = Dots
+    # o or O = Power pellets
+    # % = Fruit
+
+    # Scoring:
+    # - Dot: 10 points
+    # - Power pellet: 50 points
+    # - Ghost: 200, 400, 800, 1600
+    # - Fruit: Varies by level
+
+    # Why play:
+    # - Nostalgic fun
+    # - Works anywhere
+    # - Pure arcade gameplay
+    # - Challenge high scores
+    # - Quick sessions
+
+    # Classic arcade in ASCII!
+    # Waka waka waka!`
+    },
+    {
+        title: "bastet - Tetris",
+        category: "terminal-games",
+        description: "Play Tetris in your terminal! Classic falling blocks game with high scores and different difficulty levels.",
+        tags: ["terminal", "game", "tetris", "puzzle"],
+        difficulty: 1,
+        lines: "Command: bastet",
+        code: `# Installation:
+    # Linux: sudo apt-get install bastet
+    # macOS: brew install bastet
+    # Arch: sudo pacman -S bastet
+
+    # Basic usage:
+    bastet
+
+    # Controls:
+    # Arrow keys: Move pieces
+    # Space: Drop piece
+    # p: Pause
+    # q: Quit
+
+    # Features:
+    # - Classic Tetris gameplay
+    # - High score tracking
+    # - Preview next piece
+    # - Level progression
+    # - Score system
+
+    # The name "bastet" is a play on words:
+    # - Bastet (Egyptian cat goddess)
+    # - "Bastard Tetris" (the game is evil!)
+
+    # The game tries to give you the worst possible pieces!`
+    },
+    {
+        title: "moon-buggy - Jump Game",
+        category: "terminal-games",
+        description: "Drive a moon buggy across the moon's surface! Jump over craters and obstacles in this simple but addictive side-scrolling game.",
+        tags: ["terminal", "game", "jump", "arcade"],
+        difficulty: 1,
+        lines: "Command: moon-buggy",
+        code: `# Installation:
+    # Linux: sudo apt-get install moon-buggy
+    # macOS: brew install moon-buggy
+    # Arch: sudo pacman -S moon-buggy
+
+    # Basic usage:
+    moon-buggy
+
+    # Controls:
+    # Space: Jump
+    # a: Long jump
+    # q: Quit
+
+    # Features:
+    # - Side-scrolling gameplay
+    # - Increasing difficulty
+    # - Score tracking
+    # - Simple ASCII graphics
+
+    # Tips:
+    # - Short jumps for small craters
+    # - Long jumps for wide gaps
+    # - Watch ahead for obstacles
+    # - Speed increases over time
+
+    # Perfect for quick gaming sessions!`
+    },
+    {
+        title: "ninvaders - Space Invaders",
+        category: "terminal-games",
+        description: "Classic Space Invaders in your terminal! Shoot aliens, dodge missiles, and rack up high scores in this retro arcade game.",
+        tags: ["terminal", "game", "arcade", "shooter"],
+        difficulty: 1,
+        lines: "Command: ninvaders",
+        code: `# Installation:
+    # Linux: sudo apt-get install ninvaders
+    # macOS: brew install ninvaders
+    # Arch: sudo pacman -S ninvaders
+
+    # Basic usage:
+    ninvaders
+
+    # Controls:
+    # Arrow keys: Move left/right
+    # Space: Fire
+    # q: Quit
+    # p: Pause
+
+    # Features:
+    # - Classic Space Invaders gameplay
+    # - Multiple levels
+    # - Increasing difficulty
+    # - Shields for protection
+    # - UFO bonus targets
+
+    # Game mechanics:
+    # - Aliens move faster as you destroy them
+    # - Hide behind shields
+    # - Bonus UFO appears randomly
+    # - Don't let aliens reach the bottom!
+
+    # Addictive retro fun!`
+    },
+    {
+        title: "2048-cli - Number Puzzle",
+        category: "terminal-games",
+        description: "Play 2048 in your terminal! Slide tiles to combine numbers and reach 2048. Simple, addictive, and runs everywhere!",
+        tags: ["terminal", "game", "puzzle", "2048"],
+        difficulty: 1,
+        lines: "Command: 2048",
+        code: `# Installation:
+    # npm: npm install -g 2048-cli
+    # Or clone: git clone https://github.com/tiehuis/2048-cli.git
+    #           cd 2048-cli && make
+
+    # Basic usage:
+    2048
+
+    # Controls:
+    # Arrow keys: Move tiles
+    # w/a/s/d: Alternative movement
+    # q: Quit
+    # r: Restart
+
+    # How to play:
+    # - Swipe tiles in any direction
+    # - Same numbers combine when they touch
+    # - 2 + 2 = 4, 4 + 4 = 8, etc.
+    # - Goal: Reach 2048!
+
+    # Tips:
+    # - Keep highest tile in a corner
+    # - Build numbers in one direction
+    # - Don't spread numbers randomly
+    # - Plan several moves ahead
+
+    # Features:
+    # - Score tracking
+    # - Best score saving
+    # - Undo moves (some versions)
+    # - Different board sizes`
+    },
+    {
+        title: "nudoku - Sudoku",
+        category: "terminal-games",
+        description: "Play Sudoku in your terminal! Multiple difficulty levels, hints, and a clean interface for the classic number puzzle game.",
+        tags: ["terminal", "game", "puzzle", "sudoku"],
+        difficulty: 1,
+        lines: "Command: nudoku",
+        code: `# Installation:
+    # Linux: sudo apt-get install nudoku
+    # macOS: brew install nudoku
+    # Arch: sudo pacman -S nudoku
+
+    # Basic usage:
+    nudoku
+
+    # Controls:
+    # Arrow keys: Navigate
+    # 1-9: Enter number
+    # 0 or Delete: Clear cell
+    # h: Hint
+    # n: New game
+    # q: Quit
+
+    # Difficulty levels:
+    nudoku -d easy
+    nudoku -d normal
+    nudoku -d hard
+
+    # Features:
+    # - Multiple difficulty levels
+    # - Hint system
+    # - Error checking
+    # - Timer
+    # - Clean interface
+
+    # Tips:
+    # - Start with easy numbers
+    # - Use pencil marks (notes)
+    # - Look for naked singles
+    # - Check rows, columns, boxes
+
+    # Perfect for puzzle lovers!`
+    },
+    {
+        title: "greed - Dice Game",
+        category: "terminal-games",
+        description: "Terminal dice game similar to Farkle. Roll dice, score points, but don't get greedy or you'll lose everything!",
+        tags: ["terminal", "game", "dice", "strategy"],
+        difficulty: 1,
+        lines: "Command: greed",
+        code: `# Installation:
+    # Linux: sudo apt-get install bsdgames
+    # macOS: brew install bsdgames
+    # Then run: greed
+
+    # Basic usage:
+    greed
+
+    # How to play:
+    # - Roll 5 dice
+    # - Select dice to keep for points
+    # - Re-roll remaining dice
+    # - Bank points or risk losing them
+    # - First to target score wins!
+
+    # Scoring:
+    # - 1 = 100 points
+    # - 5 = 50 points
+    # - Three 1s = 1000 points
+    # - Three 2s = 200 points
+    # - Three 3s = 300 points
+    # - Three 4s = 400 points
+    # - Three 5s = 500 points
+    # - Three 6s = 600 points
+
+    # Strategy:
+    # - Know when to stop rolling
+    # - Bank points before losing them
+    # - Calculate risk vs reward
+
+    # Simple but addictive!`
+    },
+    {
+        title: "bsdgames - Game Collection",
+        category: "terminal-games",
+        description: "Collection of classic text-based games: adventure, battleship, hangman, snake, worm, and many more! Hours of retro gaming fun.",
+        tags: ["terminal", "games", "collection", "retro"],
+        difficulty: 1,
+        lines: "Command: various",
+        code: `# Installation:
+    # Linux: sudo apt-get install bsdgames
+    # macOS: brew install bsdgames
+
+    # Available games:
+
+    # adventure - Classic text adventure
+    adventure
+
+    # battleship - Naval combat game
+    battleship
+
+    # hangman - Word guessing game
+    hangman
+
+    # snake - Snake game
+    snake
+
+    # worm - Worm game (like snake)
+    worm
+
+    # tetris-bsd - Tetris
+    tetris-bsd
+
+    # boggle - Word finding game
+    boggle
+
+    # hunt - Multi-player combat
+    hunt
+
+    # quiz - Trivia game
+    quiz
+
+    # mille - Card game
+    mille
+
+    # List all games:
+    ls /usr/games/
+
+    # Each game has different controls
+    # Press 'h' or '?' for help in most games
+
+    # Classic gaming nostalgia!`
+    },
+    {
+        title: "crawl - Roguelike RPG",
+        category: "terminal-games",
+        description: "Dungeon Crawl Stone Soup - Complex roguelike RPG with permadeath. Explore dungeons, fight monsters, find treasures!",
+        tags: ["terminal", "game", "rpg", "roguelike"],
+        difficulty: 3,
+        lines: "Command: crawl",
+        code: `# Installation:
+    # Linux: sudo apt-get install crawl
+    # macOS: brew install crawl
+    # Or play online: https://crawl.develz.org/
+
+    # Basic usage:
+    crawl
+
+    # Controls:
+    # Numpad or vi keys (hjkl): Move
+    # ?: Help
+    # i: Inventory
+    # a: Use item
+    # z: Cast spell
+    # o: Auto-explore
+    # s: Search
+    # S: Save and quit
+
+    # Character creation:
+    # - Choose species (Human, Elf, Dwarf, etc.)
+    # - Choose background (Fighter, Wizard, etc.)
+    # - Choose god (optional)
+
+    # Tips for beginners:
+    # - Start with Minotaur Fighter
+    # - Read the tutorial (?)
+    # - Don't fight everything
+    # - Use stairs to escape
+    # - Save frequently
+
+    # Features:
+    # - Deep gameplay
+    # - Many character combinations
+    # - Tactical combat
+    # - Permadeath (roguelike!)
+    # - Huge dungeons
+
+    # Warning: Very addictive!`
+    },
+
+    // ============ TERMINAL FUN STUFF ============
+    {
+        title: "yes - Infinite Yes",
+        category: "terminal-fun",
+        description: "Output 'yes' infinitely! Simple but surprisingly useful. Pipe it to other commands for automatic confirmations!",
+        tags: ["terminal", "fun", "utility", "simple"],
+        difficulty: 1,
+        lines: "Command: yes",
+        code: `# Pre-installed on Unix systems
+
+    # Basic usage (infinite 'yes'):
+    yes
+
+    # Exit: Press Ctrl+C
+
+    # Custom text:
+    yes "Hello World"
+    yes "no"
+    yes "🎉"
+
+    # Practical uses:
+
+    # Auto-confirm installations:
+    yes | sudo apt-get install package
+
+    # Delete files without prompts:
+    yes | rm -i *.txt
+
+    # Fill disk (testing):
+    yes > /dev/null
+
+    # Generate test data:
+    yes "test line" | head -n 1000 > testfile.txt
+
+    # Stress test:
+    yes | head -n 1000000 | wc -l
+
+    # Fill terminal with text:
+    yes "$(tput setaf $((RANDOM % 7 + 1)))SPAM"
+
+    # Fun with pipes:
+    yes "🌈" | lolcat
+
+    # Create large file quickly:
+    yes "data" | head -c 1G > bigfile.txt
+
+    # Why it exists:
+    # - Shell scripting automation
+    # - Testing purposes
+    # - Piping to other commands
+    # - Bypassing confirmations
+
+    # Alternatives:
+    printf 'yes\n%.0s' {1..100}  # 100 times
+    seq inf | xargs -I{} echo yes
+
+    # Fun combinations:
+    yes "$(date)" | head -n 5
+    yes "Line $(seq 1 10)" | head -n 10
+
+    # Caution:
+    # Can fill disk if not careful!
+    # Use with head or timeout!
+
+    # Simple but useful!`
+    },
+    {
+        title: "banner - Large Text Banner",
+        category: "terminal-fun",
+        description: "Print large ASCII art text banners! Old-school text art for headers and announcements. Retro terminal vibes!",
+        tags: ["terminal", "ascii-art", "text", "banner"],
+        difficulty: 1,
+        lines: "Command: banner",
+        code: `# Installation:
+    # Linux: sudo apt-get install sysvbanner
+    # macOS: Often pre-installed, or brew install banner
+    # Part of bsdgames package
+
+    # Basic usage:
+    banner "HELLO"
+
+    # Features:
+    # - Large block letters
+    # - Vertical orientation
+    # - Classic ASCII style
+    # - Limited to uppercase
+    # - Simple and retro
+
+    # Examples:
+    banner "WELCOME"
+    banner "START"
+    banner "ERROR"
+    banner "SUCCESS"
+    banner "PARTY"
+
+    # Multiple words (limited):
+    banner "HI THERE"
+
+    # With color:
+    banner "COLOR" | lolcat
+
+    # Limitations:
+    # - Usually max 10 characters
+    # - Uppercase only
+    # - Simple font
+    # - Vertical layout
+
+    # Similar commands:
+    # figlet - More fonts, horizontal
+    # toilet - Color support
+    # banner - Classic vertical
+
+    # Compare styles:
+    banner "TEXT"
+    figlet "TEXT"
+    toilet "TEXT"
+
+    # Practical uses:
+    # - Script headers
+    # - Alerts
+    # - Status messages
+    # - System notifications
+    # - Login messages
+
+    # In scripts:
+    #!/bin/bash
+    clear
+    banner "BACKUP"
+    echo "Starting backup process..."
+
+    # Terminal decoration:
+    banner "$(hostname)"
+
+    # Fun combinations:
+    banner "RETRO" | grep "#"
+
+    # Redirect to file:
+    banner "TITLE" > header.txt
+
+    # Why it's cool:
+    # - Retro aesthetic
+    # - Clear visual impact
+    # - Simple and fast
+    # - Part of Unix history
+
+    # Classic terminal art!`
+    },
+    {
+        title: "rev - Reverse Text",
+        category: "terminal-fun",
+        description: "Reverse lines character by character! Make mirror text, scramble output, or just have fun with reversed text!",
+        tags: ["terminal", "text", "fun", "reverse"],
+        difficulty: 1,
+        lines: "Command: rev",
+        code: `# Pre-installed on most Unix systems
+
+    # Basic usage:
+    echo "Hello World" | rev
+    # Output: dlroW olleH
+
+    # Reverse file lines:
+    rev filename.txt
+
+    # Interactive mode:
+    rev
+    # Type text, press Enter
+    # See it reversed!
+    # Ctrl+D to exit
+
+    # Double reverse (original):
+    echo "test" | rev | rev
+
+    # Reverse multiple lines:
+    cat file.txt | rev
+
+    # Practical examples:
+
+    # Check if palindrome:
+    echo "racecar" | rev
+    # If same = palindrome!
+
+    # Create mirror effect:
+    echo "MIRROR" && echo "MIRROR" | rev
+
+    # Reverse ASCII art:
+    figlet "TEXT" | rev
+
+    # Make secret messages:
+    echo "secret message" | rev
+    # dlroW olleH
+    # Give to friend to reverse back!
+
+    # Reverse CSV columns:
+    cat data.csv | rev
+
+    # Fun with pipes:
+    fortune | rev
+    cowsay "Hello" | rev
+
+    # Create puzzles:
+    echo "Can you read this?" | rev
+    # ?siht daer uoy naC
+
+    # Reverse URLs:
+    echo "https://example.com" | rev
+
+    # Reverse code:
+    cat script.sh | rev
+
+    # With lolcat:
+    echo "RAINBOW REVERSE" | rev | lolcat
+
+    # Reverse directory listing:
+    ls -1 | rev
+
+    # Games with friends:
+    # Send reversed messages:
+    echo "Meet me at the park" | rev
+    # krap eht ta em teeM
+
+    # Scramble text:
+    cat poem.txt | rev > scrambled.txt
+
+    # Reverse alphabet:
+    echo "ABCDEFGHIJKLMNOPQRSTUVWXYZ" | rev
+
+    # Fun facts:
+    # - Simple but entertaining
+    # - Great for puzzles
+    # - Works with any text
+    # - Fast and lightweight
+
+    # Why it exists:
+    # - Text processing
+    # - Data manipulation
+    # - Fun and games!
+
+    # Simple tool, endless fun!`
+    },
+    {
+        title: "factor - Prime Factorization",
+        category: "terminal-fun",
+        description: "Calculate prime factors of numbers! See the building blocks of any number. Math fun in the terminal!",
+        tags: ["terminal", "math", "numbers", "prime"],
+        difficulty: 1,
+        lines: "Command: factor",
+        code: `# Pre-installed on Unix systems
+
+    # Basic usage:
+    factor 100
+    # Output: 100: 2 2 5 5
+
+    # Multiple numbers:
+    factor 12 15 20
+    # 12: 2 2 3
+    # 15: 3 5
+    # 20: 2 2 5
+
+    # Large numbers:
+    factor 1234567890
+    factor 999999999
+
+    # Prime number check:
+    factor 17
+    # Output: 17: 17
+    # (Only itself = prime!)
+
+    # Interactive mode:
+    factor
+    # Type numbers, press Enter
+    # Ctrl+D to exit
+
+    # Find primes in range:
+    seq 1 20 | xargs -I {} sh -c 'f=$(factor {}); [ "$(echo $f | wc -w)" -eq 2 ] && echo {}'
+
+    # Factor squares:
+    factor $((100 * 100))
+    factor 10000
+
+    # Powers of 2:
+    factor 256
+    factor 1024
+    factor 65536
+
+    # Fun examples:
+
+    # Your age:
+    factor 25
+
+    # Current year:
+    factor 2025
+    # 2025: 3 3 3 3 5 5
+
+    # Phone number:
+    factor 5551234
+
+    # Lucky numbers:
+    factor 777
+    factor 888
+
+    # Factorials:
+    factor 120  # 5!
+    factor 720  # 6!
+
+    # Perfect squares:
+    factor 144
+    factor 169
+    factor 196
+
+    # Programming uses:
+    # Check if prime:
+    count=$(factor 17 | wc -w)
+    if [ $count -eq 2 ]; then
+        echo "Prime!"
+    fi
+
+    # Find common factors:
+    factor 24
+    factor 36
+    # Common: 2, 3
+
+    # Educational:
+    # Great for learning math
+    # Understanding prime numbers
+    # Factorization practice
+
+    # Math challenges:
+    # What's the prime factorization of:
+    factor 1000000
+    factor 123456789
+
+    # Patterns:
+    seq 10 | xargs factor
+    # See patterns emerge!
+
+    # Large primes:
+    factor 2147483647
+    # Mersenne prime!
+
+    # Combine with other tools:
+    seq 100 | xargs factor | grep ": [0-9]*$"
+    # Find primes up to 100!
+
+    # Fun facts:
+    # - Fast algorithm
+    # - Works with huge numbers
+    # - Educational tool
+    # - Math nerd paradise
+
+    # Make math fun!`
+    },
+    {
+        title: "rig - Random Identity Generator",
+        category: "terminal-fun",
+        description: "Generate random fake identities! Create names, addresses, phone numbers for testing. Perfect for developers!",
+        tags: ["terminal", "fun", "random", "generator"],
+        difficulty: 1,
+        lines: "Command: rig",
+        code: `# Installation:
+    # Linux: sudo apt-get install rig
+    # macOS: brew install rig
+    # Or compile from source
+
+    # Basic usage:
+    rig
+
+    # Example output:
+    # John Smith
+    # 123 Main St
+    # Springfield, IL  12345
+    # (555) 123-4567
+
+    # Generate multiple:
+    rig 5
+
+    # Male names only:
+    rig -m
+
+    # Female names only:
+    rig -f
+
+    # Specific data sets:
+    rig -d usa     # US addresses
+    rig -d canada  # Canadian addresses
+
+    # Custom format:
+    rig | head -n 1  # Name only
+    rig | tail -n 1  # Phone only
+
+    # Practical uses:
+
+    # Test data for forms:
+    for i in {1..10}; do rig; echo "---"; done
+
+    # Database seeding:
+    rig 100 > test_users.txt
+
+    # CSV format:
+    rig | paste -sd "," -
+
+    # API testing:
+    rig | jq -R -s -c 'split("\n")'
+
+    # Mock user creation:
+    #!/bin/bash
+    identity=$(rig)
+    name=$(echo "$identity" | head -n 1)
+    echo "Creating user: $name"
+
+    # Generate test emails:
+    rig | head -1 | tr ' ' '.' | tr '[:upper:]' '[:lower:]'
+    # Output: john.smith
+
+    # Privacy testing:
+    # Don't use real data!
+    # Use rig instead
+
+    # Batch generation:
+    for i in {1..5}; do
+        echo "User $i:"
+        rig
+        echo ""
+    done
+
+    # Random scenarios:
+    # - Testing registration forms
+    # - Dummy user accounts
+    # - Address validation
+    # - Phone number formats
+    # - Name parsing logic
+
+    # With other tools:
+    rig | cowsay
+    rig | figlet
+    rig | lolcat
+
+    # Save to file:
+    rig 1000 > fake_users.txt
+
+    # Extract parts:
+    name=$(rig | head -n 1)
+    address=$(rig | sed -n '2p')
+    phone=$(rig | tail -n 1)
+
+    # Fun uses:
+    # - Character generation for games
+    # - Story writing
+    # - Roleplaying
+    # - Privacy education
+
+    # Alternative tools:
+    # - faker (Python)
+    # - faker.js (Node.js)
+    # - generatedata.com (web)
+
+    # Note:
+    # All data is randomly generated
+    # Not real people!
+    # Safe for testing!
+
+    # Perfect for developers!
+    # Never use real data in tests!`
+    },
+    {
+        title: "espeak - Text to Speech",
+        category: "terminal-fun",
+        description: "Make your terminal talk! Convert text to speech with different voices, speeds, and accents. Robot voice fun!",
+        tags: ["terminal", "fun", "speech", "audio", "tts"],
+        difficulty: 1,
+        lines: "Command: espeak",
+        code: `# Installation:
+    # Linux: sudo apt-get install espeak
+    # macOS: brew install espeak
+    # Windows: Download from espeak.sourceforge.net
+
+    # Basic usage:
+    espeak "Hello World"
+
+    # Different speeds:
+    espeak -s 150 "Fast speech"  # 150 words per minute
+    espeak -s 80 "Slow speech"   # 80 words per minute
+    # Default is 175 wpm
+
+    # Volume control:
+    espeak -a 200 "Loud"    # 200 = very loud
+    espeak -a 50 "Quiet"    # 50 = quiet
+    # Range: 0-200, default 100
+
+    # Different voices:
+    espeak -v en "English"
+    espeak -v en-us "American English"
+    espeak -v en-gb "British English"
+    espeak -v es "Spanish"
+    espeak -v fr "French"
+    espeak -v de "German"
+    espeak -v it "Italian"
+
+    # List all voices:
+    espeak --voices
+
+    # Male/female variants:
+    espeak -v en+m1 "Male voice 1"
+    espeak -v en+f1 "Female voice 1"
+
+    # Pitch control:
+    espeak -p 80 "High pitch"   # 0-99
+    espeak -p 20 "Low pitch"    # 0-99
+    # Default is 50
+
+    # Save to file:
+    espeak -w output.wav "Save this audio"
+
+    # Read from file:
+    espeak -f textfile.txt
+
+    # Pipe text:
+    echo "Hello from pipe" | espeak
+    cat story.txt | espeak
+
+    # Fun examples:
+
+    # Make computer greet you:
+    espeak "Welcome $(whoami)"
+
+    # Speak fortune:
+    fortune | espeak
+
+    # Alarm:
+    sleep 10 && espeak "Time is up!"
+
+    # Countdown:
+    for i in {10..1}; do
+        espeak "$i"
+        sleep 1
+    done
+    espeak "Blast off!"
+
+    # Robot voice:
+    espeak -p 1 -s 200 "I am a robot"
+
+    # Sing (kinda):
+    espeak -p 80 "La la la la la"
+
+    # System notifications:
+    espeak "Backup complete"
+    espeak "Warning: Low disk space"
+
+    # Different accents:
+    espeak -v en-scottish "Scottish accent"
+    espeak -v en-westindies "Caribbean accent"
+
+    # SSML support (markup):
+    espeak '<speak><prosody rate="slow">Slow</prosody></speak>'
+
+    # Practical uses:
+
+    # Accessibility:
+    cat document.txt | espeak
+
+    # Learning:
+    espeak -v es "Buenos días"  # Learn pronunciation
+
+    # Alerts:
+    if ! ping -c 1 google.com; then
+        espeak "Network is down"
+    fi
+
+    # Script feedback:
+    espeak "Process started"
+    ./long_script.sh
+    espeak "Process completed"
+
+    # Time announcements:
+    while true; do
+        espeak "The time is $(date '+%I %M %p')"
+        sleep 3600  # Every hour
+    done
+
+    # Fun with pipes:
+    cowsay "Moo" | espeak
+    figlet "LOUD" | espeak
+
+    # Prank scripts:
+    espeak -a 200 "Surprise!"
+
+    # Story reader:
+    espeak -s 150 -f story.txt
+
+    # Why it's awesome:
+    # - Accessibility tool
+    # - System notifications
+    # - Learning pronunciation
+    # - Fun experiments
+    # - Automation feedback
+
+    # Make your terminal talk!`
+    },
+    {
+        title: "cal - Calendar Display",
+        category: "terminal-fun",
+        description: "Display beautiful ASCII calendars! View any month/year, see the whole year, highlight today. Simple and useful!",
+        tags: ["terminal", "calendar", "date", "time"],
+        difficulty: 1,
+        lines: "Command: cal",
+        code: `# Pre-installed on Unix systems
+
+    # Current month:
+    cal
+
+    # Example output:
+    #     March 2025
+    # Su Mo Tu We Th Fr Sa
+    #                    1
+    #  2  3  4  5  6  7  8
+    #  9 10 11 12 13 14 15
+    # 16 17 18 19 20 21 22
+    # 23 24 25 26 27 28 29
+    # 30 31
+
+    # Specific month and year:
+    cal 12 2025        # December 2025
+    cal january 2024   # January 2024
+
+    # Whole year:
+    cal 2025
+
+    # Three months (previous, current, next):
+    cal -3
+
+    # Highlight a date:
+    cal -h 15  # Highlight the 15th
+
+    # Monday as first day:
+    cal -m
+
+    # Julian calendar:
+    cal -j  # Shows day numbers (1-365)
+
+    # No highlighting:
+    cal -h no
+
+    # Fun examples:
+
+    # Your birthday:
+    cal 7 1990  # July 1990
+
+    # Historical dates:
+    cal 7 1969  # Moon landing month
+    cal 12 1999 # Y2K month
+
+    # Future planning:
+    cal 12 2030
+
+    # See patterns:
+    cal 2025 | grep "13"  # All Friday 13ths
+
+    # Full year view:
+    cal 2025 | less
+
+    # Check weekday:
+    cal 12 25 2025  # What day is Christmas?
+
+    # Year you were born:
+    cal 1990
+
+    # Leap years:
+    cal 2 2024  # 29 days
+    cal 2 2025  # 28 days
+
+    # Month when started job:
+    cal 6 2020
+
+    # Practical uses:
+
+    # Planning:
+    cal -3  # See 3 months for planning
+
+    # Quick date check:
+    cal | grep "$(date +%e)"
+
+    # Historical events:
+    cal 7 1776  # Declaration of Independence
+    cal 11 1989 # Berlin Wall
+
+    # Combine with date:
+    echo "Today is $(date +%A)" && cal
+
+    # Script for reminders:
+    #!/bin/bash
+    cal
+    echo "Meetings today: $(date +%A)"
+
+    # Check holidays:
+    cal 12 2025  # See when Christmas falls
+
+    # Year comparison:
+    cal 2024 > cal2024.txt
+    cal 2025 > cal2025.txt
+    diff cal2024.txt cal2025.txt
+
+    # Colorful calendar:
+    cal | lolcat
+
+    # With decorations:
+    figlet "$(date +%B)" && cal
+
+    # ASCII art calendar:
+    banner "$(date +%Y)" && cal
+
+    # Fun facts about calendar:
+
+    # 13 Friday the 13ths max per year:
+    for m in {1..12}; do cal $m 2025 | grep " 13"; done
+
+    # Leap year check:
+    cal 2 2024 | grep "29"
+
+    # Century patterns:
+    cal 1900
+    cal 2000
+
+    # Tips:
+    # - Great for quick date checks
+    # - Planning meetings
+    # - Historical reference
+    # - Simple and fast
+
+    # Alternatives:
+    # - ncal (BSD variant)
+    # - gcal (advanced features)
+    # - date (just today)
+
+    # Simple but essential!`
+    },
+    {
+        title: "oneko - Cat Chases Cursor",
+        category: "terminal-fun",
+        description: "A cute cat chases your mouse cursor! Classic X11 toy. Adorable desktop pet that follows your pointer around!",
+        tags: ["terminal", "fun", "gui", "cat", "cursor"],
+        difficulty: 1,
+        lines: "Command: oneko",
+        code: `# Installation:
+    # Linux: sudo apt-get install oneko
+    # macOS: brew install oneko
+    # Requires X11/XQuartz
+
+    # Basic usage:
+    oneko &
+
+    # The cat appears and chases your cursor!
+
+    # Different animals:
+    oneko -dog         # Dog instead of cat
+    oneko -tora        # Tiger
+    oneko -sakura      # Pink cat
+    oneko -tomoyo      # Different character
+
+    # Multiple cats:
+    oneko &
+    oneko -tora &
+    oneko -dog &
+
+    # Speed control:
+    oneko -speed 20    # Faster
+    oneko -speed 5     # Slower
+
+    # Size control:
+    oneko -scale 2     # Double size
+    oneko -scale 0.5   # Half size
+
+    # Reverse (cat runs from cursor):
+    oneko -reverse
+
+    # Different behaviors:
+    oneko -idle 3      # Cat sleeps after 3 seconds
+    oneko -nekomata    # Two-tailed cat
+
+    # Position:
+    oneko -position +100+100  # Start position
+
+    # No wandering:
+    oneko -stay
+
+    # Stop all oneko instances:
+    killall oneko
+
+    # Fun combinations:
+
+    # Cat party:
+    for i in {1..5}; do oneko -tora & sleep 0.5; done
+
+    # Different speeds:
+    oneko -speed 30 &
+    oneko -dog -speed 10 &
+
+    # Big and small:
+    oneko -scale 2 &
+    oneko -scale 0.5 &
+
+    # Cat family:
+    oneko &
+    oneko -sakura &
+    oneko -tora &
+
+    # Chase mode:
+    oneko -reverse &  # Runs from cursor
+
+    # Easter eggs:
+    # Try different character names!
+    # Some versions have hidden characters
+
+    # Productivity killer:
+    # Warning: Very distracting!
+    # Hard to work with cute cat chasing cursor
+    # You've been warned!
+
+    # Alternatives:
+    # - xeyes (eyes follow cursor)
+    # - xsnow (snow on desktop)
+    # - xpenguins (penguins on screen)
+
+    # Similar programs:
+    xeyes &    # Eyes follow cursor
+    # Both running is chaos!
+
+    # Desktop toys:
+    oneko &
+    xeyes &
+    # Cursor party!
+
+    # Why it's awesome:
+    # - Cute and fun
+    # - Desktop decoration
+    # - Stress relief
+    # - Makes people smile
+    # - Classic Unix toy
+
+    # History:
+    # - Created in 1989
+    # - Japanese origin (neko = cat)
+    # - Classic X11 toy
+    # - Still loved today
+
+    # Tips:
+    # - Run in background with &
+    # - Kill with: killall oneko
+    # - Great for screenshots
+    # - Fun in presentations
+    # - Prank coworkers!
+
+    # Caution:
+    # EXTREMELY distracting
+    # Not recommended during work
+    # May cause excessive smiling
+    # Could reduce productivity by 50%
+
+    # But totally worth it!`
+    },
+    {
+        title: "bb - ASCII Art Demo",
+        category: "terminal-fun",
+        description: "Amazing ASCII art demo/animation! Classic demoscene production in terminal. Watch the show with music and effects!",
+        tags: ["terminal", "animation", "ascii-art", "demo", "art"],
+        difficulty: 1,
+        lines: "Command: bb",
+        code: `# Installation:
+    # Linux: sudo apt-get install bb
+    # macOS: brew install bb
+    # Part of aalib (ASCII art library)
+
+    # Basic usage:
+    bb
+
+    # Exit: Press any key or Ctrl+C
+
+    # Features:
+    # - Animated ASCII art
+    # - 3D-like effects
+    # - Music visualization (if audio available)
+    # - Multiple scenes
+    # - Credits scroll
+    # - Demoscene tribute
+
+    # What you'll see:
+    # - Rotating 3D objects
+    # - Tunnel effects
+    # - Plasma animations
+    # - Text effects
+    # - Morphing shapes
+    # - Fire effects
+
+    # Controls:
+    # - Space or any key: Skip/Exit
+    # - Sometimes 'q': Quit
+    # - Just watch and enjoy!
+
+    # The demo includes:
+    # 1. Intro sequence
+    # 2. 3D objects
+    # 3. Tunnel ride
+    # 4. Plasma effects
+    # 5. Credits
+    # 6. Loops back
+
+    # History:
+    # - Released 1997
+    # - Created by Jan Hubicka
+    # - Demoscene production
+    # - Pure ASCII art
+    # - No graphics mode needed
+
+    # Demoscene:
+    # - Computer art subculture
+    # - Real-time animations
+    # - Size-limited demos
+    # - Technical showcase
+    # - Often with music
+
+    # Why it's special:
+    # - Runs in terminal
+    # - Pure text mode
+    # - Impressive for ASCII
+    # - Historic demo
+    # - Still cool today
+
+    # Similar demos:
+    # - aafire (fire animation)
+    # - cacademo (libcaca demo)
+    # - Other aalib programs
+
+    # Technical details:
+    # - Uses aalib
+    # - ASCII rendering engine
+    # - Real-time generation
+    # - Dithering algorithms
+    # - Character selection
+
+    # Run with audio (if supported):
+    # Some versions have audio output
+    # Check documentation for your version
+
+    # Screenshot it:
+    # Terminal: take screenshot during demo
+    # Impress friends with ASCII art
+
+    # Show it to:
+    # - Fellow geeks
+    # - Retro computing fans
+    # - ASCII art lovers
+    # - Demoscene enthusiasts
+
+    # Fun facts:
+    # - Still actively maintained
+    # - Ported to many systems
+    # - Educational tool
+    # - Art meets code
+    # - Terminal beauty
+
+    # Other aalib programs:
+    aview image.jpg   # View images as ASCII
+    aainfo            # Show aalib info
+
+    # Why watch:
+    # - Pure nostalgia
+    # - Technical appreciation
+    # - ASCII art beauty
+    # - Demoscene culture
+    # - It's just cool!
+
+    # Perfect for:
+    # - Terminal demos
+    # - Impressing people
+    # - Geek cred
+    # - Coffee break entertainment
+
+    # A piece of digital art history!
+    # Pure terminal magic!`
+    },
+    {
+        title: "xcowsay - GUI Cowsay",
+        category: "terminal-fun",
+        description: "Cow displays messages on your desktop! GUI version of cowsay with a cute cow in a speech bubble. Desktop notifications with moo!",
+        tags: ["terminal", "fun", "gui", "cow", "notification"],
+        difficulty: 1,
+        lines: "Command: xcowsay",
+        code: `# Installation:
+    # Linux: sudo apt-get install xcowsay
+    # macOS: brew install xcowsay (requires XQuartz)
+    # Requires X11
+
+    # Basic usage:
+    xcowsay "Hello World"
+
+    # A cow appears on desktop with message!
+
+    # Custom duration:
+    xcowsay --time=5 "5 second message"
+    xcowsay -t 10 "10 seconds"
+
+    # Different cow images:
+    xcowsay --cow-size=large "Big cow"
+    xcowsay --cow-size=medium "Medium cow"
+    xcowsay --cow-size=small "Small cow"
+
+    # Different animals:
+    xcowsay --image=/path/to/image.png "Custom"
+
+    # Reading mode (fortune cow):
+    xcowsay --reading-speed=fast "Quick read"
+    xcowsay --reading-speed=slow "Slow read"
+
+    # At specific position:
+    xcowsay --at=100,100 "Positioned"
+
+    # Daemon mode:
+    xcowsay --daemon  # Background server
+    echo "Message" | xcowsay --daemon
+
+    # Debug mode:
+    xcowsay --debug "Debug info"
+
+    # Practical examples:
+
+    # System notifications:
+    xcowsay "Backup completed successfully"
+    xcowsay "Warning: Low disk space"
+    xcowsay "Update available"
+
+    # Script notifications:
+    #!/bin/bash
+    ./long_process.sh
+    xcowsay "Process finished!"
+
+    # With fortune:
+    xcowsay "$(fortune)"
+
+    # Random wisdom:
+    fortune | xcowsay
+
+    # Timer notifications:
+    sleep 1800 && xcowsay "Break time!"
+
+    # Greeting:
+    xcowsay "Good morning, $(whoami)!"
+
+    # System stats:
+    xcowsay "Uptime: $(uptime -p)"
+
+    # Reminders:
+    xcowsay -t 10 "Meeting in 5 minutes!"
+
+    # Fun messages:
+    xcowsay "Moo! 🐮"
+    xcowsay "The cow says: Moo-ve over!"
+    xcowsay "Holy cow! 🎉"
+
+    # Error notifications:
+    if [ $? -ne 0 ]; then
+        xcowsay "Error occurred!"
+    fi
+
+    # Success messages:
+    if [ $? -eq 0 ]; then
+        xcowsay "Success! 🎊"
+    fi
+
+    # Time announcements:
+    while true; do
+        xcowsay "$(date '+%I:%M %p')"
+        sleep 3600
+    done
+
+    # Combine with other tools:
+    # Fortune cow:
+    while true; do
+        fortune | xcowsay -t 10
+        sleep 300
+    done
+
+    # News cow:
+    curl -s news-api.com | xcowsay
+
+    # Weather cow:
+    curl wttr.in?format=3 | xcowsay
+
+    # Pomodoro timer:
+    xcowsay "Work time: 25 minutes"
+    sleep 1500
+    xcowsay "Break time: 5 minutes"
+
+    # Desktop pet:
+    while true; do
+        xcowsay -t 5 "Moo! $(date +%T)"
+        sleep 60
+    done
+
+    # Creative uses:
+    # - Easter eggs in scripts
+    # - Friendly reminders
+    # - System alerts
+    # - Gaming notifications
+    # - Prank messages
+
+    # Startup message:
+    # Add to ~/.bashrc or startup:
+    xcowsay "Welcome back, $(whoami)!"
+
+    # Why it's fun:
+    # - Visual notifications
+    # - Desktop personality
+    # - Friendly interface
+    # - Fun alternative to notify-send
+    # - Makes people smile
+
+    # Compared to:
+    # - notify-send (boring rectangles)
+    # - xmessage (plain dialogs)
+    # - xcowsay (cow with personality!)
+
+    # Perfect for:
+    # - Script feedback
+    # - System monitoring
+    # - Friendly reminders
+    # - Desktop decoration
+    # - Humor
+
+    # The cow makes everything better!
+    # Moo-ve over, boring notifications!`
+    },
+    {
+        title: "aafire - Animated Fire",
+        category: "terminal-fun",
+        description: "Watch realistic ASCII fire animation in your terminal! Mesmerizing flame effects with different colors and intensities.",
+        tags: ["terminal", "animation", "fire", "art"],
+        difficulty: 1,
+        lines: "Command: aafire",
+        code: `# Installation:
+    # Linux: sudo apt-get install libaa-bin
+    # macOS: brew install aalib
+    # Then run: aafire
+
+    # Basic usage:
+    aafire
+
+    # Exit: Press Ctrl+C
+
+    # Features:
+    # - Realistic fire simulation
+    # - ASCII art rendering
+    # - Smooth animation
+    # - Different flame patterns
+
+    # Other AA-lib programs:
+    # - aview: Image viewer
+    # - bb: Demo program
+
+    # The fire algorithm:
+    # - Simulates heat distribution
+    # - Bottom row has highest heat
+    # - Heat rises and dissipates
+    # - Colors represent temperature
+
+    # Relaxing to watch!
+    # Good for testing terminal capabilities!`
+    },
+    {
+        title: "cbeams - Light Beams",
+        category: "terminal-fun",
+        description: "Colorful light beam animation inspired by blade runner. Watch colorful beams dance across your terminal!",
+        tags: ["terminal", "animation", "art", "colors"],
+        difficulty: 1,
+        lines: "Command: cbeams",
+        code: `# Installation:
+    # git clone https://github.com/bartobri/cbeams.git
+    # cd cbeams
+    # make
+    # sudo make install
+
+    # Or download binary from releases:
+    # https://github.com/bartobri/cbeams/releases
+
+    # Basic usage:
+    cbeams
+
+    # Exit: Press Ctrl+C or 'q'
+
+    # Features:
+    # - Beautiful light beam effects
+    # - Rainbow colors
+    # - Smooth animation
+    # - Inspired by "Blade Runner"
+
+    # The famous quote:
+    # "All those moments will be lost in time,
+    #  like tears in rain"
+
+    # Perfect for:
+    # - Sci-fi fans
+    # - Terminal art lovers
+    # - Screensaver
+    # - Relaxation
+
+    # Mesmerizing animation!`
+    },
+    {
+        title: "boxes - Text Box Drawing",
+        category: "terminal-fun",
+        description: "Draw ASCII art boxes around text! Choose from dozens of box styles - perfect for comments, headers, and banners.",
+        tags: ["terminal", "ascii-art", "text", "decoration"],
+        difficulty: 1,
+        lines: "Command: boxes",
+        code: `# Installation:
+    # Linux: sudo apt-get install boxes
+    # macOS: brew install boxes
+
+    # Basic usage:
+    echo "Hello World" | boxes
+
+    # Different box styles:
+    echo "Hello" | boxes -d stone
+    echo "Hello" | boxes -d unicornsay
+    echo "Hello" | boxes -d dog
+    echo "Hello" | boxes -d diamonds
+    echo "Hello" | boxes -d santa
+
+    # List all designs:
+    boxes -l
+
+    # Remove box:
+    boxes -r < boxed_file.txt
+
+    # Box a file:
+    boxes -d stone < input.txt > output.txt
+
+    # Create comment blocks:
+    echo "Function description" | boxes -d c-cmt
+    echo "TODO: Fix this" | boxes -d java-cmt
+
+    # Box with custom size:
+    echo "Text" | boxes -s 40x10
+
+    # Align text:
+    echo "Centered" | boxes -a c
+    echo "Left" | boxes -a l
+    echo "Right" | boxes -a r
+
+    # Perfect for:
+    # - Code comments
+    # - README files
+    # - Banners
+    # - Decorating text`
+    },
+    {
+        title: "figlet fonts - More ASCII Fonts",
+        category: "terminal-fun",
+        description: "Hundreds of additional figlet fonts! Download the full collection for even more ASCII text art styles.",
+        tags: ["terminal", "ascii-art", "fonts", "text"],
+        difficulty: 1,
+        lines: "Command: figlet",
+        code: `# Install additional fonts:
+    # Linux: sudo apt-get install figlet-fonts
+    # macOS: brew install figlet-fonts
+
+    # Or download manually:
+    # wget http://www.figlet.org/fonts/contributed.tar.gz
+    # tar -xzf contributed.tar.gz
+    # sudo cp *.flf /usr/share/figlet/
+
+    # Cool fonts to try:
+
+    figlet -f big "BIG TEXT"
+    figlet -f banner3 "BANNER"
+    figlet -f block "BLOCK"
+    figlet -f bubble "BUBBLE"
+    figlet -f digital "12345"
+    figlet -f doom "DOOM"
+    figlet -f epic "EPIC"
+    figlet -f graffiti "GRAFFITI"
+    figlet -f isometric1 "3D"
+    figlet -f larry3d "LARRY 3D"
+    figlet -f nancyj "FANCY"
+    figlet -f ogre "OGRE"
+    figlet -f rectangles "RECTANGLES"
+    figlet -f shadow "SHADOW"
+    figlet -f slant "SLANT"
+    figlet -f speed "SPEED"
+    figlet -f starwars "STAR WARS"
+    figlet -f sub-zero "MORTAL KOMBAT"
+
+    # Random font:
+    figlet -f $(ls /usr/share/figlet/*.flf | shuf -n1) "RANDOM"
+
+    # Combine with lolcat:
+    figlet -f starwars "AWESOME" | lolcat`
+    },
+
+    // ============ TERMINAL TOOLS (USEFUL) ============
+    {
+        title: "rsync - File Sync",
+        category: "terminal-tools",
+        description: "Efficiently sync files and directories between locations. Essential for backups, deployments, and file transfers!",
+        tags: ["terminal", "sync", "backup", "transfer"],
+        difficulty: 2,
+        lines: "Command: rsync",
+        code: `# Usually pre-installed on Unix systems
+
+    # Basic syntax:
+    rsync [options] source destination
+
+    # Copy directory locally:
+    rsync -av /source/dir/ /dest/dir/
+
+    # Sync to remote server:
+    rsync -av /local/dir/ user@server:/remote/dir/
+
+    # Sync from remote server:
+    rsync -av user@server:/remote/dir/ /local/dir/
+
+    # Important options:
+    # -a: Archive mode (preserves everything)
+    # -v: Verbose
+    # -z: Compress during transfer
+    # -P: Show progress
+    # -n: Dry run (test without changes)
+    # --delete: Delete files in dest not in source
+
+    # Backup with progress:
+    rsync -avzP /source/ /backup/
+
+    # Exclude files:
+    rsync -av --exclude='*.log' --exclude='.git' /source/ /dest/
+
+    # Dry run (test first!):
+    rsync -avn --delete /source/ /dest/
+
+    # Resume interrupted transfer:
+    rsync -avzP --partial /source/ user@server:/dest/
+
+    # Sync over SSH:
+    rsync -avz -e ssh /local/ user@server:/remote/
+
+    # Show bandwidth usage:
+    rsync -av --progress --stats /source/ /dest/
+
+    # Common use cases:
+    # - Backup: rsync -avz /data/ /backup/
+    # - Deploy: rsync -avz --delete /local/site/ user@server:/var/www/
+    # - Mirror: rsync -av --delete /source/ /mirror/`
+    },
+    {
+        title: "diff - Compare Files",
+        category: "terminal-tools",
+        description: "Compare files line by line. Find differences between text files, configurations, or code. Essential for debugging!",
+        tags: ["terminal", "compare", "diff", "text"],
+        difficulty: 2,
+        lines: "Command: diff",
+        code: `# Pre-installed on Unix systems
+
+    # Basic comparison:
+    diff file1.txt file2.txt
+
+    # Side-by-side comparison:
+    diff -y file1.txt file2.txt
+
+    # Unified format (like git diff):
+    diff -u file1.txt file2.txt
+
+    # Context format:
+    diff -c file1.txt file2.txt
+
+    # Ignore whitespace:
+    diff -w file1.txt file2.txt
+
+    # Ignore blank lines:
+    diff -B file1.txt file2.txt
+
+    # Ignore case:
+    diff -i file1.txt file2.txt
+
+    # Compare directories:
+    diff -r dir1/ dir2/
+
+    # Show only if files differ:
+    diff -q file1.txt file2.txt
+
+    # Color output (on systems with colordiff):
+    colordiff file1.txt file2.txt
+
+    # Generate patch file:
+    diff -u old.txt new.txt > changes.patch
+
+    # Apply patch:
+    patch old.txt < changes.patch
+
+    # Compare with context:
+    diff -U 3 file1.txt file2.txt  # 3 lines of context
+
+    # Practical examples:
+    diff config.old config.new
+    diff -r website-v1/ website-v2/
+    diff <(ls dir1) <(ls dir2)  # Compare directory contents`
+    },
+    {
+        title: "watch - Run Command Repeatedly",
+        category: "terminal-tools",
+        description: "Execute a command periodically and watch the output update. Monitor logs, processes, disk space, and more in real-time!",
+        tags: ["terminal", "monitoring", "periodic", "watch"],
+        difficulty: 1,
+        lines: "Command: watch",
+        code: `# Pre-installed on most Unix systems
+
+    # Basic usage (updates every 2 seconds):
+    watch df -h
+
+    # Custom interval (1 second):
+    watch -n 1 date
+
+    # Highlight differences:
+    watch -d free -h
+
+    # No title/header:
+    watch -t date
+
+    # Exit on error:
+    watch -e command
+
+    # Precise timing:
+    watch -p -n 0.5 command
+
+    # Useful monitoring examples:
+
+    # Watch disk space:
+    watch -n 5 df -h
+
+    # Watch memory usage:
+    watch -n 2 free -h
+
+    # Watch processes:
+    watch -n 1 'ps aux | grep python'
+
+    # Watch network:
+    watch -n 1 'netstat -an | grep ESTABLISHED | wc -l'
+
+    # Watch file size:
+    watch -n 1 'ls -lh largefile.zip'
+
+    # Watch directory size:
+    watch -n 5 'du -sh /var/log'
+
+    # Watch Docker containers:
+    watch -n 2 'docker ps'
+
+    # Watch GPU usage (if nvidia):
+    watch -n 1 nvidia-smi
+
+    # Watch who's logged in:
+    watch -n 10 w
+
+    # Watch system load:
+    watch -n 1 uptime
+
+    # Tips:
+    # - Ctrl+C to exit
+    # - Use quotes for complex commands
+    # - Great for monitoring long operations`
+    },
+    {
+        title: "screen - Terminal Multiplexer",
+        category: "terminal-tools",
+        description: "Keep programs running after disconnecting! Create persistent terminal sessions, split screens, and never lose your work.",
+        tags: ["terminal", "multiplexer", "sessions", "productivity"],
+        difficulty: 2,
+        lines: "Command: screen",
+        code: `# Installation:
+    # macOS: brew install screen
+    # Linux: sudo apt-get install screen
+    # (Often pre-installed)
+
+    # Start new session:
+    screen
+
+    # Start named session:
+    screen -S mysession
+
+    # List sessions:
+    screen -ls
+
+    # Attach to session:
+    screen -r
+    screen -r mysession
+
+    # Detach from session:
+    Ctrl+a d
+
+    # Key bindings (Ctrl+a then...):
+    # c: Create new window
+    # n: Next window
+    # p: Previous window
+    # 0-9: Switch to window number
+    # ": List windows
+    # A: Rename window
+    # k: Kill window
+    # [: Enter copy mode
+    # ]: Paste
+    # |: Split vertically
+    # S: Split horizontally
+    # Tab: Switch split
+    # X: Close split
+    # d: Detach
+
+    # Scroll back:
+    # Ctrl+a [ then use arrow keys
+    # Press Esc to exit scroll mode
+
+    # Copy mode:
+    # Ctrl+a [
+    # Navigate with arrow keys
+    # Space to start selection
+    # Space again to copy
+    # Ctrl+a ] to paste
+
+    # Share session:
+    screen -x mysession
+
+    # Kill session:
+    screen -X -S mysession quit
+
+    # Use cases:
+    # - Run long processes
+    # - SSH sessions that persist
+    # - Remote server management
+    # - Multiple terminals in one
+
+    # Example workflow:
+    screen -S work
+    # Do work
+    Ctrl+a d  # Detach
+    # Later...
+    screen -r work  # Resume`
+    },
+    {
+        title: "sed - Stream Editor",
+        category: "terminal-tools",
+        description: "Edit text streams and files with powerful pattern matching. Search and replace, delete lines, insert text, and more!",
+        tags: ["terminal", "text-processing", "regex", "editing"],
+        difficulty: 3,
+        lines: "Command: sed",
+        code: `# Pre-installed on Unix systems
+
+    # Basic substitution:
+    sed 's/old/new/' file.txt
+
+    # Replace all occurrences:
+    sed 's/old/new/g' file.txt
+
+    # Replace in-place:
+    sed -i 's/old/new/g' file.txt
+
+    # Delete lines:
+    sed '5d' file.txt              # Delete line 5
+    sed '1,10d' file.txt           # Delete lines 1-10
+    sed '/pattern/d' file.txt      # Delete lines matching pattern
+
+    # Print specific lines:
+    sed -n '5p' file.txt           # Print line 5
+    sed -n '10,20p' file.txt       # Print lines 10-20
+    sed -n '/pattern/p' file.txt   # Print matching lines
+
+    # Insert text:
+    sed '5i\New line' file.txt     # Insert before line 5
+    sed '5a\New line' file.txt     # Append after line 5
+
+    # Multiple commands:
+    sed -e 's/old/new/g' -e 's/foo/bar/g' file.txt
+
+    # Use different delimiter:
+    sed 's|/old/path|/new/path|g' file.txt
+
+    # Case insensitive:
+    sed 's/pattern/replacement/gI' file.txt
+
+    # Practical examples:
+
+    # Remove empty lines:
+    sed '/^$/d' file.txt
+
+    # Remove comments:
+    sed '/^#/d' file.txt
+
+    # Add line numbers:
+    sed = file.txt | sed 'N;s/\n/\t/'
+
+    # Replace in multiple files:
+    sed -i 's/old/new/g' *.txt
+
+    # Remove Windows line endings:
+    sed -i 's/\r$//' file.txt
+
+    # Double space a file:
+    sed G file.txt
+
+    # Add prefix to lines:
+    sed 's/^/PREFIX: /' file.txt`
+    },
+    {
+        title: "awk - Text Processing",
+        category: "terminal-tools",
+        description: "Process and analyze text files with pattern scanning and processing. Extract columns, calculate sums, format output!",
+        tags: ["terminal", "text-processing", "data", "scripting"],
+        difficulty: 3,
+        lines: "Command: awk",
+        code: `# Pre-installed on Unix systems
+
+    # Print specific column:
+    awk '{print $1}' file.txt          # First column
+    awk '{print $1, $3}' file.txt      # First and third columns
+    awk '{print $NF}' file.txt         # Last column
+
+    # With delimiter:
+    awk -F',' '{print $1, $2}' file.csv    # CSV
+    awk -F':' '{print $1}' /etc/passwd     # Colon-separated
+
+    # Pattern matching:
+    awk '/pattern/ {print $0}' file.txt
+    awk '$3 > 100 {print $1}' file.txt     # Where column 3 > 100
+
+    # Calculate sum:
+    awk '{sum += $1} END {print sum}' numbers.txt
+
+    # Calculate average:
+    awk '{sum += $1; count++} END {print sum/count}' numbers.txt
+
+    # Count lines:
+    awk 'END {print NR}' file.txt
+
+    # Print line numbers:
+    awk '{print NR, $0}' file.txt
+
+    # Format output:
+    awk '{printf "%-10s %5d\n", $1, $2}' file.txt
+
+    # Multiple conditions:
+    awk '$3 > 100 && $4 < 200 {print $1}' file.txt
+
+    # BEGIN and END blocks:
+    awk 'BEGIN {print "Start"} {print $1} END {print "End"}' file.txt
+
+    # Practical examples:
+
+    # Sum column:
+    ps aux | awk '{sum += $3} END {print "Total CPU:", sum "%"}'
+
+    # Print unique values:
+    awk '!seen[$1]++' file.txt
+
+    # Get file sizes:
+    ls -l | awk '{sum += $5} END {print "Total:", sum/1024/1024 "MB"}'
+
+    # Extract email domain:
+    awk -F'@' '{print $2}' emails.txt
+
+    # Format CSV:
+    awk -F',' '{printf "%-20s %s\n", $1, $2}' data.csv
+
+    # Print lines longer than 80 chars:
+    awk 'length > 80' file.txt
+
+    # Replace field:
+    awk '{$2 = "REDACTED"; print}' file.txt
+
+    # Count occurrences:
+    awk '{count[$1]++} END {for (word in count) print word, count[word]}' file.txt`
+    },
+    {
+        title: "find - Search Files",
+        category: "terminal-tools",
+        description: "Search for files and directories with powerful filters. Find by name, size, date, permissions, and execute commands on results!",
+        tags: ["terminal", "search", "files", "find"],
+        difficulty: 2,
+        lines: "Command: find",
+        code: `# Pre-installed on Unix systems
+
+    # Find by name:
+    find . -name "*.txt"
+    find . -iname "*.TXT"              # Case insensitive
+    find /path -name "pattern*"
+
+    # Find by type:
+    find . -type f                     # Files only
+    find . -type d                     # Directories only
+    find . -type l                     # Symbolic links
+
+    # Find by size:
+    find . -size +100M                 # Larger than 100MB
+    find . -size -1M                   # Smaller than 1MB
+    find . -size 50k                   # Exactly 50KB
+
+    # Find by time:
+    find . -mtime -7                   # Modified in last 7 days
+    find . -mtime +30                  # Modified more than 30 days ago
+    find . -atime -1                   # Accessed in last 24 hours
+
+    # Find by permissions:
+    find . -perm 644
+    find . -perm -u+x                  # User executable
+
+    # Find empty files/directories:
+    find . -empty
+
+    # Find and delete:
+    find . -name "*.log" -delete
+
+    # Find and execute command:
+    find . -name "*.txt" -exec cat {} \;
+    find . -type f -exec chmod 644 {} \;
+
+    # Find with multiple conditions:
+    find . -name "*.py" -and -size +1M
+    find . -name "*.txt" -or -name "*.md"
+    find . \( -name "*.jpg" -o -name "*.png" \) -size +1M
+
+    # Find and move:
+    find . -name "*.bak" -exec mv {} /backup/ \;
+
+    # Find and count:
+    find . -type f | wc -l
+
+    # Practical examples:
+
+    # Find large files:
+    find / -type f -size +100M 2>/dev/null
+
+    # Find recently modified:
+    find . -mtime -1 -type f
+
+    # Find and compress:
+    find . -name "*.log" -exec gzip {} \;
+
+    # Find duplicates by name:
+    find . -type f -printf '%f\n' | sort | uniq -d
+
+    # Find by user:
+    find / -user username 2>/dev/null
+
+    # Find and copy:
+    find . -name "*.jpg" -exec cp {} /destination/ \;
+
+    # Clean old files:
+    find /tmp -type f -mtime +7 -delete
+
+    # Complex search:
+    find . -type f -name "*.js" -not -path "*/node_modules/*" -exec grep -l "TODO" {} \;`
     },
 ];
 

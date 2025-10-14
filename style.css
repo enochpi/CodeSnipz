@@ -452,7 +452,21 @@ body {
   transform: scaleX(0);
   transition: transform 0.3s ease;
 }
+.project-card[data-category="terminal"] .project-category {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
 
+.project-card[data-category="terminal"]::after {
+  content: "💻";
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 2rem;
+  opacity: 0.1;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.3));
+}
 .project-card::after {
   content: '';
   position: absolute;
@@ -1586,4 +1600,177 @@ code {
 
 .shadow-glow {
   box-shadow: 0 0 20px rgba(255, 154, 86, 0.3);
+}
+/* YouTube Section */
+.youtube-section {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding: 2rem;
+  background: var(--grey-darker);
+  border-radius: 20px;
+  border: 2px solid var(--grey-light);
+}
+
+.youtube-section h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.youtube-description {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.youtube-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  background: #FF0000;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 25px rgba(255, 0, 0, 0.4);
+}
+
+.youtube-btn:hover {
+  background: #CC0000;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 35px rgba(255, 0, 0, 0.6);
+}
+
+.youtube-icon {
+  font-size: 1.5rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+/* YouTube Call to Action Section */
+.youtube-cta-section {
+  padding: 6rem 0;
+  background: linear-gradient(135deg, #282828 0%, #1a1a1a 100%);
+  border-top: 3px solid #FF0000;
+  border-bottom: 3px solid #FF0000;
+  position: relative;
+  overflow: hidden;
+}
+
+.youtube-cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(255, 0, 0, 0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.youtube-cta-content {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.youtube-cta-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+.youtube-cta-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #FF0000;
+  text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+}
+
+.youtube-cta-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-bottom: 2.5rem;
+  line-height: 1.8;
+}
+
+.youtube-cta-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.25rem 2.5rem;
+  background: #FF0000;
+  color: white;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.25rem;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 30px rgba(255, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.youtube-cta-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.youtube-cta-btn:hover::before {
+  left: 100%;
+}
+
+.youtube-cta-btn:hover {
+  background: #CC0000;
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 15px 40px rgba(255, 0, 0, 0.7);
+}
+
+.yt-icon {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+  animation: pulse 2s infinite;
+}
+
+.subscriber-hint {
+  font-size: 0.9rem;
+  font-weight: 500;
+  opacity: 0.9;
+  margin-top: 0.5rem;
+}
+
+.youtube-handle {
+  margin-top: 1.5rem;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-family: 'Courier New', monospace;
+}
+.youtube-nav {
+  background: #FF0000;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  color: white !important;
+}
+
+
+
+.youtube-nav::after {
+  display: none;
 }
