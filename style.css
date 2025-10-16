@@ -1601,66 +1601,50 @@ code {
 .shadow-glow {
   box-shadow: 0 0 20px rgba(255, 154, 86, 0.3);
 }
-/* YouTube Section */
-.youtube-section {
-  text-align: center;
-  margin-bottom: 3rem;
-  padding: 2rem;
-  background: var(--grey-darker);
-  border-radius: 20px;
-  border: 2px solid var(--grey-light);
-}
-
-.youtube-section h3 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: var(--text-primary);
-}
-
-.youtube-description {
-  color: var(--text-secondary);
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem;
+/* YouTube Call to Action Section - Cleaned Up */
+/* Hero YouTube Link Styling */
+.hero-youtube-text {
+  margin-top: 1rem;
+  font-size: 1rem;
   line-height: 1.6;
 }
 
-.youtube-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2rem;
-  background: #FF0000;
-  color: white;
-  text-decoration: none;
+.hero-youtube-link {
+  color: var(--primary-color);
   font-weight: 600;
-  font-size: 1.1rem;
-  border-radius: 50px;
+  text-decoration: none;
   transition: all 0.3s ease;
-  box-shadow: 0 6px 25px rgba(255, 0, 0, 0.4);
+  border-bottom: 2px solid transparent;
 }
 
-.youtube-btn:hover {
-  background: #CC0000;
-  transform: translateY(-3px);
-  box-shadow: 0 10px 35px rgba(255, 0, 0, 0.6);
+.hero-youtube-link:hover {
+  color: var(--secondary-color);
+  border-bottom-color: var(--primary-color);
 }
 
-.youtube-icon {
-  font-size: 1.5rem;
-  animation: pulse 2s infinite;
+/* YouTube Nav Button */
+.youtube-nav {
+  background: var(--gradient-accent);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  color: white !important;
 }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+.youtube-nav:hover {
+  background: var(--secondary-color);
+  transform: scale(1.05);
 }
+
+.youtube-nav::after {
+  display: none;
+}
+
 /* YouTube Call to Action Section */
 .youtube-cta-section {
   padding: 6rem 0;
-  background: linear-gradient(135deg, #282828 0%, #1a1a1a 100%);
-  border-top: 3px solid #FF0000;
-  border-bottom: 3px solid #FF0000;
+  background: var(--grey-darker);
+  border-top: 1px solid var(--grey-light);
+  border-bottom: 1px solid var(--grey-light);
   position: relative;
   overflow: hidden;
 }
@@ -1672,7 +1656,7 @@ code {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at 30% 20%, rgba(255, 0, 0, 0.1) 0%, transparent 50%);
+  background: radial-gradient(circle at 30% 20%, rgba(255, 154, 86, 0.05) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -1690,12 +1674,16 @@ code {
   animation: float 3s ease-in-out infinite;
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
 .youtube-cta-title {
   font-size: 2.5rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  color: #FF0000;
-  text-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+  color: var(--text-primary);
 }
 
 .youtube-cta-subtitle {
@@ -1717,7 +1705,7 @@ code {
   font-size: 1.25rem;
   border-radius: 50px;
   transition: all 0.3s ease;
-  box-shadow: 0 8px 30px rgba(255, 0, 0, 0.5);
+  box-shadow: 0 8px 30px rgba(255, 0, 0, 0.3);
   position: relative;
   overflow: hidden;
 }
@@ -1729,7 +1717,7 @@ code {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.5s ease;
 }
 
@@ -1739,14 +1727,19 @@ code {
 
 .youtube-cta-btn:hover {
   background: #CC0000;
-  transform: translateY(-5px) scale(1.05);
-  box-shadow: 0 15px 40px rgba(255, 0, 0, 0.7);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(255, 0, 0, 0.4);
 }
 
 .yt-icon {
   font-size: 1.5rem;
   margin-right: 0.5rem;
   animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 .subscriber-hint {
@@ -1762,15 +1755,39 @@ code {
   font-size: 1rem;
   font-family: 'Courier New', monospace;
 }
-.youtube-nav {
-  background: #FF0000;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  color: white !important;
+
+
+
+
+
+
+/* ========================================
+   REMOVE DECORATIVE FLOATING CIRCLES ONLY
+   ======================================== */
+
+/* Remove the TWO RADIAL GRADIENT CIRCLES in hero section */
+.hero::before {
+  background: none !important;
+  display: none !important;
 }
 
+/* Remove decorative circle in YouTube CTA section */
+.youtube-cta-section::before {
+  background: none !important;
+  display: none !important;
+}
 
+/* Remove glowing circle effect on project cards */
+.project-card::after {
+  opacity: 0 !important;
+  display: none !important;
+}
 
-.youtube-nav::after {
-  display: none;
+/* Make sure about and contact sections don't have decorative backgrounds */
+.about-section {
+  background: transparent !important;
+}
+
+.contact-section {
+  background: transparent !important;
 }
